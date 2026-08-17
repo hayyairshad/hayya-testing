@@ -286,26 +286,44 @@
             document.getElementById('ref-no').value = "";
         }
 
+               // --- PUT THIS PART AT THE BOTTOM OF YOUR SCRIPT ---
+
         function renderHistory(filter = "") {
             const listDiv = document.getElementById('history-list');
             listDiv.innerHTML = "";
             
-            const filteredData = tempStorage.filter(item => 
-                item.phone.includes(filter) || 
-                item.case.includes(filter) || 
-                item.ref.includes(filter)
-            );
+            // We use 'index' so we know exactly which one to delete
+            tempStorage.forEach((item, index) => {
+                // This checks if the search filter matches phone, case, or ref
+                if (item.phone.includes(filter) || item.case.includes(filter) || item.ref.includes(filter)) {
+                    const div = document.createElement('div');
+                    div.className = "history-item";
+                    div.style.display = "flex";
+                    div.style.justifyContent = "space-between";
+                    div.style.alignItems = "center";
 
-            filteredData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "history-item";
-                div.innerHTML = `
-                    <span style="color:#ff0000; font-weight:bold;">[TEMP SAVE]</span> 
-                    By ${item.user} on ${item.timestamp}<br>
-                    <b>Ph:</b> ${item.phone} | <b>Case:</b> ${item.case} | <b>Ref:</b> ${item.ref}
-                `;
-                listDiv.appendChild(div);
+                    div.innerHTML = `
+                        <div>
+                            <span style="color:#ff0000; font-weight:bold;">[TEMP SAVE]</span> 
+                            By ${item.user} on ${item.timestamp}<br>
+                            <b>Ph:</b> ${item.phone} | <b>Case:</b> ${item.case} | <b>Ref:</b> ${item.ref}
+                        </div>
+                        <button onclick="deleteEntry(${index})" 
+                                style="width:40px; margin-top:0; padding:5px; background:#333; border:1px solid #ff0000; color:red; cursor:pointer;">
+                            X
+                        </button>
+                    `;
+                    listDiv.appendChild(div);
+                }
             });
+        }
+
+        function deleteEntry(index) {
+            // Ask for confirmation before deleting
+            if(confirm("Are you sure you want to delete this record?")) {
+                tempStorage.splice(index, 1); // Remove 1 item at that index
+                renderHistory(); // Refresh the list
+            }
         }
 
         function searchData() {
