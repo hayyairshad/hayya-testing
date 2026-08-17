@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTING</title>
+    <style>
+    /* 1. Base Styles */
+    body { 
+        font-family: 'Segoe UI', sans-serif; 
+        display: flex; 
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; 
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px; /* Space for mobile edges */
+        background-color: #000000; 
+        color: white; 
+        box-sizing: border-box;
+    }
+
+    h1 { 
+        color: #ff0000; 
+        text-transform: uppercase; 
+        letter-spacing: 5px; 
+        margin: 10px 0;
+        font-size: 1.5rem; /* Scales with screen size */
+    }
+
+    /* 2. The Card (Responsive) */
+    .card { 
+        background: #1a1a1a; 
+        padding: 20px; 
+        border-radius: 12px; 
+        border: 2px solid #ff0000; 
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); 
+        width: 100%;       /* Full width on small screens */
+        max-width: 400px;  /* Max width on desktop */
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    /* Wider card for data entry */
+    .wide-card { 
+        max-width: 700px; 
+    }
+
+    .hidden { display: none; }
+
+    /* 3. Inputs & Buttons */
+    input, select { 
+        width: 100%; /* Changed from 95% to 100% */
+        padding: 12px; 
+        margin-top: 15px; 
+        background: #000; 
+        color: #ff0000; 
+        border: 1px solid #ff0000;
+        border-radius: 5px;
+        outline: none;
+        font-size: 16px;
+        box-sizing: border-box; /* Ensures padding doesn't break width */
+    }
+
+    /* Row Handling: side-by-side on desktop, stacked on mobile */
+    .row { 
+        display: flex; 
+        gap: 10px; 
+        width: 100%; 
+        flex-wrap: wrap; /* Allows items to drop to next line */
+    }
+
+    .row input, .row button {
+        flex: 1; /* Makes them equal width */
+        min-width: 150px; /* Forces stack on very small screens */
+    }
+
+    button { 
+        width: 100%; 
+        padding: 14px; /* Slightly larger for touch */
+        margin-top: 20px; 
+        cursor: pointer; 
+        background-color: #ff0000; 
+        color: white; 
+        border: none; 
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+
+    /* 4. Lists & History */
+    ul { padding: 0; list-style: none; text-align: left; }
+    li { 
+        background: #222; 
+        margin-bottom: 10px; 
+        padding: 15px; /* Larger for finger-tap */
+        border-left: 5px solid #ff0000; 
+        border-radius: 4px;
+    }
+
+    .history-item {
+        font-size: 12px;
+        background: #111;
+        padding: 12px;
+        border-bottom: 1px solid #333;
+        word-wrap: break-word; /* Prevents long text from breaking layout */
+    }
+
+    /* 5. MEDIA QUERIES (Mobile Specific) */
+    @media (max-width: 480px) {
+        h1 { font-size: 1.2rem; letter-spacing: 3px; }
+        .card { padding: 15px; }
+        .row { flex-direction: column; gap: 0; }
+        .row input { margin-top: 15px; }
+        .history-item { font-size: 11px; }
+    }
+</style>
+</head>
+<body>
+
+    <h1>TESTING</h1>
+
+    <!-- STAGE 1: MASTER LOGIN -->
+    <div id="master-login" class="card">
+        <h2 style="color: #ff0000;">SYSTEM ACCESS</h2>
+        <input type="text" id="user-id" placeholder="User ID">
+        <input type="password" id="user-pass" placeholder="Password">
+        <p id="login-error" class="error-msg">ACCESS DENIED</p>
+        <button onclick="checkMasterLogin()">Authorize</button>
+    </div>
+
+    <!-- STAGE 2: EMPLOYEE SELECTION -->
+    <div id="login-page" class="card hidden">
+        <h2 style="color: #ff0000;">SELECT STAFF</h2>
+        <select id="employee-select">
+            <option value="Uzair">Uzair (Manager HP)</option>
+            <option value="Waqas">Waqas (Rider)</option>
+            <option value="Junaid">Junaid (Clerk)</option>
+            <option value="Ahmed">Ahmed (Head of Recovery)</option>
+            <option value="Zuni">Zuni (Manager Recovery)</option>
+            <option value="Sumaira">Sumaira (Call Center)</option>
+            <option value="Jawad">Jawad (Director)</option>
+        </select>
+        <button onclick="showTasks()">Load Profile</button>
+    </div>
+
+    <!-- STAGE 3: TASK PAGE -->
+    <div id="task-page" class="card hidden">
+        <h2 id="welcome-msg" style="color: #ff0000; margin-bottom: 5px;"></h2>
+        <p id="user-role" style="color: #888; font-style: italic; margin-bottom: 20px;"></p>
+        <ul id="task-list"></ul>
+        <button class="secondary-btn" onclick="logout()">Terminate Session</button>
+    </div>
+
+    <!-- STAGE 4: DATA ENTRY & HISTORY -->
+    <div id="entry-form-page" class="card wide-card hidden">
+        <h2 style="color: #ff0000;">DATA ENTRY</h2>
+        <p id="active-task" style="color: #888;"></p>
+        
+        <input type="text" id="phone-num" placeholder="Phone Number (Required)">
+        <div class="row">
+            <input type="text" id="case-num" placeholder="Case Number">
+            <input type="text" id="ref-no" placeholder="Ref No.">
+        </div>
+
+        <div class="row">
+            <button onclick="handleSave('Temp')">Temp Save</button>
+            <button onclick="handleSave('Final')" style="background-color: #444;">Final Save</button>
+        </div>
+        <button class="secondary-btn" onclick="backToTasks()">Back to Tasks</button>
+
+        <!-- Search and List -->
+        <div class="history-container">
+            <h3 style="color: #ff0000;">SEARCH RECORDS</h3>
+            <input type="text" id="search-bar" placeholder="Filter by Phone, Case, or Ref..." onkeyup="searchData()">
+            
+            <div id="history-list" style="max-height: 250px; overflow-y: auto; margin-top: 10px;">
+                <!-- Entries will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & CONFIG ---
+        const MASTER_ID = "admin";
+        const MASTER_PASS = "1234";
+
+        const employeeInfo = {
+            "Uzair": { role: "Manager HP", tasks: ["Presentation"] },
+            "Waqas": { role: "Rider", tasks: ["Visit"] },
+            "Junaid": { role: "Clerk", tasks: ["Delivery Linkage"] },
+            "Ahmed": { role: "Head of Recovery", tasks: ["Reporting"] },
+            "Zuni": { role: "Manager Recovery", tasks: ["Entries"] },
+            "Sumaira": { role: "Call Center", tasks: ["Follow-up"] },
+            "Jawad": { role: "Director", tasks: ["Cross checking"] }
+        };
+
+        let tempStorage = []; // Array to store entries
+
+        // --- NAVIGATION ---
+
+        function checkMasterLogin() {
+            const id = document.getElementById('user-id').value;
+            const pass = document.getElementById('user-pass').value;
+            if (id === MASTER_ID && pass === MASTER_PASS) {
+                document.getElementById('master-login').classList.add('hidden');
+                document.getElementById('login-page').classList.remove('hidden');
+            } else {
+                document.getElementById('login-error').style.display = "block";
+            }
+        }
+
+        function showTasks() {
+            const user = document.getElementById('employee-select').value;
+            const data = employeeInfo[user];
+
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('task-page').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = user;
+            document.getElementById('user-role').innerText = data.role;
+
+            const list = document.getElementById('task-list');
+            list.innerHTML = "";
+            data.tasks.forEach(task => {
+                let li = document.createElement('li');
+                li.innerText = "◈ " + task;
+                li.onclick = () => openForm(task);
+                list.appendChild(li);
+            });
+        }
+
+        function openForm(taskName) {
+            document.getElementById('task-page').classList.add('hidden');
+            document.getElementById('entry-form-page').classList.remove('hidden');
+            document.getElementById('active-task').innerText = "Current Task: " + taskName;
+        }
+
+        function backToTasks() {
+            document.getElementById('entry-form-page').classList.add('hidden');
+            document.getElementById('task-page').classList.remove('hidden');
+        }
+
+        function logout() { location.reload(); }
+
+        // --- CORE LOGIC ---
+
+        function handleSave(saveType) {
+            const name = document.getElementById('welcome-msg').innerText;
+            const phone = document.getElementById('phone-num').value.trim();
+            const caseNo = document.getElementById('case-num').value.trim();
+            const refNo = document.getElementById('ref-no').value.trim();
+
+            // Validation Rules
+            if (!phone) {
+                alert("Phone number is required!");
+                return;
+            }
+            if (!caseNo && !refNo) {
+                alert("You must provide either a Case Number or a Ref Number!");
+                return;
+            }
+
+            if (saveType === 'Final') {
+                alert("Final Save Triggered. Data sent to permanent storage.");
+                return;
+            }
+
+            // Create Entry
+            const entry = {
+                user: name,
+                timestamp: new Date().toLocaleString(),
+                phone: phone,
+                case: caseNo || "N/A",
+                ref: refNo || "N/A"
+            };
+
+            tempStorage.unshift(entry); // Add to beginning of list
+            clearInputs();
+            renderHistory();
+        }
+
+        function clearInputs() {
+            document.getElementById('phone-num').value = "";
+            document.getElementById('case-num').value = "";
+            document.getElementById('ref-no').value = "";
+        }
+
+        function renderHistory(filter = "") {
+            const listDiv = document.getElementById('history-list');
+            listDiv.innerHTML = "";
+            
+            const filteredData = tempStorage.filter(item => 
+                item.phone.includes(filter) || 
+                item.case.includes(filter) || 
+                item.ref.includes(filter)
+            );
+
+            filteredData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "history-item";
+                div.innerHTML = `
+                    <span style="color:#ff0000; font-weight:bold;">[TEMP SAVE]</span> 
+                    By ${item.user} on ${item.timestamp}<br>
+                    <b>Ph:</b> ${item.phone} | <b>Case:</b> ${item.case} | <b>Ref:</b> ${item.ref}
+                `;
+                listDiv.appendChild(div);
+            });
+        }
+
+        function searchData() {
+            const query = document.getElementById('search-bar').value;
+            renderHistory(query);
+        }
+    </script>
+</body>
+</html>
