@@ -191,8 +191,12 @@
         <button class="secondary-btn" onclick="backToTasks()">Back to Tasks</button>
 
         <!-- Search and List -->
+               <!-- Search and List -->
         <div class="history-container">
-            <h3 style="color: #ff0000;">RECORDS HISTORY</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: #ff0000;">RECORDS HISTORY</h3>
+                <button onclick="clearAllData()" style="width: auto; padding: 5px 10px; font-size: 10px; background: #444; margin-top: 0;">Clear All</button>
+            </div>
             <input type="text" id="search-bar" placeholder="Search by Phone, Case, or Ref..." onkeyup="searchData()">
             
             <div id="history-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
@@ -201,8 +205,7 @@
         </div>
     </div>
 
-    <script>
-        // --- DATA & CONFIG ---
+       <script>
         const MASTER_ID = "admin";
         const MASTER_PASS = "1234";
 
@@ -216,9 +219,9 @@
             "Jawad": { role: "Director", tasks: ["Cross checking"] }
         };
 
-        let tempStorage = [];
+        // LOAD DATA FROM MEMORY: This looks for saved data when the page opens
+        let tempStorage = JSON.parse(localStorage.getItem('employeeData')) || [];
 
-        // --- NAVIGATION ---
         function checkMasterLogin() {
             const id = document.getElementById('user-id').value;
             const pass = document.getElementById('user-pass').value;
@@ -246,6 +249,7 @@
                 li.onclick = () => openForm(task);
                 list.appendChild(li);
             });
+            renderHistory(); // Show history immediately after login
         }
 
         function openForm(taskName) {
@@ -261,7 +265,6 @@
 
         function logout() { location.reload(); }
 
-        // --- CORE LOGIC ---
         function handleSave(saveType) {
             const name = document.getElementById('welcome-msg').innerText;
             const phone = document.getElementById('phone-num').value.trim();
@@ -272,7 +275,7 @@
             if (!caseNo && !refNo) { alert("Enter either a Case No or Ref No!"); return; }
 
             if (saveType === 'Final') {
-                alert("Final Save selected (Database integration pending).");
+                alert("Final Save selected (Sending to Excel simulation).");
                 return;
             }
 
@@ -284,7 +287,11 @@
                 ref: refNo || "N/A"
             };
 
-            tempStorage.unshift(entry); // Add new entry to the top
+            tempStorage.unshift(entry); 
+            
+            // SAVE TO MEMORY
+            localStorage.setItem('employeeData', JSON.stringify(tempStorage));
+
             document.getElementById('phone-num').value = "";
             document.getElementById('case-num').value = "";
             document.getElementById('ref-no').value = "";
@@ -296,15 +303,16 @@
             listDiv.innerHTML = "";
             
             tempStorage.forEach((item, index) => {
-                if (item.phone.includes(filter) || item.case.includes(filter) || item.ref.includes(filter)) {
+                const searchStr = (item.phone + item.case + item.ref).toLowerCase();
+                if (searchStr.includes(filter.toLowerCase())) {
                     const div = document.createElement('div');
                     div.className = "history-item";
                     div.innerHTML = `
-                        <div>
+                        <div style="flex-grow: 1;">
                             <span style="color:#ff0000; font-weight:bold;">[TEMP]</span> By ${item.user} at ${item.timestamp}<br>
                             Ph: ${item.phone} | Case: ${item.case} | Ref: ${item.ref}
                         </div>
-                        <button class="delete-btn" onclick="deleteEntry(${index})">X</button>
+                        <button onclick="deleteEntry(${index})" style="width:30px; height:30px; padding:0; background:#333; border:1px solid red; color:red; margin-top:0;">X</button>
                     `;
                     listDiv.appendChild(div);
                 }
@@ -314,6 +322,15 @@
         function deleteEntry(index) {
             if(confirm("Delete this record?")) {
                 tempStorage.splice(index, 1);
+                localStorage.setItem('employeeData', JSON.stringify(tempStorage)); // Update memory
+                renderHistory();
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("Are you sure you want to WIPE ALL saved data?")) {
+                tempStorage = [];
+                localStorage.removeItem('employeeData');
                 renderHistory();
             }
         }
