@@ -2,57 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- This line below is what makes the site mobile-friendly -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESTING</title>
+    <title>TESTING PORTAL</title>
     <style>
-        /* 1. Reset and Base Styles */
-        * { box-sizing: border-box; } /* Crucial for mobile sizing */
-
+        /* 1. BASE STYLES & MOBILE OPTIMIZATION */
+        * { box-sizing: border-box; }
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', sans-serif; 
             display: flex; 
             flex-direction: column;
             align-items: center;
             justify-content: center; 
             min-height: 100vh;
             margin: 0;
-            padding: 20px; /* Gap around the edges on mobile */
+            padding: 20px;
             background-color: #000000; 
             color: white; 
         }
 
-        h1 { 
-            color: #ff0000; 
-            text-transform: uppercase; 
-            letter-spacing: 5px; 
-            margin-bottom: 20px;
-            font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive font size */
-        }
+        h1 { color: #ff0000; text-transform: uppercase; letter-spacing: 5px; margin: 20px 0; font-size: 1.8rem; }
 
-        /* 2. Responsive Card Design */
         .card { 
             background: #1a1a1a; 
             padding: 25px; 
             border-radius: 12px; 
             border: 2px solid #ff0000; 
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); 
-            width: 100%;       /* Full width on phones */
-            max-width: 400px;  /* Limit width on computers */
+            width: 100%;       
+            max-width: 400px;  
             text-align: center;
         }
 
-        /* Wider card for the data entry and logs */
-        .wide-card { 
-            max-width: 700px; 
-        }
-
+        .wide-card { max-width: 600px; }
         .hidden { display: none; }
 
-        /* 3. Inputs & Buttons */
+        /* 2. INPUTS & BUTTONS */
         input, select { 
             width: 100%; 
-            padding: 14px; 
+            padding: 12px; 
             margin-top: 15px; 
             background: #000; 
             color: #ff0000; 
@@ -62,14 +49,8 @@
             font-size: 16px;
         }
 
-        /* Side-by-side inputs that stack on mobile */
-        .row { 
-            display: flex; 
-            gap: 10px; 
-            width: 100%; 
-            flex-wrap: wrap; 
-        }
-        .row input, .row button { flex: 1; min-width: 140px; }
+        .row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+        .row input { flex: 1; min-width: 120px; }
 
         button { 
             width: 100%; 
@@ -83,14 +64,12 @@
             text-transform: uppercase;
             border-radius: 5px;
             transition: 0.3s;
-            font-size: 14px;
         }
 
         button:hover { background-color: #b30000; box-shadow: 0 0 15px #ff0000; }
-        
         .secondary-btn { background: transparent; border: 1px solid #ff0000; margin-top: 10px; }
 
-        /* 4. Lists & History */
+        /* 3. TASK LIST & HISTORY */
         ul { padding: 0; list-style: none; text-align: left; }
         li { 
             background: #222; 
@@ -102,7 +81,7 @@
         }
 
         .history-container {
-            margin-top: 20px;
+            margin-top: 25px;
             border-top: 1px solid #444;
             padding-top: 15px;
             text-align: left;
@@ -119,22 +98,15 @@
             gap: 10px;
         }
 
-        .delete-btn {
-            background: #333;
-            color: red;
-            border: 1px solid red;
-            width: 35px;
-            height: 35px;
-            padding: 0;
-            margin: 0;
-            line-height: 35px;
+        .del-x { 
+            background: #333; color: red; border: 1px solid red; 
+            width: 30px; height: 30px; padding: 0; margin: 0; 
         }
 
-        /* 5. Mobile Adjustments */
+        /* 4. MOBILE STACKING */
         @media (max-width: 480px) {
-            body { padding: 10px; }
-            .card { padding: 15px; }
             .row { flex-direction: column; gap: 0; }
+            .wide-card { padding: 15px; }
         }
     </style>
 </head>
@@ -150,7 +122,7 @@
         <button onclick="checkMasterLogin()">Authorize</button>
     </div>
 
-    <!-- STAGE 2: EMPLOYEE SELECTION -->
+    <!-- STAGE 2: SELECT STAFF -->
     <div id="login-page" class="card hidden">
         <h2 style="color: #ff0000;">SELECT STAFF</h2>
         <select id="employee-select">
@@ -191,21 +163,18 @@
         <button class="secondary-btn" onclick="backToTasks()">Back to Tasks</button>
 
         <!-- Search and List -->
-               <!-- Search and List -->
         <div class="history-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: #ff0000;">RECORDS HISTORY</h3>
-                <button onclick="clearAllData()" style="width: auto; padding: 5px 10px; font-size: 10px; background: #444; margin-top: 0;">Clear All</button>
+                <h3 style="color: #ff0000; margin: 0;">RECORDS</h3>
+                <button onclick="clearAllData()" style="width: auto; padding: 5px 10px; font-size: 10px; background: #444; margin: 0;">Clear All</button>
             </div>
-            <input type="text" id="search-bar" placeholder="Search by Phone, Case, or Ref..." onkeyup="searchData()">
-            
-            <div id="history-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
-                <!-- Entries will appear here -->
-            </div>
+            <input type="text" id="search-bar" placeholder="Filter by Phone, Case, or Ref..." onkeyup="searchData()">
+            <div id="history-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;"></div>
         </div>
     </div>
 
-       <script>
+    <script>
+        // --- DATA ---
         const MASTER_ID = "admin";
         const MASTER_PASS = "1234";
 
@@ -219,18 +188,17 @@
             "Jawad": { role: "Director", tasks: ["Cross checking"] }
         };
 
-        // LOAD DATA FROM MEMORY: This looks for saved data when the page opens
+        // Initialize Memory
         let tempStorage = JSON.parse(localStorage.getItem('employeeData')) || [];
 
+        // --- NAVIGATION ---
         function checkMasterLogin() {
             const id = document.getElementById('user-id').value;
             const pass = document.getElementById('user-pass').value;
             if (id === MASTER_ID && pass === MASTER_PASS) {
                 document.getElementById('master-login').classList.add('hidden');
                 document.getElementById('login-page').classList.remove('hidden');
-            } else {
-                alert("Invalid Credentials");
-            }
+            } else { alert("Access Denied"); }
         }
 
         function showTasks() {
@@ -249,7 +217,7 @@
                 li.onclick = () => openForm(task);
                 list.appendChild(li);
             });
-            renderHistory(); // Show history immediately after login
+            renderHistory();
         }
 
         function openForm(taskName) {
@@ -265,19 +233,17 @@
 
         function logout() { location.reload(); }
 
+        // --- CORE LOGIC ---
         function handleSave(saveType) {
             const name = document.getElementById('welcome-msg').innerText;
             const phone = document.getElementById('phone-num').value.trim();
             const caseNo = document.getElementById('case-num').value.trim();
             const refNo = document.getElementById('ref-no').value.trim();
 
-            if (!phone) { alert("Phone Number is required!"); return; }
-            if (!caseNo && !refNo) { alert("Enter either a Case No or Ref No!"); return; }
+            if (!phone) { alert("Phone is required!"); return; }
+            if (!caseNo && !refNo) { alert("Need Case or Ref No!"); return; }
 
-            if (saveType === 'Final') {
-                alert("Final Save selected (Sending to Excel simulation).");
-                return;
-            }
+            if (saveType === 'Final') { alert("Final Save triggered."); return; }
 
             const entry = {
                 user: name,
@@ -288,10 +254,7 @@
             };
 
             tempStorage.unshift(entry); 
-            
-            // SAVE TO MEMORY
             localStorage.setItem('employeeData', JSON.stringify(tempStorage));
-
             document.getElementById('phone-num').value = "";
             document.getElementById('case-num').value = "";
             document.getElementById('ref-no').value = "";
@@ -301,18 +264,17 @@
         function renderHistory(filter = "") {
             const listDiv = document.getElementById('history-list');
             listDiv.innerHTML = "";
-            
             tempStorage.forEach((item, index) => {
-                const searchStr = (item.phone + item.case + item.ref).toLowerCase();
-                if (searchStr.includes(filter.toLowerCase())) {
+                const text = (item.phone + item.case + item.ref).toLowerCase();
+                if (text.includes(filter.toLowerCase())) {
                     const div = document.createElement('div');
                     div.className = "history-item";
                     div.innerHTML = `
-                        <div style="flex-grow: 1;">
-                            <span style="color:#ff0000; font-weight:bold;">[TEMP]</span> By ${item.user} at ${item.timestamp}<br>
+                        <div>
+                            <span style="color:red;font-weight:bold;">[TEMP]</span> By ${item.user} at ${item.timestamp}<br>
                             Ph: ${item.phone} | Case: ${item.case} | Ref: ${item.ref}
                         </div>
-                        <button onclick="deleteEntry(${index})" style="width:30px; height:30px; padding:0; background:#333; border:1px solid red; color:red; margin-top:0;">X</button>
+                        <button class="del-x" onclick="deleteEntry(${index})">X</button>
                     `;
                     listDiv.appendChild(div);
                 }
@@ -320,15 +282,15 @@
         }
 
         function deleteEntry(index) {
-            if(confirm("Delete this record?")) {
+            if(confirm("Delete this?")) {
                 tempStorage.splice(index, 1);
-                localStorage.setItem('employeeData', JSON.stringify(tempStorage)); // Update memory
+                localStorage.setItem('employeeData', JSON.stringify(tempStorage));
                 renderHistory();
             }
         }
 
         function clearAllData() {
-            if(confirm("Are you sure you want to WIPE ALL saved data?")) {
+            if(confirm("WIPE ALL DATA?")) {
                 tempStorage = [];
                 localStorage.removeItem('employeeData');
                 renderHistory();
@@ -336,8 +298,7 @@
         }
 
         function searchData() {
-            const query = document.getElementById('search-bar').value;
-            renderHistory(query);
+            renderHistory(document.getElementById('search-bar').value);
         }
     </script>
 </body>
