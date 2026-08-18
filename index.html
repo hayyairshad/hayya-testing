@@ -3,302 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESTING PORTAL</title>
+    <title>Mahana Trackers</title>
     <style>
-        /* 1. BASE STYLES & MOBILE OPTIMIZATION */
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; 
-            min-height: 100vh;
+        :root {
+            --teal-bg: #004d40;
+            --glass-white: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --teal-accent: #00897b;
+            --text-glow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+        body {
+            background-color: var(--teal-bg);
+            background-image: radial-gradient(circle at center, #006064 0%, #002d2d 100%);
+            color: white;
             margin: 0;
-            padding: 20px;
-            background-color: #000000; 
-            color: white; 
-        }
-
-        h1 { color: #ff0000; text-transform: uppercase; letter-spacing: 5px; margin: 20px 0; font-size: 1.8rem; }
-
-        .card { 
-            background: #1a1a1a; 
-            padding: 25px; 
-            border-radius: 12px; 
-            border: 2px solid #ff0000; 
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); 
-            width: 100%;       
-            max-width: 400px;  
-            text-align: center;
-        }
-
-        .wide-card { max-width: 600px; }
-        .hidden { display: none; }
-
-        /* 2. INPUTS & BUTTONS */
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin-top: 15px; 
-            background: #000; 
-            color: #ff0000; 
-            border: 1px solid #ff0000;
-            border-radius: 5px;
-            outline: none;
-            font-size: 16px;
-        }
-
-        .row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
-        .row input { flex: 1; min-width: 120px; }
-
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            margin-top: 20px; 
-            cursor: pointer; 
-            background-color: #ff0000; 
-            color: white; 
-            border: none; 
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        button:hover { background-color: #b30000; box-shadow: 0 0 15px #ff0000; }
-        .secondary-btn { background: transparent; border: 1px solid #ff0000; margin-top: 10px; }
-
-        /* 3. TASK LIST & HISTORY */
-        ul { padding: 0; list-style: none; text-align: left; }
-        li { 
-            background: #222; 
-            margin-bottom: 10px; 
-            padding: 15px; 
-            border-left: 5px solid #ff0000; 
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .history-container {
-            margin-top: 25px;
-            border-top: 1px solid #444;
-            padding-top: 15px;
-            text-align: left;
-        }
-
-        .history-item {
-            font-size: 13px;
-            background: #111;
-            padding: 12px;
-            border-bottom: 1px solid #333;
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 20px;
+            display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .del-x { 
-            background: #333; color: red; border: 1px solid red; 
-            width: 30px; height: 30px; padding: 0; margin: 0; 
-        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo-box { height: 45px; display: flex; gap: 12px; align-items: center; }
+        .logo-box img { height: 100%; width: auto; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .site-name { font-weight: bold; font-size: 1.3rem; letter-spacing: 1px; color: #00e5ff; text-shadow: var(--text-glow); }
 
-        /* 4. MOBILE STACKING */
-        @media (max-width: 480px) {
-            .row { flex-direction: column; gap: 0; }
-            .wide-card { padding: 15px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .user-tag { font-size: 0.9rem; color: #00e5ff; padding-right: 12px; border-right: 1px solid var(--glass-border); }
+
+        /* BUTTONS */
+        .btn-glass {
+            background: var(--glass-white);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-glass:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        .btn-main { background: var(--teal-accent); border: none; width: 100%; margin-top: 15px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* CARDS */
+        .container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .glass-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 35px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .wide-card { max-width: 900px; }
+        .hidden { display: none !important; }
+
+        /* INPUTS */
+        input {
+            width: 100%; padding: 14px; margin: 10px 0;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            border-radius: 12px; color: white; font-size: 1.1rem;
+        }
+        input:focus { border-color: #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.3); outline: none; }
+        label { font-size: 0.85rem; color: #b2dfdb; margin-left: 5px; }
+
+        /* TILES */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-top: 25px; }
+        .tile {
+            background: var(--glass-white); padding: 30px 15px; border-radius: 20px;
+            text-align: center; border: 1px solid var(--glass-border);
+            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .tile:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #00e5ff; }
+        .tile strong { font-size: 1.1rem; display: block; margin-bottom: 5px; }
+
+        /* TABLE */
+        .history-section { margin-top: 40px; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 15px; overflow: hidden; }
+        .history-table th { background: rgba(0,0,0,0.2); text-align: left; padding: 15px; color: #00e5ff; font-size: 0.9rem; }
+        .history-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); }
+        .del-btn { color: #ff5252; background: none; border: 1px solid #ff5252; border-radius: 5px; cursor: pointer; padding: 2px 8px; }
+
+        @media (max-width: 600px) {
+            .site-name { display: none; }
+            .grid-container { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .glass-card { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <h1>TESTING</h1>
-
-    <!-- STAGE 1: MASTER LOGIN -->
-    <div id="master-login" class="card">
-        <h2 style="color: #ff0000;">SYSTEM ACCESS</h2>
-        <input type="text" id="user-id" placeholder="User ID">
-        <input type="password" id="user-pass" placeholder="Password">
-        <button onclick="checkMasterLogin()">Authorize</button>
-    </div>
-
-    <!-- STAGE 2: SELECT STAFF -->
-    <div id="login-page" class="card hidden">
-        <h2 style="color: #ff0000;">SELECT STAFF</h2>
-        <select id="employee-select">
-            <option value="Uzair">Uzair (Manager HP)</option>
-            <option value="Waqas">Waqas (Rider)</option>
-            <option value="Junaid">Junaid (Clerk)</option>
-            <option value="Ahmed">Ahmed (Head of Recovery)</option>
-            <option value="Zuni">Zuni (Manager Recovery)</option>
-            <option value="Sumaira">Sumaira (Call Center)</option>
-            <option value="Jawad">Jawad (Director)</option>
-        </select>
-        <button onclick="showTasks()">Load Profile</button>
-    </div>
-
-    <!-- STAGE 3: TASK PAGE -->
-    <div id="task-page" class="card hidden">
-        <h2 id="welcome-msg" style="color: #ff0000; margin-bottom: 5px;"></h2>
-        <p id="user-role" style="color: #888; font-style: italic; margin-bottom: 20px;"></p>
-        <ul id="task-list"></ul>
-        <button class="secondary-btn" onclick="logout()">Terminate Session</button>
-    </div>
-
-    <!-- STAGE 4: DATA ENTRY & HISTORY -->
-    <div id="entry-form-page" class="card wide-card hidden">
-        <h2 style="color: #ff0000;">DATA ENTRY</h2>
-        <p id="active-task" style="color: #888;"></p>
-        
-        <input type="text" id="phone-num" placeholder="Phone Number (Required)">
-        <div class="row">
-            <input type="text" id="case-num" placeholder="Case Number">
-            <input type="text" id="ref-no" placeholder="Ref No.">
-        </div>
-
-        <div class="row">
-            <button onclick="handleSave('Temp')">Temp Save</button>
-            <button onclick="handleSave('Final')" style="background-color: #444;">Final Save</button>
-        </div>
-        <button class="secondary-btn" onclick="backToTasks()">Back to Tasks</button>
-
-        <!-- Search and List -->
-        <div class="history-container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="color: #ff0000; margin: 0;">RECORDS</h3>
-                <button onclick="clearAllData()" style="width: auto; padding: 5px 10px; font-size: 10px; background: #444; margin: 0;">Clear All</button>
+    <header>
+        <div class="header-left">
+            <div class="logo-box">
+                <img src="mahana-logo.png" alt="Mahana">
+                <img src="friends-logo.png" alt="Friends">
             </div>
-            <input type="text" id="search-bar" placeholder="Filter by Phone, Case, or Ref..." onkeyup="searchData()">
-            <div id="history-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;"></div>
+            <span class="site-name">Mahana Trackers</span>
+            <button id="nav-back" class="btn-glass hidden" onclick="navigateBack()" style="margin-left:15px;">← Back</button>
+        </div>
+        <div class="header-right">
+            <span id="active-user-name" class="user-tag hidden"></span>
+            <button id="btn-logout" class="btn-glass hidden" onclick="location.reload()">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- SCREEN 1: LOGIN -->
+        <div id="scr-login" class="glass-card">
+            <h2 style="text-align:center; color:#00e5ff;">Sign In</h2>
+            <input type="text" id="in-user" placeholder="User ID">
+            <input type="password" id="in-pass" placeholder="Password">
+            <button class="btn-glass btn-main" onclick="doLogin()">Sign In</button>
+            <div style="display:flex; justify-content:space-between; margin-top:25px; font-size:0.85rem;">
+                <a href="#" style="color:#00e5ff; text-decoration:none;">Forgot Password</a>
+                <a href="#" style="color:#00e5ff; text-decoration:none;">Sign Up</a>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: STAFF SELECTION -->
+        <div id="scr-select" class="glass-card wide-card hidden">
+            <h2 style="color:#00e5ff;">Load Workspace</h2>
+            <div id="staff-tiles" class="grid-container"></div>
+        </div>
+
+        <!-- SCREEN 3: TASK SELECTION -->
+        <div id="scr-tasks" class="glass-card wide-card hidden">
+            <h2 id="workspace-header" style="color:#00e5ff;">Workspace</h2>
+            <div id="task-tiles" class="grid-container"></div>
+        </div>
+
+        <!-- SCREEN 4: DATA ENTRY -->
+        <div id="scr-entry" class="glass-card wide-card hidden">
+            <h1 id="bold-task-name" style="color:#00e5ff; margin-top:0;">Task Name</h1>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div style="grid-column: span 2;">
+                    <label>Ref Number</label>
+                    <input type="number" id="field-ref" inputmode="numeric" placeholder="0000">
+                </div>
+                <div>
+                    <label>Case Number</label>
+                    <input type="number" id="field-case" inputmode="numeric" placeholder="0000">
+                </div>
+                <div>
+                    <label>Mobile Number</label>
+                    <input type="number" id="field-mob" inputmode="numeric" placeholder="0300...">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:15px; margin-top:25px;">
+                <button class="btn-glass btn-main" onclick="saveData('Temp')">Temp Save</button>
+                <button class="btn-glass btn-main" style="background:#37474f" onclick="saveData('Final')">Final Save</button>
+            </div>
+
+            <div class="history-section">
+                <h3 style="color:#00e5ff;">Temporary Entries</h3>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th>Time</th>
+                                <th>Mobile</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="temp-grid-body"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        const MASTER_ID = "admin";
-        const MASTER_PASS = "1234";
-
-        const employeeInfo = {
-            "Uzair": { role: "Manager HP", tasks: ["Presentation"] },
-            "Waqas": { role: "Rider", tasks: ["Visit"] },
-            "Junaid": { role: "Clerk", tasks: ["Delivery Linkage"] },
-            "Ahmed": { role: "Head of Recovery", tasks: ["Reporting"] },
-            "Zuni": { role: "Manager Recovery", tasks: ["Entries"] },
-            "Sumaira": { role: "Call Center", tasks: ["Follow-up"] },
-            "Jawad": { role: "Director", tasks: ["Cross checking"] }
+        // --- SPECIAL INPUT: SETUP STAFF HERE ---
+        const STAFF_DATA = {
+            "jawad":   { name: "Jawad",   pass: "123", level: 0, role: "Director", tasks: ["Cross Checking", "Entries"] },
+            "uzair":   { name: "Uzair",   pass: "123", level: 1, role: "Manager HP", tasks: ["Presentation"] },
+            "ahmed":   { name: "Ahmed",   pass: "123", level: 1, role: "Head of Recovery", tasks: ["Reporting"] },
+            "waqas":   { name: "Waqas",   pass: "123", level: 2, role: "Rider", tasks: ["Visit"] },
+            "junaid":  { name: "Junaid",  pass: "123", level: 2, role: "Clerk", tasks: ["Delivery Linkage"] },
+            "zuni":    { name: "Zuni",    pass: "123", level: 2, role: "Manager Recovery", tasks: ["Entries"] },
+            "sumaira": { name: "Sumaira", pass: "123", level: 2, role: "Call Center", tasks: ["Follow-up"] }
         };
 
-        // Initialize Memory
-        let tempStorage = JSON.parse(localStorage.getItem('employeeData')) || [];
+        let loggedInUser = null; 
+        let currentWorkspace = null;
+        let storage = JSON.parse(localStorage.getItem('mahana_storage')) || [];
 
-        // --- NAVIGATION ---
-        function checkMasterLogin() {
-            const id = document.getElementById('user-id').value;
-            const pass = document.getElementById('user-pass').value;
-            if (id === MASTER_ID && pass === MASTER_PASS) {
-                document.getElementById('master-login').classList.add('hidden');
-                document.getElementById('login-page').classList.remove('hidden');
-            } else { alert("Access Denied"); }
+        function doLogin() {
+            const u = document.getElementById('in-user').value.toLowerCase();
+            const p = document.getElementById('in-pass').value;
+
+            if (STAFF_DATA[u] && STAFF_DATA[u].pass === p) {
+                loggedInUser = STAFF_DATA[u];
+                document.getElementById('scr-login').classList.add('hidden');
+                document.getElementById('btn-logout').classList.remove('hidden');
+                document.getElementById('active-user-name').classList.remove('hidden');
+                document.getElementById('active-user-name').innerText = loggedInUser.name;
+
+                if (loggedInUser.level < 2) showStaffSelection();
+                else enterWorkspace(loggedInUser.name);
+            } else alert("Access Denied");
         }
 
-        function showTasks() {
-            const user = document.getElementById('employee-select').value;
-            const data = employeeInfo[user];
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('task-page').classList.remove('hidden');
-            document.getElementById('welcome-msg').innerText = user;
-            document.getElementById('user-role').innerText = data.role;
-
-            const list = document.getElementById('task-list');
-            list.innerHTML = "";
-            data.tasks.forEach(task => {
-                let li = document.createElement('li');
-                li.innerText = "◈ " + task;
-                li.onclick = () => openForm(task);
-                list.appendChild(li);
-            });
-            renderHistory();
-        }
-
-        function openForm(taskName) {
-            document.getElementById('task-page').classList.add('hidden');
-            document.getElementById('entry-form-page').classList.remove('hidden');
-            document.getElementById('active-task').innerText = "Task: " + taskName;
-        }
-
-        function backToTasks() {
-            document.getElementById('entry-form-page').classList.add('hidden');
-            document.getElementById('task-page').classList.remove('hidden');
-        }
-
-        function logout() { location.reload(); }
-
-        // --- CORE LOGIC ---
-        function handleSave(saveType) {
-            const name = document.getElementById('welcome-msg').innerText;
-            const phone = document.getElementById('phone-num').value.trim();
-            const caseNo = document.getElementById('case-num').value.trim();
-            const refNo = document.getElementById('ref-no').value.trim();
-
-            if (!phone) { alert("Phone is required!"); return; }
-            if (!caseNo && !refNo) { alert("Need Case or Ref No!"); return; }
-
-            if (saveType === 'Final') { alert("Final Save triggered."); return; }
-
-            const entry = {
-                user: name,
-                timestamp: new Date().toLocaleString(),
-                phone: phone,
-                case: caseNo || "N/A",
-                ref: refNo || "N/A"
-            };
-
-            tempStorage.unshift(entry); 
-            localStorage.setItem('employeeData', JSON.stringify(tempStorage));
-            document.getElementById('phone-num').value = "";
-            document.getElementById('case-num').value = "";
-            document.getElementById('ref-no').value = "";
-            renderHistory();
-        }
-
-        function renderHistory(filter = "") {
-            const listDiv = document.getElementById('history-list');
-            listDiv.innerHTML = "";
-            tempStorage.forEach((item, index) => {
-                const text = (item.phone + item.case + item.ref).toLowerCase();
-                if (text.includes(filter.toLowerCase())) {
-                    const div = document.createElement('div');
-                    div.className = "history-item";
-                    div.innerHTML = `
-                        <div>
-                            <span style="color:red;font-weight:bold;">[TEMP]</span> By ${item.user} at ${item.timestamp}<br>
-                            Ph: ${item.phone} | Case: ${item.case} | Ref: ${item.ref}
-                        </div>
-                        <button class="del-x" onclick="deleteEntry(${index})">X</button>
-                    `;
-                    listDiv.appendChild(div);
+        function showStaffSelection() {
+            hideAll();
+            document.getElementById('scr-select').classList.remove('hidden');
+            document.getElementById('nav-back').classList.add('hidden');
+            const grid = document.getElementById('staff-tiles');
+            grid.innerHTML = "";
+            Object.values(STAFF_DATA).forEach(s => {
+                if (loggedInUser.level === 0 || s.level > 0) {
+                    const tile = document.createElement('div');
+                    tile.className = "tile";
+                    tile.innerHTML = `<strong>${s.name}</strong><small>${s.role}</small>`;
+                    tile.onclick = () => enterWorkspace(s.name);
+                    grid.appendChild(tile);
                 }
             });
         }
 
-        function deleteEntry(index) {
-            if(confirm("Delete this?")) {
-                tempStorage.splice(index, 1);
-                localStorage.setItem('employeeData', JSON.stringify(tempStorage));
-                renderHistory();
+        function enterWorkspace(staffName) {
+            hideAll();
+            currentWorkspace = Object.values(STAFF_DATA).find(s => s.name === staffName);
+            document.getElementById('scr-tasks').classList.remove('hidden');
+            document.getElementById('workspace-header').innerText = staffName + "'s Workspace";
+            if (loggedInUser.level < 2) document.getElementById('nav-back').classList.remove('hidden');
+            const grid = document.getElementById('task-tiles');
+            grid.innerHTML = "";
+            currentWorkspace.tasks.forEach(t => {
+                const tile = document.createElement('div');
+                tile.className = "tile";
+                tile.innerHTML = `<strong>${t}</strong>`;
+                tile.onclick = () => showEntryForm(t);
+                grid.appendChild(tile);
+            });
+        }
+
+        function showEntryForm(task) {
+            hideAll();
+            document.getElementById('scr-entry').classList.remove('hidden');
+            document.getElementById('bold-task-name').innerText = task;
+            document.getElementById('nav-back').classList.remove('hidden');
+            refreshGrid();
+        }
+
+        function saveData(mode) {
+            const ref = document.getElementById('field-ref').value;
+            const cas = document.getElementById('field-case').value;
+            const mob = document.getElementById('field-mob').value;
+            if (mode === 'Temp' && !mob) return alert("Mobile Number Required");
+            if (mode === 'Final' && !ref && !cas) return alert("Ref or Case Number Required");
+            if (mode === 'Final') return alert("Final data recorded.");
+
+            storage.unshift({
+                staff: currentWorkspace.name,
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                mob: mob,
+                id: Date.now()
+            });
+            localStorage.setItem('mahana_storage', JSON.stringify(storage));
+            refreshGrid();
+            document.getElementById('field-ref').value = "";
+            document.getElementById('field-case').value = "";
+            document.getElementById('field-mob').value = "";
+        }
+
+        function refreshGrid() {
+            const body = document.getElementById('temp-grid-body');
+            body.innerHTML = "";
+            storage.forEach(item => {
+                if (item.staff === currentWorkspace.name) {
+                    body.insertAdjacentHTML('beforeend', `<tr>
+                        <td>${item.staff}</td>
+                        <td>${item.time}</td>
+                        <td>${item.mob}</td>
+                        <td><button class="del-btn" onclick="removeItem(${item.id})">X</button></td>
+                    </tr>`);
+                }
+            });
+        }
+
+        function removeItem(id) {
+            if(confirm("Delete entry?")) {
+                storage = storage.filter(i => i.id !== id);
+                localStorage.setItem('mahana_storage', JSON.stringify(storage));
+                refreshGrid();
             }
         }
 
-        function clearAllData() {
-            if(confirm("WIPE ALL DATA?")) {
-                tempStorage = [];
-                localStorage.removeItem('employeeData');
-                renderHistory();
-            }
+        function hideAll() {
+            document.querySelectorAll('.glass-card').forEach(c => c.classList.add('hidden'));
         }
 
-        function searchData() {
-            renderHistory(document.getElementById('search-bar').value);
+        function navigateBack() {
+            if (!document.getElementById('scr-entry').classList.contains('hidden')) enterWorkspace(currentWorkspace.name);
+            else if (!document.getElementById('scr-tasks').classList.contains('hidden')) showStaffSelection();
         }
     </script>
 </body>
