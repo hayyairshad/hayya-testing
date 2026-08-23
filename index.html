@@ -376,9 +376,40 @@ const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.goo
 // Updated STAFF config with ALL 29 tasks
 const STAFF = {
   "Jawad": { 
-    role: "Director", 
-    tasks: ["Gift Issued for Early Payment"] 
-  },
+  role: "Director", 
+  tasks: [
+    "WhatsApp Contact Save",
+    "Customer Thank You Confirmation",
+    "Initial Documents Collection",
+    "Rider Call & Visit Scheduling",
+    "Visit Rating & Feedback",
+    "Approval Request Sent",
+    "Advance/Cheque Arrangement",
+    "Advance Confirmation",
+    "Sale Processing",
+    "Voucher Processing",
+    "File Update",
+    "Digital Document Archive",
+    "Physical Document Archive",
+    "Cheque Management",
+    "Installment Plan Sent",
+    "Tele File Documentation",
+    "Recovery Follow-up",
+    "Recovery Presentation",
+    "6-Month Report Submission",
+    "Branch & Salesman Report",
+    "Cheque Exemption & Red Cases",
+    "Case Completion Thank You",
+    "Installment Slip Received",
+    "Installment Voucher",
+    "Installment File Update",
+    "Updated Installment Plan Sent",
+    "Delivery Linkage",
+    "Mahana Temporary Verification",
+    "Gift Issued for Early Payment",
+    "Entries"
+  ] 
+},
   "Uzair": { 
     role: "Manager HP", 
     tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Approval Request Sent", "Advance/Cheque Arrangement", "Advance Confirmation", "Sale Processing", "Voucher Processing", "File Update", "Tele File Documentation", "Installment Slip Received", "Installment File Update", "Mahana Temporary Verification"] 
@@ -564,7 +595,15 @@ function openProfile(name) {
   
   const grid = document.getElementById('task-grid');
   grid.innerHTML = "";
-  profile.tasks.forEach(t => {
+  
+  // If Jawad (Level 0), show ALL tasks from that person
+  // Otherwise show only their assigned tasks
+  let tasksToShow = profile.tasks;
+  if (user.level === 0) {
+    tasksToShow = profile.tasks; // Jawad sees all their tasks
+  }
+  
+  tasksToShow.forEach(t => {
     grid.insertAdjacentHTML('beforeend', `<div class="dashboard-item" onclick="openForm('${t}')"><strong>${t}</strong></div>`);
   });
 }
