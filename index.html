@@ -197,13 +197,20 @@
 
                     <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
                         <button class="btn btn-primary" id="btn-temp-save" onclick="saveData('Temp')">Temp Save</button>
-                        <button class="btn icon-btn icon-tick" id="btn-final-save" onclick="saveData('Final')" title="Final Save">&#10003;</button>
+                        <button class="btn" id="btn-final-save" onclick="saveData('Final')">Final Save</button>
                     </div>
 
                     <div class="data-section">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <label>Recent Temporary Entries</label>
-                            <button class="btn" style="padding:4px 10px; font-size:0.7rem;" onclick="loadTemp()">Refresh</button>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <label style="margin-bottom:0;">Recent Temporary Entries</label>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <div style="position:relative;">
+                                    <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-dim); font-size:0.8rem;">&#128269;</span>
+                                    <input type="text" id="search-temp" placeholder="Search entries" oninput="filterTable()"
+                                        style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
+                                </div>
+                                <button class="btn" style="padding:4px 10px; font-size:0.7rem;" onclick="loadTemp()">Refresh</button>
+                            </div>
                         </div>
                         <table class="data-table">
                             <thead>
@@ -386,14 +393,27 @@
             }
         }
 
-        function renderTable() {
+        function filterTable() {
+            const q = document.getElementById('search-temp').value.trim().toLowerCase();
+            if (!q) { renderTable(); return; }
+            const filtered = tempEntries.filter(item =>
+                String(item.comment || "").toLowerCase().includes(q) ||
+                String(item.staffName || "").toLowerCase().includes(q) ||
+                String(item.refNo || "").toLowerCase().includes(q) ||
+                String(item.caseNo || "").toLowerCase().includes(q)
+            );
+            renderTable(filtered);
+        }
+
+        function renderTable(list) {
+            const items = list || tempEntries;
             const body = document.getElementById('data-body');
             body.innerHTML = "";
-            if (tempEntries.length === 0) {
-                body.innerHTML = `<tr><td colspan="4" style="color:var(--text-dim)">No temporary entries</td></tr>`;
+            if (items.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" style="color:var(--text-dim)">No matching entries</td></tr>`;
                 return;
             }
-            tempEntries.forEach(item => {
+            items.forEach(item => {
                 body.insertAdjacentHTML('beforeend', `<tr>
                     <td>${item.staffName}</td>
                     <td style="color:var(--text-dim)">${item.createdAt || ''}</td>
@@ -441,8 +461,23 @@
         }
 
         async function finalizeEntry(tempId) {
+            const entry = tempEntries.find(e => String(e.tempId) === String(tempId));
+            let refNo = entry ? String(entry.refNo || "") : "";
+            let caseNo = entry ? String(entry.caseNo || "") : "";
+
+            if (!refNo && !caseNo) {
+                refNo = window.prompt("Reference Number (leave blank to use Case Number instead):", "") || "";
+                if (!refNo) {
+                    caseNo = window.prompt("Case Number:", "") || "";
+                }
+                if (!refNo && !caseNo) {
+                    alert("Reference or Case Number is required to finalize.");
+                    return;
+                }
+            }
+
             if (!confirm("Push this entry to Final records?")) return;
-            const result = await apiCall('tempFinalize', { tempId });
+            const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
             if (!result.ok) return alert(result.error || "Could not finalize");
             await loadTemp();
         }
