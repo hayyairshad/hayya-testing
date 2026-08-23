@@ -80,7 +80,7 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
         .wide-panel { max-width: 900px; }
-        .entry-panel { max-width: 1000px; }
+        .entry-panel { max-width: 1150px; }
         .hidden { display: none !important; }
 
         h2 { font-weight: 400; margin-top: 0; margin-bottom: 25px; letter-spacing: -0.5px; }
@@ -212,17 +212,21 @@
                                 <button class="btn" style="padding:4px 10px; font-size:0.7rem;" onclick="loadTemp()">Refresh</button>
                             </div>
                         </div>
+                        <div style="overflow-x:auto;">
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Staff Member</th>
                                     <th>Timestamp</th>
                                     <th>Comment</th>
+                                    <th>Ref No</th>
+                                    <th>Case No</th>
                                     <th style="text-align:right">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="data-body"></tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -410,7 +414,7 @@
             const body = document.getElementById('data-body');
             body.innerHTML = "";
             if (items.length === 0) {
-                body.innerHTML = `<tr><td colspan="4" style="color:var(--text-dim)">No matching entries</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">No matching entries</td></tr>`;
                 return;
             }
             items.forEach(item => {
@@ -418,7 +422,9 @@
                     <td>${item.staffName}</td>
                     <td style="color:var(--text-dim)">${item.createdAt || ''}</td>
                     <td>${item.comment || ''}</td>
-                    <td style="text-align:right">
+                    <td><input type="text" class="row-ref" data-id="${item.tempId}" value="${item.refNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+                    <td><input type="text" class="row-case" data-id="${item.tempId}" value="${item.caseNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+                    <td style="text-align:right; white-space:nowrap;">
                         <button class="btn icon-btn icon-tick" onclick="finalizeEntry('${item.tempId}')" title="Finalize">&#10003;</button>
                         <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete">&#10005;</button>
                     </td>
@@ -461,19 +467,14 @@
         }
 
         async function finalizeEntry(tempId) {
-            const entry = tempEntries.find(e => String(e.tempId) === String(tempId));
-            let refNo = entry ? String(entry.refNo || "") : "";
-            let caseNo = entry ? String(entry.caseNo || "") : "";
+            const refInput = document.querySelector(`.row-ref[data-id="${tempId}"]`);
+            const caseInput = document.querySelector(`.row-case[data-id="${tempId}"]`);
+            const refNo = refInput ? refInput.value.trim() : "";
+            const caseNo = caseInput ? caseInput.value.trim() : "";
 
             if (!refNo && !caseNo) {
-                refNo = window.prompt("Reference Number (leave blank to use Case Number instead):", "") || "";
-                if (!refNo) {
-                    caseNo = window.prompt("Case Number:", "") || "";
-                }
-                if (!refNo && !caseNo) {
-                    alert("Reference or Case Number is required to finalize.");
-                    return;
-                }
+                alert("Fill in Reference No or Case No before finalizing.");
+                return;
             }
 
             if (!confirm("Push this entry to Final records?")) return;
