@@ -29,56 +29,60 @@ header {
 background: rgba(0, 0, 0, 0.3);
 backdrop-filter: blur(20px);
 border-bottom: 1px solid var(--border-color);
-padding: 12px 40px;
+padding: 12px 20px;
 display: flex;
 align-items: center;
 justify-content: space-between;
 position: sticky;
 top: 0;
 z-index: 1000;
+flex-wrap: wrap;
+gap: 10px;
 }
-.header-left { display: flex; align-items: center; gap: 20px; }
-.logo-group { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 5px 12px;
+.header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.logo-group { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 10px;
 border-radius: 8px; }
-.logo-group img { height: 32px; width: auto; }
-.site-title { font-weight: 500; font-size: 1.1rem; letter-spacing: 0.5px; border-left: 1px solid var(--border-color);
-padding-left: 20px; }
-.header-right { display: flex; align-items: center; gap: 20px; }
-.user-meta { font-size: 0.85rem; color: var(--text-dim); }
+.logo-group img { height: 28px; width: auto; }
+.site-title { font-weight: 500; font-size: 1rem; letter-spacing: 0.5px; border-left: 1px solid var(--border-color);
+padding-left: 15px; }
+.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.user-meta { font-size: 0.8rem; color: var(--text-dim); }
 .btn {
 background: var(--panel-color);
 border: 1px solid var(--border-color);
 color: white;
-padding: 10px 24px;
+padding: 8px 16px;
 border-radius: 6px;
 cursor: pointer;
-font-size: 0.85rem;
+font-size: 0.8rem;
 transition: all 0.2s ease;
+white-space: nowrap;
 }
 .btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
 .btn-primary { background: var(--accent-color); border: none; font-weight: 600; }
 .btn-primary:hover { background: #00897b; }
 .btn-small { padding: 6px 12px; font-size: 0.75rem; }
-.icon-btn { padding: 6px 16px; font-size: 1rem; line-height: 1; font-weight: 700; }
+.icon-btn { padding: 6px 12px; font-size: 0.9rem; line-height: 1; font-weight: 700; }
 .icon-tick { color: #69f0ae; border-color: #69f0ae; }
 .icon-tick:hover { background: rgba(105,240,174,0.15); }
+.icon-tick:disabled { color: #555; border-color: #555; cursor: not-allowed; opacity: 0.5; }
 .icon-cross { color: #ff8a80; border-color: #ff8a80; }
 .icon-cross:hover { background: rgba(255,138,128,0.15); }
-.main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+.main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .glass-panel {
 background: var(--panel-color);
 backdrop-filter: blur(30px);
 border: 1px solid var(--border-color);
 border-radius: 16px;
-padding: 40px;
+padding: 30px;
 width: 100%;
 max-width: 420px;
 box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 .wide-panel { max-width: 900px; }
-.entry-panel { max-width: 1150px; }
+.entry-panel { max-width: 1200px; }
 .hidden { display: none !important; }
-h2 { font-weight: 400; margin-top: 0; margin-bottom: 25px; letter-spacing: -0.5px; }
+h2 { font-weight: 400; margin-top: 0; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.3rem; }
 label { display: block; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
 margin-bottom: 6px; }
 input, select, textarea {
@@ -111,6 +115,7 @@ transition: 0.15s ease;
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
 font-size: 0.75rem; text-transform: uppercase; }
 .data-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+.data-table input { margin: 0; padding: 6px 8px; width: 90px; font-size: 0.8rem; }
 .copyable-tile {
 background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px;
 padding: 15px; margin-bottom: 20px; position: relative;
@@ -121,8 +126,7 @@ padding: 15px; margin-bottom: 20px; position: relative;
 .radio-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 0; cursor: pointer; }
 .radio-group input[type="radio"] { width: auto; margin: 0; }
 .time-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-.time-inputs input { margin-bottom: 0; }
-.rating-select { max-width: 200px; }
+.time-inputs input, .time-inputs select { margin-bottom: 0; }
 
 @media (max-width: 700px) {
 .entry-layout { grid-template-columns: 1fr; }
@@ -130,10 +134,13 @@ padding: 15px; margin-bottom: 20px; position: relative;
 padding-right: 0; padding-bottom: 16px; }
 }
 @media (max-width: 600px) {
-header { padding: 10px 20px; }
+header { padding: 10px 15px; }
 .site-title { display: none; }
 .dashboard-grid { grid-template-columns: 1fr; }
-.glass-panel { padding: 25px; }
+.glass-panel { padding: 20px; }
+.data-table { font-size: 0.8rem; }
+.data-table td { padding: 8px; }
+.data-table input { width: 70px; padding: 4px; }
 }
 </style>
 </head>
@@ -184,7 +191,7 @@ Sign in with your authorized Google account.
 <div>
 <h2 id="bold-task-header" style="font-weight: 600;"></h2>
 
-<!-- Default Entry Form -->
+<!-- DEFAULT FORM (for most tasks) -->
 <div id="form-default" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
@@ -206,8 +213,9 @@ Sign in with your authorized Google account.
 </div>
 </div>
 
-<!-- Rider Call & Visit Scheduling Form (Task #4) -->
+<!-- RIDER SCHEDULING FORM -->
 <div id="form-rider-scheduling" class="hidden">
+<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
 <label>Reference Number</label>
 <input type="number" id="field-ref-rider" inputmode="numeric">
@@ -217,10 +225,15 @@ Sign in with your authorized Google account.
 <input type="number" id="field-case-rider" inputmode="numeric">
 </div>
 <div>
+<label>Comment</label>
+<input type="text" id="field-comment-rider">
+</div>
+</div>
+<div class="time-inputs">
+<div>
 <label>Scheduled Date</label>
 <input type="date" id="field-date-rider">
 </div>
-<div class="time-inputs">
 <div>
 <label>Hour</label>
 <select id="field-hour-rider">
@@ -253,12 +266,14 @@ Sign in with your authorized Google account.
 <button class="btn btn-small copy-btn" onclick="copyToClipboard('copyable-text-rider')">Copy</button>
 </div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
-<button class="btn btn-primary" onclick="saveRiderScheduling('Final')">Final Save</button>
+<button class="btn btn-primary" id="btn-temp-save-rider" onclick="saveRiderScheduling('Temp')" style="display:none;">Temp Save</button>
+<button class="btn btn-primary" id="btn-final-save-rider" onclick="saveRiderScheduling('Final')">Final Save</button>
 </div>
 </div>
 
-<!-- Visit Rating & Feedback Form (Task #5) -->
+<!-- VISIT RATING FORM -->
 <div id="form-visit-rating" class="hidden">
+<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
 <label>Reference Number</label>
 <input type="number" id="field-ref-rating" inputmode="numeric">
@@ -268,9 +283,14 @@ Sign in with your authorized Google account.
 <input type="number" id="field-case-rating" inputmode="numeric">
 </div>
 <div>
-<label>Case Rating</label>
-<select id="field-rating" class="rating-select">
-<option value="">Select Rating (1-10)</option>
+<label>Comment</label>
+<input type="text" id="field-comment-rating">
+</div>
+</div>
+<div>
+<label>Case Rating 1-10</label>
+<select id="field-rating">
+<option value="">Select Rating</option>
 <option value="1">1 - Poor</option>
 <option value="2">2</option>
 <option value="3">3</option>
@@ -288,8 +308,9 @@ Sign in with your authorized Google account.
 </div>
 </div>
 
-<!-- Approval Request Form (Task #6) -->
+<!-- APPROVAL FORM -->
 <div id="form-approval" class="hidden">
+<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
 <label>Reference Number</label>
 <input type="number" id="field-ref-approval" inputmode="numeric">
@@ -297,6 +318,11 @@ Sign in with your authorized Google account.
 <div>
 <label>Case Number</label>
 <input type="number" id="field-case-approval" inputmode="numeric">
+</div>
+<div>
+<label>Comment</label>
+<input type="text" id="field-comment-approval">
+</div>
 </div>
 <div class="radio-group">
 <label>
@@ -313,8 +339,9 @@ Sign in with your authorized Google account.
 </div>
 </div>
 
-<!-- Copyable Text Tile Form (Tasks #7, #8) -->
+<!-- COPYABLE TILE FORM -->
 <div id="form-copyable-tile" class="hidden">
+<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
 <label>Reference Number</label>
 <input type="number" id="field-ref-tile" inputmode="numeric">
@@ -322,6 +349,11 @@ Sign in with your authorized Google account.
 <div>
 <label>Case Number</label>
 <input type="number" id="field-case-tile" inputmode="numeric">
+</div>
+<div>
+<label>Comment</label>
+<input type="text" id="field-comment-tile">
+</div>
 </div>
 <div class="copyable-tile">
 <span class="copyable-text" id="copyable-text-tile"></span>
@@ -333,7 +365,7 @@ Sign in with your authorized Google account.
 </div>
 </div>
 
-<!-- Data Table Section -->
+<!-- DATA TABLE -->
 <div class="data-section">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
 <label style="margin-bottom:0;">Recent Temporary Entries</label>
@@ -353,7 +385,9 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 <tr>
 <th>Staff Member</th>
 <th>Timestamp</th>
-<th>Details</th>
+<th>Comment</th>
+<th>Ref No</th>
+<th>Case No</th>
 <th style="text-align:right">Action</th>
 </tr>
 </thead>
@@ -373,43 +407,42 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyNDZgj-jFeTQFDSd2JdD_ls-qoqrIcP4Ni0_t-B02inJTEtoTndGjUCEA/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
-// Updated STAFF config with ALL 29 tasks
 const STAFF = {
   "Jawad": { 
-  role: "Director", 
-  tasks: [
-    "WhatsApp Contact Save",
-    "Customer Thank You Confirmation",
-    "Initial Documents Collection",
-    "Rider Call & Visit Scheduling",
-    "Visit Rating & Feedback",
-    "Approval Request Sent",
-    "Advance/Cheque Arrangement",
-    "Advance Confirmation",
-    "Sale Processing",
-    "Voucher Processing",
-    "File Update",
-    "Digital Document Archive",
-    "Physical Document Archive",
-    "Cheque Management",
-    "Installment Plan Sent",
-    "Tele File Documentation",
-    "Recovery Follow-up",
-    "Recovery Presentation",
-    "6-Month Report Submission",
-    "Branch & Salesman Report",
-    "Cheque Exemption & Red Cases",
-    "Case Completion Thank You",
-    "Installment Slip Received",
-    "Installment Voucher",
-    "Installment File Update",
-    "Updated Installment Plan Sent",
-    "Delivery Linkage",
-    "Mahana Temporary Verification",
-    "Gift Issued for Early Payment",
-    "Entries"
-  ] 
-},
+    role: "Director", 
+    tasks: [
+      "WhatsApp Contact Save",
+      "Customer Thank You Confirmation",
+      "Initial Documents Collection",
+      "Rider Call & Visit Scheduling",
+      "Visit Rating & Feedback",
+      "Approval Request Sent",
+      "Advance/Cheque Arrangement",
+      "Advance Confirmation",
+      "Sale Processing",
+      "Voucher Processing",
+      "File Update",
+      "Digital Document Archive",
+      "Physical Document Archive",
+      "Cheque Management",
+      "Installment Plan Sent",
+      "Tele File Documentation",
+      "Recovery Follow-up",
+      "Recovery Presentation",
+      "6-Month Report Submission",
+      "Branch & Salesman Report",
+      "Cheque Exemption & Red Cases",
+      "Case Completion Thank You",
+      "Installment Slip Received",
+      "Installment Voucher",
+      "Installment File Update",
+      "Updated Installment Plan Sent",
+      "Delivery Linkage",
+      "Mahana Temporary Verification",
+      "Gift Issued for Early Payment",
+      "Entries"
+    ] 
+  },
   "Uzair": { 
     role: "Manager HP", 
     tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Approval Request Sent", "Advance/Cheque Arrangement", "Advance Confirmation", "Sale Processing", "Voucher Processing", "File Update", "Tele File Documentation", "Installment Slip Received", "Installment File Update", "Mahana Temporary Verification"] 
@@ -427,9 +460,9 @@ const STAFF = {
     tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Physical Document Archive", "Sale Processing", "Voucher Processing", "Delivery Linkage", "Mahana Temporary Verification"] 
   },
   "Zuni": { 
-  role: "Manager Recovery", 
-  tasks: ["Entries", "Digital Document Archive", "Installment Voucher", "Installment Slip Received"] 
-},
+    role: "Manager Recovery", 
+    tasks: ["Entries", "Digital Document Archive", "Installment Voucher", "Installment Slip Received"] 
+  },
   "Samiya": { 
     role: "Call Center", 
     tasks: ["WhatsApp Contact Save", "Customer Thank You Confirmation", "Initial Documents Collection", "Installment Slip Received"] 
@@ -444,9 +477,8 @@ const STAFF = {
   }
 };
 
-// Task configuration (temp/permanent, copyable text, etc.)
 const TASK_CONFIG = {
-    "Entries": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Entries": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "WhatsApp Contact Save": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Customer Thank You Confirmation": { tempOrPerm: "PERMANENT", interface: "default" },
   "Initial Documents Collection": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
@@ -484,7 +516,6 @@ let profile = null;
 let currentTask = null;
 let tempEntries = [];
 
-// ---- Generic backend call ----
 async function apiCall(action, payload = {}) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
@@ -494,7 +525,6 @@ async function apiCall(action, payload = {}) {
   return res.json();
 }
 
-// ---- Google Sign-In ----
 function initGoogleSignIn() {
   if (typeof google === 'undefined') {
     handleGsiLoadError();
@@ -513,7 +543,7 @@ function initGoogleSignIn() {
 
 function handleGsiLoadError() {
   document.getElementById('login-status').innerText =
-    "Could not load Google Sign-In. Make sure this page is served over http(s):// and that you have an internet connection.";
+    "Could not load Google Sign-In. Make sure this page is served over https:// and that you have an internet connection.";
 }
 
 function handleCredentialResponse(response) {
@@ -552,7 +582,6 @@ function doLogout() {
   location.reload();
 }
 
-// ---- Navigation screens ----
 function showSelection() {
   hideAll();
   document.getElementById('scr-select').classList.remove('hidden');
@@ -565,13 +594,10 @@ function showSelection() {
     let shouldShow = false;
     
     if (user.level === 0) {
-      // Director sees everyone
       shouldShow = true;
     } else if (user.level === 1) {
-      // Managers see everyone EXCEPT Jawad
       shouldShow = (name !== "Jawad");
     } else {
-      // Staff see only themselves
       shouldShow = (user.staffName === name);
     }
     
@@ -595,15 +621,7 @@ function openProfile(name) {
   
   const grid = document.getElementById('task-grid');
   grid.innerHTML = "";
-  
-  // If Jawad (Level 0), show ALL tasks from that person
-  // Otherwise show only their assigned tasks
-  let tasksToShow = profile.tasks;
-  if (user.level === 0) {
-    tasksToShow = profile.tasks; // Jawad sees all their tasks
-  }
-  
-  tasksToShow.forEach(t => {
+  profile.tasks.forEach(t => {
     grid.insertAdjacentHTML('beforeend', `<div class="dashboard-item" onclick="openForm('${t}')"><strong>${t}</strong></div>`);
   });
 }
@@ -631,7 +649,6 @@ function renderTaskSidebar() {
 }
 
 function renderFormInterface() {
-  // Hide all forms first
   document.getElementById('form-default').classList.add('hidden');
   document.getElementById('form-rider-scheduling').classList.add('hidden');
   document.getElementById('form-visit-rating').classList.add('hidden');
@@ -641,9 +658,11 @@ function renderFormInterface() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
   
-  // Show appropriate form
   if (config.interface === "rider-scheduling") {
     document.getElementById('form-rider-scheduling').classList.remove('hidden');
+    const tempBtn = document.getElementById('btn-temp-save-rider');
+    if (isTempOrPerm) tempBtn.style.display = 'block';
+    else tempBtn.style.display = 'none';
   } else if (config.interface === "visit-rating") {
     document.getElementById('form-visit-rating').classList.remove('hidden');
   } else if (config.interface === "approval") {
@@ -652,33 +671,29 @@ function renderFormInterface() {
     document.getElementById('form-copyable-tile').classList.remove('hidden');
     document.getElementById('copyable-text-tile').innerText = config.copyableText;
     const tempBtn = document.getElementById('btn-temp-save-tile');
-    const finalBtn = document.getElementById('btn-final-save-tile');
     if (isTempOrPerm) tempBtn.style.display = 'block';
     else tempBtn.style.display = 'none';
   } else {
-    // Default form
     document.getElementById('form-default').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-default');
-    const finalBtn = document.getElementById('btn-final-save-default');
     if (isTempOrPerm) tempBtn.style.display = 'block';
     else tempBtn.style.display = 'none';
   }
 }
 
-// ---- Data operations ----
 async function loadTemp() {
   const body = document.getElementById('data-body');
-  body.innerHTML = `<tr><td colspan="4" style="color:var(--text-dim)">Loading...</td></tr>`;
+  body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">Loading...</td></tr>`;
   try {
     const result = await apiCall('tempList', { targetStaffName: profile.name, taskName: currentTask });
     if (!result.ok) {
-      body.innerHTML = `<tr><td colspan="4">${result.error || 'Could not load entries'}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="6">${result.error || 'Could not load entries'}</td></tr>`;
       return;
     }
     tempEntries = result.items || [];
     renderTable();
   } catch (e) {
-    body.innerHTML = `<tr><td colspan="4">Network error</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6">Network error</td></tr>`;
   }
 }
 
@@ -686,8 +701,10 @@ function filterTable() {
   const q = document.getElementById('search-temp').value.trim().toLowerCase();
   if (!q) { renderTable(); return; }
   const filtered = tempEntries.filter(item =>
-    String(item.details || "").toLowerCase().includes(q) ||
-    String(item.staffName || "").toLowerCase().includes(q)
+    String(item.comment || "").toLowerCase().includes(q) ||
+    String(item.staffName || "").toLowerCase().includes(q) ||
+    String(item.refNo || "").toLowerCase().includes(q) ||
+    String(item.caseNo || "").toLowerCase().includes(q)
   );
   renderTable(filtered);
 }
@@ -697,16 +714,18 @@ function renderTable(list) {
   const body = document.getElementById('data-body');
   body.innerHTML = "";
   if (items.length === 0) {
-    body.innerHTML = `<tr><td colspan="4" style="color:var(--text-dim)">No matching entries</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">No matching entries</td></tr>`;
     return;
   }
   items.forEach(item => {
     body.insertAdjacentHTML('beforeend', `<tr>
       <td>${item.staffName}</td>
-      <td style="color:var(--text-dim)">${item.createdAt || ''}</td>
-      <td>${item.details || ''}</td>
+      <td style="color:var(--text-dim); font-size:0.85rem;">${item.createdAt || ''}</td>
+      <td>${item.comment || ''}</td>
+      <td><input type="text" class="row-ref" data-id="${item.tempId}" value="${item.refNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+      <td><input type="text" class="row-case" data-id="${item.tempId}" value="${item.caseNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td style="text-align:right; white-space:nowrap;">
-        <button class="btn icon-btn icon-tick" onclick="finalizeEntry('${item.tempId}')" title="Finalize">✓</button>
+        <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${item.tempId}')" title="Finalize">✓</button>
         <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete">✕</button>
       </td>
     </tr>`);
@@ -714,20 +733,35 @@ function renderTable(list) {
 }
 
 async function saveData(type) {
-  const ref = document.getElementById('field-ref').value;
-  const cas = document.getElementById('field-case').value;
-  const comment = document.getElementById('field-comment').value;
-  try {
-    if (type === 'Temp') {
-      if (!comment) return alert("Comment required");
+  if (type === 'Temp') {
+    const comment = document.getElementById('field-comment').value.trim();
+    const ref = document.getElementById('field-ref').value.trim();
+    const cas = document.getElementById('field-case').value.trim();
+    
+    if (!comment) return alert("Comment required for Temp Save");
+    
+    try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return alert(result.error || "Could not save entry");
-    } else {
-      if (!ref && !cas) return alert("Reference or Case Required");
+      document.getElementById('field-ref').value = "";
+      document.getElementById('field-case').value = "";
+      document.getElementById('field-comment').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error while saving.");
+    }
+  } else {
+    const ref = document.getElementById('field-ref').value.trim();
+    const cas = document.getElementById('field-case').value.trim();
+    const comment = document.getElementById('field-comment').value.trim();
+    
+    if (!ref && !cas) return alert("Reference No OR Case No required for Final Save");
+    
+    try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
@@ -735,145 +769,204 @@ async function saveData(type) {
       });
       if (!result.ok) return alert(result.error || "Could not save entry");
       alert("Confirmed. Data pushed to central records.");
+      document.getElementById('field-ref').value = "";
+      document.getElementById('field-case').value = "";
+      document.getElementById('field-comment').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error while saving.");
     }
-    document.getElementById('field-ref').value = "";
-    document.getElementById('field-case').value = "";
-    document.getElementById('field-comment').value = "";
-    await loadTemp();
-  } catch (e) {
-    alert("Network error while saving.");
   }
 }
 
 async function saveRiderScheduling(type) {
-  const ref = document.getElementById('field-ref-rider').value;
-  const cas = document.getElementById('field-case-rider').value;
+  const ref = document.getElementById('field-ref-rider').value.trim();
+  const cas = document.getElementById('field-case-rider').value.trim();
+  const comment = document.getElementById('field-comment-rider').value.trim();
   const date = document.getElementById('field-date-rider').value;
   const hour = document.getElementById('field-hour-rider').value;
   const min = document.getElementById('field-min-rider').value;
   
-  if (!ref && !cas) return alert("Reference or Case Required");
-  if (!date) return alert("Date required");
-  if (!hour || !min) return alert("Time required");
-  
-  const scheduledTime = `${hour}:${min}`;
-  
-  try {
-    const result = await apiCall('finalAdd', {
-      targetStaffName: profile.name,
-      taskName: currentTask,
-      refNo: ref, caseNo: cas,
-      scheduledDate: date,
-      scheduledTime: scheduledTime
-    });
-    if (!result.ok) return alert(result.error || "Could not save entry");
-    alert("Rider scheduling saved!");
-    document.getElementById('field-ref-rider').value = "";
-    document.getElementById('field-case-rider').value = "";
-    document.getElementById('field-date-rider').value = "";
-    document.getElementById('field-hour-rider').value = "";
-    document.getElementById('field-min-rider').value = "";
-    await loadTemp();
-  } catch (e) {
-    alert("Network error while saving.");
+  if (type === 'Temp') {
+    if (!comment) return alert("Comment required for Temp Save");
+    try {
+      const result = await apiCall('tempAdd', {
+        targetStaffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        scheduledDate: date, scheduledTime: `${hour}:${min}`
+      });
+      if (!result.ok) return alert(result.error);
+      document.getElementById('field-ref-rider').value = "";
+      document.getElementById('field-case-rider').value = "";
+      document.getElementById('field-comment-rider').value = "";
+      document.getElementById('field-date-rider').value = "";
+      document.getElementById('field-hour-rider').value = "";
+      document.getElementById('field-min-rider').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error");
+    }
+  } else {
+    if (!ref && !cas) return alert("Reference No OR Case No required");
+    if (!date) return alert("Date required");
+    if (!hour || !min) return alert("Time required");
+    
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) return alert("Date must be in future");
+    
+    try {
+      const result = await apiCall('finalAdd', {
+        targetStaffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        scheduledDate: date, scheduledTime: `${hour}:${min}`
+      });
+      if (!result.ok) return alert(result.error);
+      alert("Rider scheduling saved!");
+      document.getElementById('field-ref-rider').value = "";
+      document.getElementById('field-case-rider').value = "";
+      document.getElementById('field-comment-rider').value = "";
+      document.getElementById('field-date-rider').value = "";
+      document.getElementById('field-hour-rider').value = "";
+      document.getElementById('field-min-rider').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error");
+    }
   }
 }
 
 async function saveVisitRating(type) {
-  const ref = document.getElementById('field-ref-rating').value;
-  const cas = document.getElementById('field-case-rating').value;
+  const ref = document.getElementById('field-ref-rating').value.trim();
+  const cas = document.getElementById('field-case-rating').value.trim();
+  const comment = document.getElementById('field-comment-rating').value.trim();
   const rating = document.getElementById('field-rating').value;
   
-  if (!ref && !cas) return alert("Reference or Case Required");
+  if (!ref && !cas) return alert("Reference No OR Case No required");
   if (!rating) return alert("Rating required");
   
   try {
     const result = await apiCall('finalAdd', {
       targetStaffName: profile.name,
       taskName: currentTask,
-      refNo: ref, caseNo: cas,
+      comment, refNo: ref, caseNo: cas,
       rating: rating
     });
-    if (!result.ok) return alert(result.error || "Could not save entry");
+    if (!result.ok) return alert(result.error);
     alert("Rating saved!");
     document.getElementById('field-ref-rating').value = "";
     document.getElementById('field-case-rating').value = "";
+    document.getElementById('field-comment-rating').value = "";
     document.getElementById('field-rating').value = "";
     await loadTemp();
   } catch (e) {
-    alert("Network error while saving.");
+    alert("Network error");
   }
 }
 
 async function saveApproval(type) {
-  const ref = document.getElementById('field-ref-approval').value;
-  const cas = document.getElementById('field-case-approval').value;
+  const ref = document.getElementById('field-ref-approval').value.trim();
+  const cas = document.getElementById('field-case-approval').value.trim();
+  const comment = document.getElementById('field-comment-approval').value.trim();
   const status = document.querySelector('input[name="approval-status"]:checked');
   
-  if (!ref && !cas) return alert("Reference or Case Required");
+  if (!ref && !cas) return alert("Reference No OR Case No required");
   if (!status) return alert("Approval status required");
   
   try {
     const result = await apiCall('finalAdd', {
       targetStaffName: profile.name,
       taskName: currentTask,
-      refNo: ref, caseNo: cas,
+      comment, refNo: ref, caseNo: cas,
       approvalStatus: status.value
     });
-    if (!result.ok) return alert(result.error || "Could not save entry");
+    if (!result.ok) return alert(result.error);
     alert("Approval saved!");
     document.getElementById('field-ref-approval').value = "";
     document.getElementById('field-case-approval').value = "";
+    document.getElementById('field-comment-approval').value = "";
     document.querySelector('input[name="approval-status"]').checked = false;
     await loadTemp();
   } catch (e) {
-    alert("Network error while saving.");
+    alert("Network error");
   }
 }
 
 async function saveCopyableTile(type) {
-  const ref = document.getElementById('field-ref-tile').value;
-  const cas = document.getElementById('field-case-tile').value;
+  const ref = document.getElementById('field-ref-tile').value.trim();
+  const cas = document.getElementById('field-case-tile').value.trim();
+  const comment = document.getElementById('field-comment-tile').value.trim();
   
-  try {
-    if (type === 'Temp') {
-      if (!ref && !cas) return alert("Reference or Case Required");
+  if (type === 'Temp') {
+    if (!comment) return alert("Comment required for Temp Save");
+    try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
-        refNo: ref, caseNo: cas
+        comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error || "Could not save entry");
-    } else {
-      if (!ref && !cas) return alert("Reference or Case Required");
+      if (!result.ok) return alert(result.error);
+      document.getElementById('field-ref-tile').value = "";
+      document.getElementById('field-case-tile').value = "";
+      document.getElementById('field-comment-tile').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error");
+    }
+  } else {
+    if (!ref && !cas) return alert("Reference No OR Case No required");
+    try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
-        refNo: ref, caseNo: cas
+        comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error || "Could not save entry");
+      if (!result.ok) return alert(result.error);
       alert("Saved!");
+      document.getElementById('field-ref-tile').value = "";
+      document.getElementById('field-case-tile').value = "";
+      document.getElementById('field-comment-tile').value = "";
+      await loadTemp();
+    } catch (e) {
+      alert("Network error");
     }
-    document.getElementById('field-ref-tile').value = "";
-    document.getElementById('field-case-tile').value = "";
-    await loadTemp();
-  } catch (e) {
-    alert("Network error while saving.");
   }
 }
 
-async function finalizeEntry(tempId) {
+async function finalizeEntryWithInputs(tempId) {
+  const refInput = document.querySelector(`.row-ref[data-id="${tempId}"]`);
+  const caseInput = document.querySelector(`.row-case[data-id="${tempId}"]`);
+  const refNo = refInput ? refInput.value.trim() : "";
+  const caseNo = caseInput ? caseInput.value.trim() : "";
+  
+  if (!refNo && !caseNo) {
+    alert("Fill in Reference No OR Case No before finalizing.");
+    return;
+  }
+  
   if (!confirm("Push this entry to Final records?")) return;
-  const result = await apiCall('tempFinalize', { tempId });
-  if (!result.ok) return alert(result.error || "Could not finalize");
-  await loadTemp();
+  
+  try {
+    const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
+    if (!result.ok) return alert(result.error || "Could not finalize");
+    await loadTemp();
+  } catch (e) {
+    alert("Network error");
+  }
 }
 
 async function removeEntry(tempId) {
   if (!confirm("Permanently delete this entry?")) return;
-  const result = await apiCall('tempDelete', { tempId });
-  if (!result.ok) return alert(result.error || "Could not delete");
-  await loadTemp();
+  try {
+    const result = await apiCall('tempDelete', { tempId });
+    if (!result.ok) return alert(result.error || "Could not delete");
+    await loadTemp();
+  } catch (e) {
+    alert("Network error");
+  }
 }
 
 function copyToClipboard(elementId) {
