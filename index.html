@@ -65,7 +65,6 @@ white-space: nowrap;
 .icon-btn { padding: 6px 12px; font-size: 0.9rem; line-height: 1; font-weight: 700; }
 .icon-tick { color: #69f0ae; border-color: #69f0ae; }
 .icon-tick:hover { background: rgba(105,240,174,0.15); }
-.icon-tick:disabled { color: #555; border-color: #555; cursor: not-allowed; opacity: 0.5; }
 .icon-cross { color: #ff8a80; border-color: #ff8a80; }
 .icon-cross:hover { background: rgba(255,138,128,0.15); }
 .main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -191,7 +190,7 @@ Sign in with your authorized Google account.
 <div>
 <h2 id="bold-task-header" style="font-weight: 600;"></h2>
 
-<!-- DEFAULT FORM (for most tasks) -->
+<!-- DEFAULT FORM -->
 <div id="form-default" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
@@ -403,7 +402,6 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 </div>
 
 <script>
-// ====== BACKEND CONFIG ======
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyNDZgj-jFeTQFDSd2JdD_ls-qoqrIcP4Ni0_t-B02inJTEtoTndGjUCEA/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
@@ -598,7 +596,7 @@ function showSelection() {
     } else if (user.level === 1) {
       shouldShow = (name !== "Jawad");
     } else {
-      shouldShow = (user.staffName === name);
+      shouldShow = (user.name === name);
     }
     
     if (shouldShow) {
@@ -732,6 +730,17 @@ function renderTable(list) {
   });
 }
 
+// ===== OPTIMISTIC UI: adds locally, avoids full reload =====
+function addLocalTempEntry(entry) {
+  tempEntries.unshift(entry);
+  renderTable();
+}
+
+function removeLocalTempEntry(tempId) {
+  tempEntries = tempEntries.filter(item => String(item.tempId) !== String(tempId));
+  renderTable();
+}
+
 async function saveData(type) {
   if (type === 'Temp') {
     const comment = document.getElementById('field-comment').value.trim();
@@ -747,10 +756,19 @@ async function saveData(type) {
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return alert(result.error || "Could not save entry");
+      
+      addLocalTempEntry({
+        tempId: result.tempId,
+        staffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        createdAt: result.createdAt || "Just now",
+        createdBy: result.createdBy || user.name
+      });
+      
       document.getElementById('field-ref').value = "";
       document.getElementById('field-case').value = "";
       document.getElementById('field-comment').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error while saving.");
     }
@@ -772,7 +790,6 @@ async function saveData(type) {
       document.getElementById('field-ref').value = "";
       document.getElementById('field-case').value = "";
       document.getElementById('field-comment').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error while saving.");
     }
@@ -794,16 +811,25 @@ async function saveRiderScheduling(type) {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
-        scheduledDate: date, scheduledTime: `${hour}:${min}`
+        scheduledDate: date, scheduledTime: (hour && min) ? `${hour}:${min}` : ""
       });
       if (!result.ok) return alert(result.error);
+      
+      addLocalTempEntry({
+        tempId: result.tempId,
+        staffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        createdAt: result.createdAt || "Just now",
+        createdBy: result.createdBy || user.name
+      });
+      
       document.getElementById('field-ref-rider').value = "";
       document.getElementById('field-case-rider').value = "";
       document.getElementById('field-comment-rider').value = "";
       document.getElementById('field-date-rider').value = "";
       document.getElementById('field-hour-rider').value = "";
       document.getElementById('field-min-rider').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error");
     }
@@ -832,7 +858,6 @@ async function saveRiderScheduling(type) {
       document.getElementById('field-date-rider').value = "";
       document.getElementById('field-hour-rider').value = "";
       document.getElementById('field-min-rider').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error");
     }
@@ -861,7 +886,6 @@ async function saveVisitRating(type) {
     document.getElementById('field-case-rating').value = "";
     document.getElementById('field-comment-rating').value = "";
     document.getElementById('field-rating').value = "";
-    await loadTemp();
   } catch (e) {
     alert("Network error");
   }
@@ -889,7 +913,6 @@ async function saveApproval(type) {
     document.getElementById('field-case-approval').value = "";
     document.getElementById('field-comment-approval').value = "";
     document.querySelector('input[name="approval-status"]').checked = false;
-    await loadTemp();
   } catch (e) {
     alert("Network error");
   }
@@ -909,10 +932,19 @@ async function saveCopyableTile(type) {
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return alert(result.error);
+      
+      addLocalTempEntry({
+        tempId: result.tempId,
+        staffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        createdAt: result.createdAt || "Just now",
+        createdBy: result.createdBy || user.name
+      });
+      
       document.getElementById('field-ref-tile').value = "";
       document.getElementById('field-case-tile').value = "";
       document.getElementById('field-comment-tile').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error");
     }
@@ -929,7 +961,6 @@ async function saveCopyableTile(type) {
       document.getElementById('field-ref-tile').value = "";
       document.getElementById('field-case-tile').value = "";
       document.getElementById('field-comment-tile').value = "";
-      await loadTemp();
     } catch (e) {
       alert("Network error");
     }
@@ -952,7 +983,7 @@ async function finalizeEntryWithInputs(tempId) {
   try {
     const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
     if (!result.ok) return alert(result.error || "Could not finalize");
-    await loadTemp();
+    removeLocalTempEntry(tempId);
   } catch (e) {
     alert("Network error");
   }
@@ -963,7 +994,7 @@ async function removeEntry(tempId) {
   try {
     const result = await apiCall('tempDelete', { tempId });
     if (!result.ok) return alert(result.error || "Could not delete");
-    await loadTemp();
+    removeLocalTempEntry(tempId);
   } catch (e) {
     alert("Network error");
   }
