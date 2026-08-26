@@ -109,14 +109,6 @@ transition: 0.15s ease;
 }
 .task-sidebar-item:hover { background: rgba(255,255,255,0.08); }
 .task-sidebar-item.active { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
-
-/* Make anchor-based nav items look like the old divs */
-a.dashboard-item, a.task-sidebar-item {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-}
-
 .data-section { margin-top: 40px; }
 .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
@@ -148,6 +140,12 @@ header { padding: 10px 15px; }
 .data-table { font-size: 0.8rem; }
 .data-table td { padding: 8px; }
 .data-table input { width: 70px; padding: 4px; }
+}
+
+a.dashboard-item, a.task-sidebar-item {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 </style>
 </head>
@@ -209,7 +207,7 @@ Sign in with your authorized Google account.
 <label>Case Number</label>
 <input type="number" id="field-case" inputmode="numeric">
 </div>
-<div>
+<div class="comment-field">
 <label>Comment</label>
 <input type="text" id="field-comment">
 </div>
@@ -231,7 +229,7 @@ Sign in with your authorized Google account.
 <label>Case Number</label>
 <input type="number" id="field-case-rider" inputmode="numeric">
 </div>
-<div>
+<div class="comment-field">
 <label>Comment</label>
 <input type="text" id="field-comment-rider">
 </div>
@@ -289,7 +287,7 @@ Sign in with your authorized Google account.
 <label>Case Number</label>
 <input type="number" id="field-case-rating" inputmode="numeric">
 </div>
-<div>
+<div class="comment-field">
 <label>Comment</label>
 <input type="text" id="field-comment-rating">
 </div>
@@ -326,7 +324,7 @@ Sign in with your authorized Google account.
 <label>Case Number</label>
 <input type="number" id="field-case-approval" inputmode="numeric">
 </div>
-<div>
+<div class="comment-field">
 <label>Comment</label>
 <input type="text" id="field-comment-approval">
 </div>
@@ -357,7 +355,7 @@ Sign in with your authorized Google account.
 <label>Case Number</label>
 <input type="number" id="field-case-tile" inputmode="numeric">
 </div>
-<div>
+<div class="comment-field">
 <label>Comment</label>
 <input type="text" id="field-comment-tile">
 </div>
@@ -373,7 +371,7 @@ Sign in with your authorized Google account.
 </div>
 
 <!-- DATA TABLE -->
-<div class="data-section">
+<div id="data-section-container" class="data-section">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
 <label style="margin-bottom:0;">Recent Temporary Entries</label>
 <div style="display:flex; gap:8px; align-items:center;">
@@ -414,77 +412,54 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyND
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
 const STAFF = {
-  "Jawad": { 
-    role: "Director", 
-    tasks: [
-      "WhatsApp Contact Save",
-      "Customer Thank You Confirmation",
-      "Initial Documents Collection",
-      "Rider Call & Visit Scheduling",
-      "Visit Rating & Feedback",
-      "Approval Request Sent",
-      "Advance/Cheque Arrangement",
-      "Advance Confirmation",
-      "Sale Processing",
-      "Voucher Processing",
-      "File Update",
-      "Digital Document Archive",
-      "Physical Document Archive",
-      "Cheque Management",
-      "Installment Plan Sent",
-      "Tele File Documentation",
-      "Recovery Follow-up",
-      "Recovery Presentation",
-      "6-Month Report Submission",
-      "Branch & Salesman Report",
-      "Cheque Exemption & Red Cases",
-      "Case Completion Thank You",
-      "Installment Slip Received",
-      "Installment Voucher",
-      "Installment File Update",
-      "Updated Installment Plan Sent",
-      "Delivery Linkage",
-      "Mahana Temporary Verification",
-      "Gift Issued for Early Payment",
-      "Entries"
-    ] 
+  "Jawad": {
+    role: "Director",
+    tasks: ["Gift Issued for Early Payment"]
   },
-  "Uzair": { 
-    role: "Manager HP", 
-    tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Approval Request Sent", "Advance/Cheque Arrangement", "Advance Confirmation", "Sale Processing", "Voucher Processing", "File Update", "Tele File Documentation", "Installment Slip Received", "Installment File Update", "Mahana Temporary Verification"] 
+  "Uzair": {
+    role: "Manager HP",
+    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Approval Request Sent",
+      "Advance/Cheque Arrangement","Advance Confirmation","Sale Processing","Voucher Processing",
+      "File Update","Tele File Documentation","Installment Slip Received","Installment File Update",
+      "Mahana Temporary Verification"]
   },
-  "Ahmed": { 
-    role: "Head of Recovery", 
-    tasks: ["Recovery Presentation"] 
+  "Ahmed": {
+    role: "Head of Recovery",
+    tasks: ["Recovery Presentation"]
   },
-  "Waqas": { 
-    role: "Rider", 
-    tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Sale Processing", "Voucher Processing", "Mahana Temporary Verification"] 
+  "Waqas": {
+    role: "Rider",
+    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Sale Processing",
+      "Voucher Processing","Mahana Temporary Verification"]
   },
-  "Junaid": { 
-    role: "Clerk", 
-    tasks: ["Rider Call & Visit Scheduling", "Visit Rating & Feedback", "Physical Document Archive", "Sale Processing", "Voucher Processing", "Delivery Linkage", "Mahana Temporary Verification"] 
+  "Junaid": {
+    role: "Clerk",
+    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Physical Document Archive",
+      "Sale Processing","Voucher Processing","Delivery Linkage","Mahana Temporary Verification"]
   },
-  "Zuni": { 
-    role: "Manager Recovery", 
-    tasks: ["Entries", "Digital Document Archive", "Installment Voucher", "Installment Slip Received"] 
+  "Zuni": {
+    role: "Manager Recovery",
+    tasks: [,"Digital Document Archive","Installment Voucher","Installment Slip Received"]
   },
-  "Samiya": { 
-    role: "Call Center", 
-    tasks: ["WhatsApp Contact Save", "Customer Thank You Confirmation", "Initial Documents Collection", "Installment Slip Received"] 
+  "Samiya": {
+    role: "Call Center",
+    tasks: ["WhatsApp Contact Save","Customer Thank You Confirmation",
+      "Initial Documents Collection","Installment Slip Received"]
   },
-  "Nabiha": { 
-    role: "Operations", 
-    tasks: ["Cheque Management", "Installment Plan Sent", "6-Month Report Submission", "Branch & Salesman Report", "Cheque Exemption & Red Cases", "Case Completion Thank You", "Updated Installment Plan Sent", "Delivery Linkage"] 
-  },
-  "Sumaira": { 
-    role: "Recovery Officer", 
-    tasks: ["Recovery Follow-up"] 
+ "Nabiha": {
+  role: "Operations",
+  tasks: ["Cheque Management","Installment Plan Sent","6-Month Report Submission",
+    "Branch & Salesman Report","Cheque Exemption & Red Cases","Case Completion Thank You",
+    "Updated Installment Plan Sent","Delivery Linkage","Plan Share"]
+},
+  "Sumaira": {
+    role: "Recovery Officer",
+    tasks: ["Recovery Follow-up"]
   }
 };
 
 const TASK_CONFIG = {
-  "Entries": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
   "WhatsApp Contact Save": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Customer Thank You Confirmation": { tempOrPerm: "PERMANENT", interface: "default" },
   "Initial Documents Collection": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
@@ -516,7 +491,7 @@ const TASK_CONFIG = {
   "Gift Issued for Early Payment": { tempOrPerm: "PERMANENT", interface: "default" }
 };
 
-let idToken = null;
+let idToken = localStorage.getItem('mahana_idToken') || null;
 let user = null;
 let profile = null;
 let currentTask = null;
@@ -544,7 +519,11 @@ function initGoogleSignIn() {
     document.getElementById('g_id_signin'),
     { theme: 'filled_black', size: 'large', width: 260 }
   );
-  google.accounts.id.prompt();
+  if (idToken) {
+    completeLogin();
+  } else {
+    google.accounts.id.prompt();
+  }
 }
 
 function handleGsiLoadError() {
@@ -554,6 +533,7 @@ function handleGsiLoadError() {
 
 function handleCredentialResponse(response) {
   idToken = response.credential;
+  localStorage.setItem('mahana_idToken', idToken);
   completeLogin();
 }
 
@@ -565,6 +545,8 @@ async function completeLogin() {
     if (!result.ok) {
       statusEl.innerText = result.error || "Authorization Failed";
       idToken = null;
+      localStorage.removeItem('mahana_idToken');
+      google.accounts.id.prompt();
       return;
     }
     user = { name: result.name, email: result.email, level: result.level };
@@ -576,32 +558,29 @@ async function completeLogin() {
 
     window.addEventListener('hashchange', route);
 
-    // If a hash already exists (e.g. deep link opened in a new tab), honor it.
-    // Otherwise send the user to their default screen.
-    if (!window.location.hash || window.location.hash === '#') {
-      redirectToDefault();
-    } else {
+    if (window.location.hash && window.location.hash !== '#') {
       route();
+    } else {
+      redirectToDefault();
     }
   } catch (e) {
     statusEl.innerText = "Could not reach the server. Please try again.";
+    idToken = null;
+    localStorage.removeItem('mahana_idToken');
   }
 }
 
 function doLogout() {
   window.removeEventListener('hashchange', route);
   idToken = null;
+  localStorage.removeItem('mahana_idToken');
   user = null;
   profile = null;
   currentTask = null;
   google.accounts.id.disableAutoSelect();
-  history.replaceState(null, '', window.location.pathname + window.location.search);
+  history.replaceState(null, '', window.location.pathname);
   location.reload();
 }
-
-/* =========================
-HASH-BASED ROUTING
-========================= */
 
 function canAccessStaffFrontend(name) {
   if (!user) return false;
@@ -611,7 +590,7 @@ function canAccessStaffFrontend(name) {
 }
 
 function redirectToDefault() {
-  if (user.level < 2) {
+  if (user.level === 0 || user.level === 1) {
     window.location.hash = '#/select';
   } else {
     window.location.hash = '#/staff/' + encodeURIComponent(user.name);
@@ -620,20 +599,22 @@ function redirectToDefault() {
 
 function route() {
   if (!user) return;
-
-  const raw = window.location.hash.replace(/^#/, '');
+  const raw = window.location.hash.replace(/^#\/?/, '');
   const segments = raw.split('/').filter(Boolean).map(decodeURIComponent);
 
-  if (segments[0] === 'staff' && segments[1]) {
+  if (segments[0] === 'select') {
+    if (user.level === 0 || user.level === 1) {
+      renderSelectionScreen();
+    } else {
+      redirectToDefault();
+    }
+  } else if (segments[0] === 'staff' && segments[1]) {
     const staffName = segments[1];
-
     if (!STAFF[staffName] || !canAccessStaffFrontend(staffName)) {
       redirectToDefault();
       return;
     }
-
     profile = { name: staffName, ...STAFF[staffName] };
-
     if (segments[2]) {
       const taskName = segments[2];
       if (!profile.tasks.includes(taskName)) {
@@ -645,12 +626,6 @@ function route() {
     } else {
       renderProfileScreen();
     }
-  } else if (segments[0] === 'select') {
-    if (user.level < 2) {
-      renderSelectionScreen();
-    } else {
-      redirectToDefault();
-    }
   } else {
     redirectToDefault();
   }
@@ -660,18 +635,12 @@ function navigateBack() {
   history.back();
 }
 
-/* =========================
-SCREEN RENDERERS
-========================= */
-
 function renderSelectionScreen() {
   hideAll();
   document.getElementById('scr-select').classList.remove('hidden');
   document.getElementById('nav-back').classList.add('hidden');
-
   const grid = document.getElementById('staff-grid');
   grid.innerHTML = "";
-
   Object.entries(STAFF).forEach(([name, s]) => {
     if (canAccessStaffFrontend(name)) {
       const href = '#/staff/' + encodeURIComponent(name);
@@ -689,13 +658,11 @@ function renderProfileScreen() {
   hideAll();
   document.getElementById('scr-tasks').classList.remove('hidden');
   document.getElementById('workspace-label').innerText = profile.name + "'s Workspace";
-
-  if (user.level < 2) {
+  if (user.level === 0 || user.level === 1) {
     document.getElementById('nav-back').classList.remove('hidden');
   } else {
     document.getElementById('nav-back').classList.add('hidden');
   }
-
   const grid = document.getElementById('task-grid');
   grid.innerHTML = "";
   profile.tasks.forEach(t => {
@@ -736,6 +703,18 @@ function renderFormInterface() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
 
+  // Hide/show comment fields based on task type
+  const commentFields = document.querySelectorAll('.comment-field');
+  commentFields.forEach(field => {
+    field.style.display = isTempOrPerm ? 'block' : 'none';
+  });
+
+  // Hide/show temp entries table based on task type
+  const dataSection = document.getElementById('data-section-container');
+  if (dataSection) {
+    dataSection.style.display = isTempOrPerm ? 'block' : 'none';
+  }
+
   if (config.interface === "rider-scheduling") {
     document.getElementById('form-rider-scheduling').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-rider');
@@ -759,11 +738,13 @@ function renderFormInterface() {
   }
 }
 
-/* =========================
-DATA OPERATIONS
-========================= */
-
 async function loadTemp() {
+  const config = TASK_CONFIG[currentTask];
+  const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
+  
+  // Don't load temp entries for PERMANENT-only tasks
+  if (!isTempOrPerm) return;
+
   const body = document.getElementById('data-body');
   body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">Loading...</td></tr>`;
   try {
@@ -808,7 +789,7 @@ function renderTable(list) {
       <td><input type="text" class="row-case" data-id="${item.tempId}" value="${item.caseNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td style="text-align:right; white-space:nowrap;">
         <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${item.tempId}')" title="Finalize">✓</button>
-        <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete">✕</button>
+        <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete"></button>
       </td>
     </tr>`);
   });
