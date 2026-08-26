@@ -109,6 +109,14 @@ transition: 0.15s ease;
 }
 .task-sidebar-item:hover { background: rgba(255,255,255,0.08); }
 .task-sidebar-item.active { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+
+/* Make anchor-based nav items look like the old divs */
+a.dashboard-item, a.task-sidebar-item {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .data-section { margin-top: 40px; }
 .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
@@ -565,71 +573,142 @@ async function completeLogin() {
     document.getElementById('btn-logout').classList.remove('hidden');
     document.getElementById('active-user-display').classList.remove('hidden');
     document.getElementById('active-user-display').innerText = user.name;
-    if (user.level < 2) showSelection();
-    else openProfile(user.name);
+
+    window.addEventListener('hashchange', route);
+
+    // If a hash already exists (e.g. deep link opened in a new tab), honor it.
+    // Otherwise send the user to their default screen.
+    if (!window.location.hash || window.location.hash === '#') {
+      redirectToDefault();
+    } else {
+      route();
+    }
   } catch (e) {
     statusEl.innerText = "Could not reach the server. Please try again.";
   }
 }
 
 function doLogout() {
+  window.removeEventListener('hashchange', route);
   idToken = null;
   user = null;
   profile = null;
+  currentTask = null;
   google.accounts.id.disableAutoSelect();
+  history.replaceState(null, '', window.location.pathname + window.location.search);
   location.reload();
 }
 
-function showSelection() {
+/* =========================
+HASH-BASED ROUTING
+========================= */
+
+function canAccessStaffFrontend(name) {
+  if (!user) return false;
+  if (user.level === 0) return true;
+  if (user.level === 1) return name !== "Jawad";
+  return user.name === name;
+}
+
+function redirectToDefault() {
+  if (user.level < 2) {
+    window.location.hash = '#/select';
+  } else {
+    window.location.hash = '#/staff/' + encodeURIComponent(user.name);
+  }
+}
+
+function route() {
+  if (!user) return;
+
+  const raw = window.location.hash.replace(/^#/, '');
+  const segments = raw.split('/').filter(Boolean).map(decodeURIComponent);
+
+  if (segments[0] === 'staff' && segments[1]) {
+    const staffName = segments[1];
+
+    if (!STAFF[staffName] || !canAccessStaffFrontend(staffName)) {
+      redirectToDefault();
+      return;
+    }
+
+    profile = { name: staffName, ...STAFF[staffName] };
+
+    if (segments[2]) {
+      const taskName = segments[2];
+      if (!profile.tasks.includes(taskName)) {
+        renderProfileScreen();
+        return;
+      }
+      currentTask = taskName;
+      renderEntryScreen();
+    } else {
+      renderProfileScreen();
+    }
+  } else if (segments[0] === 'select') {
+    if (user.level < 2) {
+      renderSelectionScreen();
+    } else {
+      redirectToDefault();
+    }
+  } else {
+    redirectToDefault();
+  }
+}
+
+function navigateBack() {
+  history.back();
+}
+
+/* =========================
+SCREEN RENDERERS
+========================= */
+
+function renderSelectionScreen() {
   hideAll();
   document.getElementById('scr-select').classList.remove('hidden');
   document.getElementById('nav-back').classList.add('hidden');
-  
+
   const grid = document.getElementById('staff-grid');
   grid.innerHTML = "";
-  
+
   Object.entries(STAFF).forEach(([name, s]) => {
-    let shouldShow = false;
-    
-    if (user.level === 0) {
-      shouldShow = true;
-    } else if (user.level === 1) {
-      shouldShow = (name !== "Jawad");
-    } else {
-      shouldShow = (user.name === name);
-    }
-    
-    if (shouldShow) {
+    if (canAccessStaffFrontend(name)) {
+      const href = '#/staff/' + encodeURIComponent(name);
       grid.insertAdjacentHTML('beforeend', `
-        <div class="dashboard-item" onclick="openProfile('${name}')">
+        <a class="dashboard-item" href="${href}">
           <strong>${name}</strong>
           <small>${s.role}</small>
-        </div>
+        </a>
       `);
     }
   });
 }
 
-function openProfile(name) {
+function renderProfileScreen() {
   hideAll();
-  profile = { name, ...STAFF[name] };
   document.getElementById('scr-tasks').classList.remove('hidden');
-  document.getElementById('workspace-label').innerText = name + "'s Workspace";
-  if (user.level < 2) document.getElementById('nav-back').classList.remove('hidden');
-  
+  document.getElementById('workspace-label').innerText = profile.name + "'s Workspace";
+
+  if (user.level < 2) {
+    document.getElementById('nav-back').classList.remove('hidden');
+  } else {
+    document.getElementById('nav-back').classList.add('hidden');
+  }
+
   const grid = document.getElementById('task-grid');
   grid.innerHTML = "";
   profile.tasks.forEach(t => {
-    grid.insertAdjacentHTML('beforeend', `<div class="dashboard-item" onclick="openForm('${t}')"><strong>${t}</strong></div>`);
+    const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
+    grid.insertAdjacentHTML('beforeend', `<a class="dashboard-item" href="${href}"><strong>${t}</strong></a>`);
   });
 }
 
-async function openForm(task) {
+async function renderEntryScreen() {
   hideAll();
   document.getElementById('scr-entry').classList.remove('hidden');
-  document.getElementById('bold-task-header').innerText = task;
+  document.getElementById('bold-task-header').innerText = currentTask;
   document.getElementById('nav-back').classList.remove('hidden');
-  currentTask = task;
   renderTaskSidebar();
   renderFormInterface();
   await loadTemp();
@@ -640,8 +719,9 @@ function renderTaskSidebar() {
   sb.innerHTML = "";
   profile.tasks.forEach(t => {
     const active = t === currentTask;
+    const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
     sb.insertAdjacentHTML('beforeend', `
-      <div class="task-sidebar-item${active ? ' active' : ''}" onclick="openForm('${t}')">${t}</div>
+      <a class="task-sidebar-item${active ? ' active' : ''}" href="${href}">${t}</a>
     `);
   });
 }
@@ -652,10 +732,10 @@ function renderFormInterface() {
   document.getElementById('form-visit-rating').classList.add('hidden');
   document.getElementById('form-approval').classList.add('hidden');
   document.getElementById('form-copyable-tile').classList.add('hidden');
-  
+
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
-  
+
   if (config.interface === "rider-scheduling") {
     document.getElementById('form-rider-scheduling').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-rider');
@@ -678,6 +758,10 @@ function renderFormInterface() {
     else tempBtn.style.display = 'none';
   }
 }
+
+/* =========================
+DATA OPERATIONS
+========================= */
 
 async function loadTemp() {
   const body = document.getElementById('data-body');
@@ -730,7 +814,6 @@ function renderTable(list) {
   });
 }
 
-// ===== OPTIMISTIC UI: adds locally, avoids full reload =====
 function addLocalTempEntry(entry) {
   tempEntries.unshift(entry);
   renderTable();
@@ -746,9 +829,9 @@ async function saveData(type) {
     const comment = document.getElementById('field-comment').value.trim();
     const ref = document.getElementById('field-ref').value.trim();
     const cas = document.getElementById('field-case').value.trim();
-    
+
     if (!comment) return alert("Comment required for Temp Save");
-    
+
     try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
@@ -756,7 +839,7 @@ async function saveData(type) {
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return alert(result.error || "Could not save entry");
-      
+
       addLocalTempEntry({
         tempId: result.tempId,
         staffName: profile.name,
@@ -765,7 +848,7 @@ async function saveData(type) {
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
-      
+
       document.getElementById('field-ref').value = "";
       document.getElementById('field-case').value = "";
       document.getElementById('field-comment').value = "";
@@ -776,9 +859,9 @@ async function saveData(type) {
     const ref = document.getElementById('field-ref').value.trim();
     const cas = document.getElementById('field-case').value.trim();
     const comment = document.getElementById('field-comment').value.trim();
-    
+
     if (!ref && !cas) return alert("Reference No OR Case No required for Final Save");
-    
+
     try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
@@ -803,7 +886,7 @@ async function saveRiderScheduling(type) {
   const date = document.getElementById('field-date-rider').value;
   const hour = document.getElementById('field-hour-rider').value;
   const min = document.getElementById('field-min-rider').value;
-  
+
   if (type === 'Temp') {
     if (!comment) return alert("Comment required for Temp Save");
     try {
@@ -814,7 +897,7 @@ async function saveRiderScheduling(type) {
         scheduledDate: date, scheduledTime: (hour && min) ? `${hour}:${min}` : ""
       });
       if (!result.ok) return alert(result.error);
-      
+
       addLocalTempEntry({
         tempId: result.tempId,
         staffName: profile.name,
@@ -823,7 +906,7 @@ async function saveRiderScheduling(type) {
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
-      
+
       document.getElementById('field-ref-rider').value = "";
       document.getElementById('field-case-rider').value = "";
       document.getElementById('field-comment-rider').value = "";
@@ -837,12 +920,12 @@ async function saveRiderScheduling(type) {
     if (!ref && !cas) return alert("Reference No OR Case No required");
     if (!date) return alert("Date required");
     if (!hour || !min) return alert("Time required");
-    
+
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) return alert("Date must be in future");
-    
+
     try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
@@ -869,10 +952,10 @@ async function saveVisitRating(type) {
   const cas = document.getElementById('field-case-rating').value.trim();
   const comment = document.getElementById('field-comment-rating').value.trim();
   const rating = document.getElementById('field-rating').value;
-  
+
   if (!ref && !cas) return alert("Reference No OR Case No required");
   if (!rating) return alert("Rating required");
-  
+
   try {
     const result = await apiCall('finalAdd', {
       targetStaffName: profile.name,
@@ -896,10 +979,10 @@ async function saveApproval(type) {
   const cas = document.getElementById('field-case-approval').value.trim();
   const comment = document.getElementById('field-comment-approval').value.trim();
   const status = document.querySelector('input[name="approval-status"]:checked');
-  
+
   if (!ref && !cas) return alert("Reference No OR Case No required");
   if (!status) return alert("Approval status required");
-  
+
   try {
     const result = await apiCall('finalAdd', {
       targetStaffName: profile.name,
@@ -922,7 +1005,7 @@ async function saveCopyableTile(type) {
   const ref = document.getElementById('field-ref-tile').value.trim();
   const cas = document.getElementById('field-case-tile').value.trim();
   const comment = document.getElementById('field-comment-tile').value.trim();
-  
+
   if (type === 'Temp') {
     if (!comment) return alert("Comment required for Temp Save");
     try {
@@ -932,7 +1015,7 @@ async function saveCopyableTile(type) {
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return alert(result.error);
-      
+
       addLocalTempEntry({
         tempId: result.tempId,
         staffName: profile.name,
@@ -941,7 +1024,7 @@ async function saveCopyableTile(type) {
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
-      
+
       document.getElementById('field-ref-tile').value = "";
       document.getElementById('field-case-tile').value = "";
       document.getElementById('field-comment-tile').value = "";
@@ -972,14 +1055,14 @@ async function finalizeEntryWithInputs(tempId) {
   const caseInput = document.querySelector(`.row-case[data-id="${tempId}"]`);
   const refNo = refInput ? refInput.value.trim() : "";
   const caseNo = caseInput ? caseInput.value.trim() : "";
-  
+
   if (!refNo && !caseNo) {
     alert("Fill in Reference No OR Case No before finalizing.");
     return;
   }
-  
+
   if (!confirm("Push this entry to Final records?")) return;
-  
+
   try {
     const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
     if (!result.ok) return alert(result.error || "Could not finalize");
@@ -1011,11 +1094,6 @@ function copyToClipboard(elementId) {
 
 function hideAll() {
   document.querySelectorAll('.glass-panel').forEach(p => p.classList.add('hidden'));
-}
-
-function navigateBack() {
-  if (!document.getElementById('scr-entry').classList.contains('hidden')) openProfile(profile.name);
-  else if (!document.getElementById('scr-tasks').classList.contains('hidden')) showSelection();
 }
 </script>
 </body>
