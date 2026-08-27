@@ -109,6 +109,28 @@ transition: 0.15s ease;
 }
 .task-sidebar-item:hover { background: rgba(255,255,255,0.08); }
 .task-sidebar-item.active { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+
+/* ===== PHASE SYSTEM (Level 0 only) ===== */
+.phase-bar {
+display: flex; flex-wrap: wrap; gap: 8px;
+margin-bottom: 25px; padding-bottom: 20px;
+border-bottom: 1px solid var(--border-color);
+}
+.phase-btn {
+background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+color: var(--text-dim); padding: 8px 14px; border-radius: 20px;
+cursor: pointer; font-size: 0.8rem; transition: 0.15s ease; white-space: nowrap;
+}
+.phase-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+.phase-btn.active { background: var(--accent-color); border-color: var(--accent-color);
+color: #fff; font-weight: 600; }
+.empty-tile {
+border: 1px dashed var(--border-color); border-radius: 12px;
+padding: 60px 20px; text-align: center;
+color: var(--text-dim); font-size: 0.9rem;
+}
+.sidebar-empty { color: var(--text-dim); font-size: 0.8rem; padding: 10px 2px; }
+
 .data-section { margin-top: 40px; }
 .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
@@ -140,6 +162,7 @@ header { padding: 10px 15px; }
 .data-table { font-size: 0.8rem; }
 .data-table td { padding: 8px; }
 .data-table input { width: 70px; padding: 4px; }
+.empty-tile { padding: 40px 15px; }
 }
 
 a.dashboard-item, a.task-sidebar-item {
@@ -191,10 +214,17 @@ Sign in with your authorized Google account.
 
 <!-- 4. DATA ENTRY -->
 <div id="scr-entry" class="glass-panel entry-panel hidden">
+
+<!-- PHASE SELECTOR (Level 0 only) -->
+<div id="phase-bar" class="phase-bar hidden"></div>
+
 <div class="entry-layout">
 <div id="task-sidebar" class="task-sidebar"></div>
 <div>
 <h2 id="bold-task-header" style="font-weight: 600;"></h2>
+
+<!-- EMPTY TILE (Level 0 only, before a task is chosen) -->
+<div id="empty-tile" class="empty-tile hidden"></div>
 
 <!-- DEFAULT FORM -->
 <div id="form-default" class="hidden">
@@ -414,14 +444,14 @@ const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.goo
 const STAFF = {
   "Jawad": {
     role: "Director",
-    tasks: ["Gift Issued for Early Payment"]
+    tasks: ["Gift To Customer If Inst Paid Earlier"]
   },
   "Uzair": {
     role: "Manager HP",
-    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Approval Request Sent",
-      "Advance/Cheque Arrangement","Advance Confirmation","Sale Processing","Voucher Processing",
-      "File Update","Tele File Documentation","Installment Slip Received","Installment File Update",
-      "Mahana Temporary Verification"]
+    tasks: ["Visit Time Tieup","Rate To Visit","Approve/Reject Case",
+      "Arrange Adv / Chq","Adv Confirmation","Sale Input","Voucher Input",
+      "File Update","File Tele","Instalment Recd","Inst File Update",
+      "Empty Mahana Temp Vir W"]
   },
   "Ahmed": {
     role: "Head of Recovery",
@@ -429,72 +459,123 @@ const STAFF = {
   },
   "Waqas": {
     role: "Rider",
-    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Sale Processing",
-      "Voucher Processing","Mahana Temporary Verification"]
+    tasks: ["Visit Time Tieup","Rate To Visit","Sale Input",
+      "Voucher Input","Empty Mahana Temp Vir W"]
   },
   "Junaid": {
     role: "Clerk",
-    tasks: ["Rider Call & Visit Scheduling","Visit Rating & Feedback","Physical Document Archive",
-      "Sale Processing","Voucher Processing","Delivery Linkage","Mahana Temporary Verification"]
+    tasks: ["Visit Time Tieup","Rate To Visit","Supporting Save In Hard",
+      "Sale Input","Voucher Input","Delivery Linkage & Aliens","Empty Mahana Temp Vir W"]
   },
   "Zuni": {
     role: "Manager Recovery",
-    tasks: [,"Digital Document Archive","Installment Voucher","Installment Slip Received"]
+    tasks: ["Supporting Save In Soft","Instalment Voucher","Instalment Recd"]
   },
   "Samiya": {
     role: "Call Center",
-    tasks: ["WhatsApp Contact Save","Customer Thank You Confirmation",
-      "Initial Documents Collection","Installment Slip Received"]
+    tasks: ["Save Contacts","Poll To Thank You Msg",
+      "Initial Documents","Instalment Recd"]
   },
  "Nabiha": {
   role: "Operations",
-  tasks: ["Cheque Management","Installment Plan Sent","6-Month Report Submission",
-    "Branch & Salesman Report","Cheque Exemption & Red Cases","Case Completion Thank You",
-    "Updated Installment Plan Sent","Delivery Linkage","Plan Share"]
+  tasks: ["Chq Management","Plan Share","Six Month Report To Taha",
+    "Branch Wise And Salesman Wise To Taha","Exmpt And Red Cases","Case Closure Msg",
+    "Updated Plan Share","Delivery Linkage & Aliens"]
 },
   "Sumaira": {
     role: "Recovery Officer",
-    tasks: ["Recovery Follow-up"]
+    tasks: ["Recovery Follow Ups"]
   }
 };
 
 const TASK_CONFIG = {
-  "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
-  "WhatsApp Contact Save": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Customer Thank You Confirmation": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Initial Documents Collection": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Rider Call & Visit Scheduling": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
-  "Visit Rating & Feedback": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
-  "Approval Request Sent": { tempOrPerm: "PERMANENT", interface: "approval" },
-  "Advance/Cheque Arrangement": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Message customer about advance/cheque arrangement" },
-  "Advance Confirmation": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Advance confirmation message" },
-  "Sale Processing": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Voucher Processing": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Save Contacts": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Poll To Thank You Msg": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Initial Documents": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
+  "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
+  "Approve/Reject Case": { tempOrPerm: "PERMANENT", interface: "approval" },
+  "Arrange Adv / Chq": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Message customer about advance/cheque arrangement" },
+  "Adv Confirmation": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Advance confirmation message" },
+  "Sale Input": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Voucher Input": { tempOrPerm: "PERMANENT", interface: "default" },
   "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Digital Document Archive": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Physical Document Archive": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Cheque Management": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Installment Plan Sent": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Tele File Documentation": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Recovery Follow-up": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Supporting Save In Soft": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Supporting Save In Hard": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Chq Management": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Recovery Follow Ups": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Exmpt And Red Cases": { tempOrPerm: "PERMANENT", interface: "default" },
   "Recovery Presentation": { tempOrPerm: "PERMANENT", interface: "default" },
-  "6-Month Report Submission": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Branch & Salesman Report": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Cheque Exemption & Red Cases": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Case Completion Thank You": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Installment Slip Received": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Installment Voucher": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Installment File Update": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Updated Installment Plan Sent": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Delivery Linkage": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Mahana Temporary Verification": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Gift Issued for Early Payment": { tempOrPerm: "PERMANENT", interface: "default" }
+  "Instalment Recd": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Instalment Voucher": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Inst File Update": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Updated Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
+  "File Tele": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Six Month Report To Taha": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Branch Wise And Salesman Wise To Taha": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Case Closure Msg": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Delivery Linkage & Aliens": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Empty Mahana Temp Vir W": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Gift To Customer If Inst Paid Earlier": { tempOrPerm: "PERMANENT", interface: "default" }
+};
+
+/* =========================
+   PHASES — the single source of truth for task grouping.
+   To move a task, move its name between these arrays. Nothing else to update.
+   Any task missing from here shows up automatically under an "Other" chip.
+   ========================= */
+const PHASES = {
+  "Interaction": [
+    "Save Contacts",
+    "Poll To Thank You Msg",
+    "Initial Documents",
+    "Visit Time Tieup"
+  ],
+  "Pre Sales": [
+    "Rate To Visit",
+    "Approve/Reject Case",
+    "Arrange Adv / Chq",
+    "Adv Confirmation"
+  ],
+  "Sales": [
+    "Sale Input",
+    "Voucher Input",
+    "File Update",
+    "Supporting Save In Soft",
+    "Supporting Save In Hard"
+  ],
+  "Post Sale": [
+    "Plan Share",
+    "Chq Management"
+  ],
+  "Recovery": [
+    "Recovery Follow Ups",
+    "Exmpt And Red Cases",
+    "Recovery Presentation",
+    "Gift To Customer If Inst Paid Earlier"
+  ],
+  "Entries": [
+    "Instalment Recd",
+    "Instalment Voucher",
+    "Inst File Update"
+  ],
+  "Recurring Tasks": [
+    "Updated Plan Share",
+    "File Tele",
+    "Six Month Report To Taha",
+    "Branch Wise And Salesman Wise To Taha",
+    "Case Closure Msg",
+    "Delivery Linkage & Aliens",
+    "Empty Mahana Temp Vir W"
+  ]
 };
 
 let idToken = localStorage.getItem('mahana_idToken') || null;
 let user = null;
 let profile = null;
 let currentTask = null;
+let currentPhase = null;
 let tempEntries = [];
 
 async function apiCall(action, payload = {}) {
@@ -577,6 +658,7 @@ function doLogout() {
   user = null;
   profile = null;
   currentTask = null;
+  currentPhase = null;
   google.accounts.id.disableAutoSelect();
   history.replaceState(null, '', window.location.pathname);
   location.reload();
@@ -597,6 +679,69 @@ function redirectToDefault() {
   }
 }
 
+/* =========================
+   PHASE HELPERS
+   ========================= */
+
+function getPhaseForTask(taskName) {
+  for (const phase in PHASES) {
+    if (PHASES[phase].includes(taskName)) return phase;
+  }
+  return "Other";
+}
+
+function staffTaskList() {
+  return (profile && profile.tasks) ? profile.tasks.filter(Boolean) : [];
+}
+
+function tasksInPhase(phase) {
+  if (!phase) return [];
+  const all = staffTaskList();
+  if (phase === "Other") return all.filter(t => getPhaseForTask(t) === "Other");
+  return all.filter(t => (PHASES[phase] || []).includes(t));
+}
+
+function phasesForStaff() {
+  const all = staffTaskList();
+  const present = Object.keys(PHASES).filter(p => all.some(t => PHASES[p].includes(t)));
+  if (all.some(t => getPhaseForTask(t) === "Other")) present.push("Other");
+  return present;
+}
+
+function setPhase(phase) {
+  currentPhase = phase;
+  // Switching phase while a task is open clears the task and returns to the empty tile.
+  if (currentTask && !tasksInPhase(phase).includes(currentTask)) {
+    currentTask = null;
+    window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
+    return;
+  }
+  renderEntryScreen();
+}
+
+function renderPhaseBar() {
+  const bar = document.getElementById('phase-bar');
+  if (!user || user.level !== 0) {
+    bar.classList.add('hidden');
+    bar.innerHTML = "";
+    return;
+  }
+  bar.classList.remove('hidden');
+  const present = phasesForStaff();
+  if (present.length === 0) {
+    bar.innerHTML = `<span class="sidebar-empty">No phases available for this workspace.</span>`;
+    return;
+  }
+  bar.innerHTML = present.map(p =>
+    `<button class="phase-btn${p === currentPhase ? ' active' : ''}" ` +
+    `onclick="setPhase('${p.replace(/'/g, "\\'")}')">${p}</button>`
+  ).join('');
+}
+
+/* =========================
+   ROUTING
+   ========================= */
+
 function route() {
   if (!user) return;
   const raw = window.location.hash.replace(/^#\/?/, '');
@@ -615,16 +760,19 @@ function route() {
       return;
     }
     profile = { name: staffName, ...STAFF[staffName] };
-    if (segments[2]) {
-      const taskName = segments[2];
-      if (!profile.tasks.includes(taskName)) {
-        renderProfileScreen();
-        return;
-      }
-      currentTask = taskName;
+
+    if (segments[2] && staffTaskList().includes(segments[2])) {
+      currentTask = segments[2];
+      // Deep link straight to a task: light up the phase that task belongs to.
+      if (user.level === 0) currentPhase = getPhaseForTask(currentTask);
       renderEntryScreen();
     } else {
-      renderProfileScreen();
+      currentTask = null;
+      if (user.level === 0) {
+        renderEntryScreen();
+      } else {
+        renderProfileScreen();
+      }
     }
   } else {
     redirectToDefault();
@@ -634,6 +782,10 @@ function route() {
 function navigateBack() {
   history.back();
 }
+
+/* =========================
+   SCREENS
+   ========================= */
 
 function renderSelectionScreen() {
   hideAll();
@@ -665,7 +817,7 @@ function renderProfileScreen() {
   }
   const grid = document.getElementById('task-grid');
   grid.innerHTML = "";
-  profile.tasks.forEach(t => {
+  staffTaskList().forEach(t => {
     const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
     grid.insertAdjacentHTML('beforeend', `<a class="dashboard-item" href="${href}"><strong>${t}</strong></a>`);
   });
@@ -674,9 +826,30 @@ function renderProfileScreen() {
 async function renderEntryScreen() {
   hideAll();
   document.getElementById('scr-entry').classList.remove('hidden');
-  document.getElementById('bold-task-header').innerText = currentTask;
   document.getElementById('nav-back').classList.remove('hidden');
+  renderPhaseBar();
   renderTaskSidebar();
+
+  const header = document.getElementById('bold-task-header');
+  const tile = document.getElementById('empty-tile');
+
+  // EMPTY STATE — Level 0 only, before a task is chosen.
+  if (!currentTask) {
+    hideAllForms();
+    document.getElementById('data-section-container').style.display = 'none';
+    tile.classList.remove('hidden');
+    if (!currentPhase) {
+      header.innerText = "Select a Phase";
+      tile.innerText = "Select a phase from the top to begin";
+    } else {
+      header.innerText = currentPhase + " Tasks";
+      tile.innerText = "Select a task from the sidebar to begin";
+    }
+    return;
+  }
+
+  tile.classList.add('hidden');
+  header.innerText = currentTask;
   renderFormInterface();
   await loadTemp();
 }
@@ -684,7 +857,18 @@ async function renderEntryScreen() {
 function renderTaskSidebar() {
   const sb = document.getElementById('task-sidebar');
   sb.innerHTML = "";
-  profile.tasks.forEach(t => {
+
+  // Level 0 sees only the current phase's tasks. Everyone else sees the full list.
+  const list = (user.level === 0) ? tasksInPhase(currentPhase) : staffTaskList();
+
+  if (list.length === 0) {
+    sb.innerHTML = `<span class="sidebar-empty">${
+      currentPhase ? 'No tasks in this phase.' : 'Pick a phase above.'
+    }</span>`;
+    return;
+  }
+
+  list.forEach(t => {
     const active = t === currentTask;
     const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
     sb.insertAdjacentHTML('beforeend', `
@@ -693,12 +877,13 @@ function renderTaskSidebar() {
   });
 }
 
+function hideAllForms() {
+  ['form-default','form-rider-scheduling','form-visit-rating','form-approval','form-copyable-tile']
+    .forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+
 function renderFormInterface() {
-  document.getElementById('form-default').classList.add('hidden');
-  document.getElementById('form-rider-scheduling').classList.add('hidden');
-  document.getElementById('form-visit-rating').classList.add('hidden');
-  document.getElementById('form-approval').classList.add('hidden');
-  document.getElementById('form-copyable-tile').classList.add('hidden');
+  hideAllForms();
 
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
@@ -741,7 +926,7 @@ function renderFormInterface() {
 async function loadTemp() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
-  
+
   // Don't load temp entries for PERMANENT-only tasks
   if (!isTempOrPerm) return;
 
@@ -788,8 +973,8 @@ function renderTable(list) {
       <td><input type="text" class="row-ref" data-id="${item.tempId}" value="${item.refNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td><input type="text" class="row-case" data-id="${item.tempId}" value="${item.caseNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td style="text-align:right; white-space:nowrap;">
-        <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${item.tempId}')" title="Finalize">✓</button>
-        <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete"></button>
+        <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${item.tempId}')" title="Finalize">&#10003;</button>
+        <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete">&#10005;</button>
       </td>
     </tr>`);
   });
