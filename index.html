@@ -370,7 +370,8 @@ Sign in with your authorized Google account.
 </label>
 </div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
-<button class="btn btn-primary" onclick="saveApproval('Final')">Final Save</button>
+<button class="btn btn-primary" id="btn-temp-save-approval" onclick="saveApproval('Temp')" style="display:none;">Temp Save</button>
+<button class="btn btn-primary" id="btn-final-save-approval" onclick="saveApproval('Final')">Final Save</button>
 </div>
 </div>
 
@@ -494,7 +495,7 @@ const TASK_CONFIG = {
   "Initial Documents": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
   "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
-  "Approve/Reject Case": { tempOrPerm: "PERMANENT", interface: "approval" },
+  "Approve/Reject Case": { tempOrPerm: "TEMP OR PERMANENT", interface: "approval" },
   "Arrange Adv / Chq": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Message customer about advance/cheque arrangement" },
   "Adv Confirmation": { tempOrPerm: "PERMANENT", interface: "copyable-tile", copyableText: "Advance confirmation message" },
   "Sale Input": { tempOrPerm: "PERMANENT", interface: "default" },
@@ -909,6 +910,9 @@ function renderFormInterface() {
     document.getElementById('form-visit-rating').classList.remove('hidden');
   } else if (config.interface === "approval") {
     document.getElementById('form-approval').classList.remove('hidden');
+    const tempBtn = document.getElementById('btn-temp-save-approval');
+    if (isTempOrPerm) tempBtn.style.display = 'block';
+    else tempBtn.style.display = 'none';
   } else if (config.interface === "copyable-tile") {
     document.getElementById('form-copyable-tile').classList.remove('hidden');
     document.getElementById('copyable-text-tile').innerText = config.copyableText;
@@ -1146,25 +1150,55 @@ async function saveApproval(type) {
   const comment = document.getElementById('field-comment-approval').value.trim();
   const status = document.querySelector('input[name="approval-status"]:checked');
 
-  if (!ref && !cas) return alert("Reference No OR Case No required");
   if (!status) return alert("Approval status required");
 
-  try {
-    const result = await apiCall('finalAdd', {
-      targetStaffName: profile.name,
-      taskName: currentTask,
-      comment, refNo: ref, caseNo: cas,
-      approvalStatus: status.value
-    });
-    if (!result.ok) return alert(result.error);
-    alert("Approval saved!");
-    document.getElementById('field-ref-approval').value = "";
-    document.getElementById('field-case-approval').value = "";
-    document.getElementById('field-comment-approval').value = "";
-    document.querySelector('input[name="approval-status"]').checked = false;
-  } catch (e) {
-    alert("Network error");
+  if (type === 'Temp') {
+    if (!comment) return alert("Comment required for Temp Save");
+    try {
+      const result = await apiCall('tempAdd', {
+        targetStaffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        approvalStatus: status.value
+      });
+      if (!result.ok) return alert(result.error || "Could not save entry");
+
+      addLocalTempEntry({
+        tempId: result.tempId,
+        staffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        approvalStatus: status.value,
+        createdAt: result.createdAt || "Just now",
+        createdBy: result.createdBy || user.name
+      });
+      clearApprovalForm();
+    } catch (e) {
+      alert("Network error");
+    }
+  } else {
+    if (!ref && !cas) return alert("Reference No OR Case No required");
+    try {
+      const result = await apiCall('finalAdd', {
+        targetStaffName: profile.name,
+        taskName: currentTask,
+        comment, refNo: ref, caseNo: cas,
+        approvalStatus: status.value
+      });
+      if (!result.ok) return alert(result.error);
+      alert("Approval saved!");
+      clearApprovalForm();
+    } catch (e) {
+      alert("Network error");
+    }
   }
+}
+
+function clearApprovalForm() {
+  document.getElementById('field-ref-approval').value = "";
+  document.getElementById('field-case-approval').value = "";
+  document.getElementById('field-comment-approval').value = "";
+  document.querySelectorAll('input[name="approval-status"]').forEach(r => r.checked = false);
 }
 
 async function saveCopyableTile(type) {
