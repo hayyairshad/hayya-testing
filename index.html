@@ -41,7 +41,8 @@ gap: 10px;
 }
 .header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
 .logo-group { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 10px;
-border-radius: 8px; }
+border-radius: 8px; cursor: pointer; transition: 0.2s ease; }
+.logo-group:hover { background: rgba(255,255,255,0.12); }
 .logo-group img { height: 28px; width: auto; }
 .site-title { font-weight: 500; font-size: 1rem; letter-spacing: 0.5px; border-left: 1px solid var(--border-color);
 padding-left: 15px; }
@@ -59,6 +60,32 @@ transition: all 0.2s ease;
 white-space: nowrap;
 }
 .btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+
+/* ===== HEADER ICON BUTTONS ===== */
+.icon-action {
+background: var(--panel-color);
+border: 1px solid var(--border-color);
+color: var(--text-main);
+width: 36px; height: 36px; padding: 0;
+border-radius: 8px;
+display: flex; align-items: center; justify-content: center;
+cursor: pointer; transition: all 0.2s ease;
+position: relative;
+}
+.icon-action:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+.icon-action svg {
+width: 18px; height: 18px;
+stroke: currentColor; fill: none;
+stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.notif-dot {
+position: absolute; top: -3px; right: -3px;
+min-width: 16px; height: 16px; padding: 0 4px;
+background: #ff5252; color: #fff;
+border-radius: 8px; font-size: 0.65rem; font-weight: 700;
+display: flex; align-items: center; justify-content: center;
+}
+
 .btn-primary { background: var(--accent-color); border: none; font-weight: 600; }
 .btn-primary:hover { background: #00897b; }
 .btn-small { padding: 6px 12px; font-size: 0.75rem; }
@@ -161,7 +188,8 @@ padding-right: 70px; }
 .radio-group { display: flex; gap: 20px; margin-bottom: 20px; }
 .radio-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 0; cursor: pointer; }
 .radio-group input[type="radio"] { width: auto; margin: 0; }
-.time-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.time-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+gap: 15px; margin-bottom: 20px; }
 .time-inputs input, .time-inputs select { margin-bottom: 0; }
 
 @media (max-width: 700px) {
@@ -190,16 +218,24 @@ a.dashboard-item, a.task-sidebar-item {
 <body>
 <header>
 <div class="header-left">
-<div class="logo-group">
+<button id="nav-back" class="icon-action hidden" onclick="navigateBack()" title="Back" aria-label="Back">
+<svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+</button>
+<div class="logo-group" onclick="goHome()" title="Home">
 <img src="mahana-logo.png" alt="Mahana">
 <img src="friends-logo.png" alt="Friends">
 </div>
-<span class="site-title">Mahana360</span>
+<span class="site-title">Mahana Trackers</span>
 </div>
 <div class="header-right">
-<button id="nav-back" class="btn hidden" onclick="navigateBack()">Back</button>
 <span id="active-user-display" class="user-meta hidden"></span>
-<button id="btn-logout" class="btn hidden" onclick="doLogout()">Sign Out</button>
+<button id="btn-notifications" class="icon-action hidden" onclick="openNotifications()" title="Notifications" aria-label="Notifications">
+<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+<span id="notif-count" class="notif-dot hidden">0</span>
+</button>
+<button id="btn-logout" class="icon-action hidden" onclick="doLogout()" title="Sign Out" aria-label="Sign Out">
+<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
+</button>
 </div>
 </header>
 
@@ -293,29 +329,43 @@ Sign in with your authorized Google account.
 <div>
 <label>Hour</label>
 <select id="field-hour-rider">
-<option value="">Select Hour</option>
-<option value="09">09</option>
+<option value="">Hour</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
 <option value="10">10</option>
 <option value="11">11</option>
 <option value="12">12</option>
-<option value="13">13</option>
-<option value="14">14</option>
-<option value="15">15</option>
-<option value="16">16</option>
-<option value="17">17</option>
-<option value="18">18</option>
 </select>
 </div>
 <div>
 <label>Minutes</label>
 <select id="field-min-rider">
-<option value="">Select Minutes</option>
+<option value="">Minutes</option>
 <option value="00">00</option>
 <option value="15">15</option>
 <option value="30">30</option>
 <option value="45">45</option>
 </select>
 </div>
+<div>
+<label>AM / PM</label>
+<select id="field-ampm-rider">
+<option value="">AM / PM</option>
+<option value="AM">AM</option>
+<option value="PM">PM</option>
+</select>
+</div>
+</div>
+<div>
+<label>Remarks</label>
+<input type="text" id="field-remarks-rider" placeholder="Anything worth noting about this visit">
 </div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
 <button class="btn btn-primary" id="btn-temp-save-rider" onclick="saveRiderScheduling('Temp')" style="display:none;">Temp Save</button>
@@ -392,7 +442,7 @@ Sign in with your authorized Google account.
 </div>
 </div>
 
-<!-- COPYABLE TILE FORM -->
+<!-- COPYABLE TILE FORM (currently unused - kept for future tasks) -->
 <div id="form-copyable-tile" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
 <div>
@@ -475,7 +525,7 @@ const STAFF = {
   "Uzair": {
     role: "Manager HP",
     tasks: ["Visit Time Tieup","Rate To Visit","Approve/Reject Case",
-      "Arrange Adv / Chq","Adv Confirmation","Sale Input","Voucher Input",
+      "Sale Input","Voucher Input",
       "File Update","File Tele","Instalment Recd","Inst File Update",
       "Empty Mahana Temp Vir W"]
   },
@@ -521,8 +571,6 @@ const TASK_CONFIG = {
   "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
   "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
   "Approve/Reject Case": { tempOrPerm: "TEMP OR PERMANENT", interface: "approval" },
-  "Arrange Adv / Chq": { tempOrPerm: "PERMANENT", interface: "copyable-tile" },
-  "Adv Confirmation": { tempOrPerm: "PERMANENT", interface: "copyable-tile" },
   "Sale Input": { tempOrPerm: "PERMANENT", interface: "default" },
   "Voucher Input": { tempOrPerm: "PERMANENT", interface: "default" },
   "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
@@ -555,9 +603,7 @@ const TASK_CONFIG = {
 const TEMPLATE_TASKS = [
   "Poll To Thank You Msg",
   "Visit Time Tieup",
-  "Approve/Reject Case",
-  "Arrange Adv / Chq",
-  "Adv Confirmation"
+  "Approve/Reject Case"
 ];
 
 /* =========================
@@ -578,9 +624,7 @@ const PHASES = {
   ],
   "Pre Sales": [
     "Rate To Visit",
-    "Approve/Reject Case",
-    "Arrange Adv / Chq",
-    "Adv Confirmation"
+    "Approve/Reject Case"
   ],
   "Sales": [
     "Sale Input",
@@ -679,6 +723,7 @@ async function completeLogin() {
     statusEl.innerText = "";
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('btn-logout').classList.remove('hidden');
+    document.getElementById('btn-notifications').classList.remove('hidden');
     document.getElementById('active-user-display').classList.remove('hidden');
     document.getElementById('active-user-display').innerText = user.name;
 
@@ -713,6 +758,16 @@ function doLogout() {
   location.reload();
 }
 
+// Placeholder until the pending queue exists.
+function openNotifications() {
+  alert("Notifications are not set up yet.");
+}
+
+function goHome() {
+  if (!user) return;
+  redirectToDefault();
+}
+
 function canAccessStaffFrontend(name) {
   if (!user) return false;
   if (user.level === 0) return true;
@@ -726,6 +781,22 @@ function redirectToDefault() {
   } else {
     window.location.hash = '#/staff/' + encodeURIComponent(user.name);
   }
+}
+
+/* =========================
+   DATE / TIME FORMATTING
+   ========================= */
+
+// "2026-08-29" -> "29 Aug 26"
+// Split as text rather than using new Date(), because new Date("2026-08-29")
+// is parsed as UTC midnight and can shift back a day in local time.
+function formatDateDMY(iso) {
+  if (!iso) return "";
+  const p = String(iso).split('-');
+  if (p.length !== 3) return iso;
+  const months = ["Jan","Feb","Mar","Apr","May","Jun",
+                  "Jul","Aug","Sep","Oct","Nov","Dec"];
+  return parseInt(p[2], 10) + " " + (months[parseInt(p[1], 10) - 1] || p[1]) + " " + p[0].slice(2);
 }
 
 /* =========================
@@ -831,7 +902,29 @@ function getPhaseForTask(taskName) {
   return "Other";
 }
 
+// True when a Level 0 user is standing in their OWN workspace.
+// That workspace becomes a full map of every task in the system.
+function isAdminPanel() {
+  return !!(user && user.level === 0 && profile && profile.name === user.name);
+}
+
+// Every task in the system, in phase order, deduped.
+function allTaskNames() {
+  const out = [];
+  Object.keys(PHASES).forEach(p => {
+    PHASES[p].forEach(t => {
+      if (TASK_CONFIG[t] && out.indexOf(t) === -1) out.push(t);
+    });
+  });
+  // Safety net: anything in TASK_CONFIG not yet placed in PHASES.
+  Object.keys(TASK_CONFIG).forEach(t => {
+    if (out.indexOf(t) === -1) out.push(t);
+  });
+  return out;
+}
+
 function staffTaskList() {
+  if (isAdminPanel()) return allTaskNames();
   return (profile && profile.tasks) ? profile.tasks.filter(Boolean) : [];
 }
 
@@ -1204,6 +1297,8 @@ async function saveRiderScheduling(type) {
   const date = document.getElementById('field-date-rider').value;
   const hour = document.getElementById('field-hour-rider').value;
   const min = document.getElementById('field-min-rider').value;
+  const ampm = document.getElementById('field-ampm-rider').value;
+  const remarks = document.getElementById('field-remarks-rider').value.trim();
 
   if (type === 'Temp') {
     if (!comment) return alert("Comment required for Temp Save");
@@ -1212,7 +1307,9 @@ async function saveRiderScheduling(type) {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
-        scheduledDate: date, scheduledTime: (hour && min) ? `${hour}:${min}` : ""
+        scheduledDate: formatDateDMY(date),
+        scheduledTime: (hour && min && ampm) ? `${hour}:${min} ${ampm}` : "",
+        remarks: remarks
       });
       if (!result.ok) return alert(result.error);
 
@@ -1221,48 +1318,54 @@ async function saveRiderScheduling(type) {
         staffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
+        remarks: remarks,
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
 
-      document.getElementById('field-ref-rider').value = "";
-      document.getElementById('field-case-rider').value = "";
-      document.getElementById('field-comment-rider').value = "";
-      document.getElementById('field-date-rider').value = "";
-      document.getElementById('field-hour-rider').value = "";
-      document.getElementById('field-min-rider').value = "";
+      clearRiderForm();
     } catch (e) {
       alert("Network error");
     }
   } else {
     if (!ref && !cas) return alert("Reference No OR Case No required");
     if (!date) return alert("Date required");
-    if (!hour || !min) return alert("Time required");
+    if (!hour || !min || !ampm) return alert("Time required");
 
-    const selectedDate = new Date(date);
+    // Build the date from parts so it is compared in local time, not UTC.
+    const dp = date.split('-');
+    const selectedDate = new Date(+dp[0], +dp[1] - 1, +dp[2]);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (selectedDate < today) return alert("Date must be in future");
+    if (selectedDate < today) return alert("Date cannot be in the past");
 
     try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
-        scheduledDate: date, scheduledTime: `${hour}:${min}`
+        scheduledDate: formatDateDMY(date),
+        scheduledTime: `${hour}:${min} ${ampm}`,
+        remarks: remarks
       });
       if (!result.ok) return alert(result.error);
       alert("Rider scheduling saved!");
-      document.getElementById('field-ref-rider').value = "";
-      document.getElementById('field-case-rider').value = "";
-      document.getElementById('field-comment-rider').value = "";
-      document.getElementById('field-date-rider').value = "";
-      document.getElementById('field-hour-rider').value = "";
-      document.getElementById('field-min-rider').value = "";
+      clearRiderForm();
     } catch (e) {
       alert("Network error");
     }
   }
+}
+
+function clearRiderForm() {
+  document.getElementById('field-ref-rider').value = "";
+  document.getElementById('field-case-rider').value = "";
+  document.getElementById('field-comment-rider').value = "";
+  document.getElementById('field-date-rider').value = "";
+  document.getElementById('field-hour-rider').value = "";
+  document.getElementById('field-min-rider').value = "";
+  document.getElementById('field-ampm-rider').value = "";
+  document.getElementById('field-remarks-rider').value = "";
 }
 
 async function saveVisitRating(type) {
@@ -1439,6 +1542,55 @@ function copyToClipboard(elementId) {
     alert('Failed to copy');
   });
 }
+
+/* =========================
+   ENTER KEY SHORTCUTS
+   Comment  -> Temp Save (only where a Temp Save button is visible)
+   Ref/Case -> Final Save
+   Row inputs in the temp table -> finalize that row
+   ========================= */
+const FORM_ACTIONS = {
+  'form-default':          { save: saveData,            tempBtn: 'btn-temp-save-default' },
+  'form-rider-scheduling': { save: saveRiderScheduling, tempBtn: 'btn-temp-save-rider' },
+  'form-visit-rating':     { save: saveVisitRating,     tempBtn: null },
+  'form-approval':         { save: saveApproval,        tempBtn: 'btn-temp-save-approval' },
+  'form-copyable-tile':    { save: saveCopyableTile,    tempBtn: 'btn-temp-save-tile' }
+};
+
+function handleEnterKey(e) {
+  if (e.key !== 'Enter') return;
+  const el = e.target;
+  if (!el || el.tagName !== 'INPUT') return;
+
+  // Rows inside the Recent Temporary Entries table.
+  if (el.classList.contains('row-ref') || el.classList.contains('row-case')) {
+    e.preventDefault();
+    finalizeEntryWithInputs(el.getAttribute('data-id'));
+    return;
+  }
+
+  const formDiv = el.closest('[id^="form-"]');
+  if (!formDiv) return;
+  const cfg = FORM_ACTIONS[formDiv.id];
+  if (!cfg) return;
+
+  const id = el.id || "";
+
+  if (id.indexOf('field-comment') === 0) {
+    e.preventDefault();
+    // Only fire if this task actually offers a Temp Save.
+    const btn = cfg.tempBtn ? document.getElementById(cfg.tempBtn) : null;
+    if (btn && btn.style.display !== 'none') cfg.save('Temp');
+    return;
+  }
+
+  if (id.indexOf('field-ref') === 0 || id.indexOf('field-case') === 0) {
+    e.preventDefault();
+    cfg.save('Final');
+  }
+}
+
+document.addEventListener('keydown', handleEnterKey);
 
 function hideAll() {
   document.querySelectorAll('.glass-panel').forEach(p => p.classList.add('hidden'));
