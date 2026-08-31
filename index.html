@@ -119,6 +119,38 @@ border-radius: 6px; color: white; font-size: 1rem;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; background: rgba(0,0,0,0.4); }
 select { cursor: pointer; }
+
+/* ===== SEARCH ===== */
+.search-wrap { position: relative; margin-bottom: 20px; }
+.search-wrap input {
+margin-bottom: 0; padding: 10px 12px 10px 36px; font-size: 0.9rem;
+}
+.search-icon {
+position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+color: var(--text-dim); font-size: 0.85rem; pointer-events: none;
+}
+.search-results {
+position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+background: #0a2f2b;
+border: 1px solid var(--border-color); border-radius: 10px;
+max-height: 320px; overflow-y: auto; z-index: 900;
+box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+.search-item {
+padding: 10px 14px; cursor: pointer; font-size: 0.88rem;
+border-bottom: 1px solid rgba(255,255,255,0.06);
+display: flex; align-items: center; gap: 10px;
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover, .search-item.active { background: rgba(0,121,107,0.35); }
+.search-kind {
+font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.5px;
+color: var(--text-dim); border: 1px solid var(--border-color);
+padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+}
+.search-sub { color: var(--text-dim); font-size: 0.78rem; margin-left: auto; }
+.search-none { padding: 12px 14px; color: var(--text-dim); font-size: 0.85rem; }
+
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
 .dashboard-item {
 background: rgba(255,255,255,0.03); padding: 30px 20px; border-radius: 12px;
@@ -138,7 +170,7 @@ transition: 0.15s ease;
 .task-sidebar-item:hover { background: rgba(255,255,255,0.08); }
 .task-sidebar-item.active { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
 
-/* ===== PHASE SYSTEM (Level 0 only) ===== */
+/* ===== PHASE SYSTEM (all user levels) ===== */
 .phase-bar {
 display: flex; flex-wrap: wrap; gap: 8px;
 margin-bottom: 25px; padding-bottom: 20px;
@@ -227,6 +259,7 @@ header { padding: 10px 15px; }
 .data-table input { width: 70px; padding: 4px; }
 .data-table input[type="checkbox"] { width: 16px; padding: 0; }
 .empty-tile { padding: 40px 15px; }
+.search-sub { display: none; }
 }
 
 a.dashboard-item, a.task-sidebar-item {
@@ -275,10 +308,17 @@ Sign in with your authorized Google account.
 <!-- 2. STAFF SELECT -->
 <div id="scr-select" class="glass-panel wide-panel hidden">
 <h2>Workspace Management</h2>
+<div class="search-wrap">
+<span class="search-icon">&#128269;</span>
+<input type="text" id="search-staff" autocomplete="off"
+placeholder="Search staff, phases or tasks"
+oninput="runSearch('staff')" onfocus="runSearch('staff')">
+<div id="search-staff-results" class="search-results hidden"></div>
+</div>
 <div id="staff-grid" class="dashboard-grid"></div>
 </div>
 
-<!-- 3. TASK SELECT -->
+<!-- 3. TASK SELECT (kept for reference - no longer routed to) -->
 <div id="scr-tasks" class="glass-panel wide-panel hidden">
 <h2 id="workspace-label">Workspace</h2>
 <div id="task-grid" class="dashboard-grid"></div>
@@ -287,7 +327,15 @@ Sign in with your authorized Google account.
 <!-- 4. DATA ENTRY -->
 <div id="scr-entry" class="glass-panel entry-panel hidden">
 
-<!-- PHASE SELECTOR (Level 0 only) -->
+<div class="search-wrap">
+<span class="search-icon">&#128269;</span>
+<input type="text" id="search-workspace" autocomplete="off"
+placeholder="Search phases or tasks in this workspace"
+oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
+<div id="search-workspace-results" class="search-results hidden"></div>
+</div>
+
+<!-- PHASE SELECTOR -->
 <div id="phase-bar" class="phase-bar hidden"></div>
 
 <div class="entry-layout">
@@ -295,7 +343,7 @@ Sign in with your authorized Google account.
 <div>
 <h2 id="bold-task-header" style="font-weight: 600;"></h2>
 
-<!-- EMPTY TILE (Level 0 only, before a task is chosen) -->
+<!-- EMPTY TILE (before a task is chosen) -->
 <div id="empty-tile" class="empty-tile hidden"></div>
 
 <!-- SHARED MESSAGE TEMPLATE TILE (read-only, set by Jawad) -->
@@ -548,6 +596,10 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyNDZgj-jFeTQFDSd2JdD_ls-qoqrIcP4Ni0_t-B02inJTEtoTndGjUCEA/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
+/* Set to true to land people straight on their first phase instead of
+   the "Select a Phase" screen. Saves Level 2 staff a tap. */
+const AUTO_SELECT_FIRST_PHASE = false;
+
 const STAFF = {
   "Jawad": {
     role: "Director",
@@ -596,15 +648,15 @@ const STAFF = {
 };
 
 const TASK_CONFIG = {
-  "Sale Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Voucher Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Save Contacts": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Poll To Thank You Msg": { tempOrPerm: "PERMANENT", interface: "default" },
   "Initial Documents": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
   "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
   "Approve/Reject Case": { tempOrPerm: "TEMP OR PERMANENT", interface: "approval" },
- "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
+  "Sale Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Voucher Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
   "Supporting Save In Soft": { tempOrPerm: "PERMANENT", interface: "default" },
   "Supporting Save In Hard": { tempOrPerm: "PERMANENT", interface: "default" },
   "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
@@ -959,9 +1011,16 @@ function allTaskNames() {
   return out;
 }
 
+// Task list for any staff member, not just the one on screen.
+// Level 0 viewing their own workspace sees every task in the system.
+function taskListFor(staffName) {
+  if (user && user.level === 0 && staffName === user.name) return allTaskNames();
+  const s = STAFF[staffName];
+  return (s && s.tasks) ? s.tasks.filter(Boolean) : [];
+}
+
 function staffTaskList() {
-  if (isAdminPanel()) return allTaskNames();
-  return (profile && profile.tasks) ? profile.tasks.filter(Boolean) : [];
+  return profile ? taskListFor(profile.name) : [];
 }
 
 function tasksInPhase(phase) {
@@ -980,6 +1039,7 @@ function phasesForStaff() {
 
 function setPhase(phase) {
   currentPhase = phase;
+  // Switching phase while a task is open clears the task and returns to the empty tile.
   if (currentTask && !tasksInPhase(phase).includes(currentTask)) {
     currentTask = null;
     window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
@@ -990,7 +1050,7 @@ function setPhase(phase) {
 
 function renderPhaseBar() {
   const bar = document.getElementById('phase-bar');
-  if (!user || user.level !== 0) {
+  if (!user || !profile) {
     bar.classList.add('hidden');
     bar.innerHTML = "";
     return;
@@ -1006,6 +1066,158 @@ function renderPhaseBar() {
     `onclick="setPhase('${p.replace(/'/g, "\\'")}')">${p}</button>`
   ).join('');
 }
+
+/* =========================
+   SEARCH
+   Scope 'staff'     -> every workspace the viewer can reach.
+   Scope 'workspace' -> the workspace currently open.
+   Matches staff names, phase names and task names.
+   ========================= */
+
+const SEARCH_LIMIT = 12;
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function accessibleStaffNames() {
+  return Object.keys(STAFF).filter(canAccessStaffFrontend);
+}
+
+function buildSearchResults(scope, q) {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [];
+
+  const results = [];
+  const seen = {};
+
+  function push(kind, label, sub, staffName, taskName, phaseName) {
+    const key = kind + '|' + staffName + '|' + (taskName || phaseName || '');
+    if (seen[key]) return;
+    seen[key] = true;
+    results.push({ kind, label, sub, staffName, taskName, phaseName });
+  }
+
+  const names = (scope === 'workspace' && profile)
+    ? [profile.name]
+    : accessibleStaffNames();
+
+  // Staff names — only meaningful when searching across workspaces.
+  if (scope === 'staff') {
+    names.forEach(n => {
+      if (n.toLowerCase().includes(needle)) {
+        push('Staff', n, STAFF[n].role, n, null, null);
+      }
+    });
+  }
+
+  // Phases the person actually has tasks in.
+  names.forEach(n => {
+    const tasks = taskListFor(n);
+    Object.keys(PHASES).forEach(p => {
+      if (!p.toLowerCase().includes(needle)) return;
+      if (!tasks.some(t => PHASES[p].includes(t))) return;
+      push('Phase', p, scope === 'staff' ? n : '', n, null, p);
+    });
+  });
+
+  // Tasks.
+  names.forEach(n => {
+    taskListFor(n).forEach(t => {
+      if (!t.toLowerCase().includes(needle)) return;
+      push('Task', t, scope === 'staff' ? n : getPhaseForTask(t), n, t, null);
+    });
+  });
+
+  return results.slice(0, SEARCH_LIMIT);
+}
+
+function runSearch(scope) {
+  const input = document.getElementById(scope === 'staff' ? 'search-staff' : 'search-workspace');
+  const box = document.getElementById(scope === 'staff' ? 'search-staff-results' : 'search-workspace-results');
+  const q = input.value;
+
+  if (!q.trim()) {
+    box.classList.add('hidden');
+    box.innerHTML = "";
+    return;
+  }
+
+  const results = buildSearchResults(scope, q);
+  box.classList.remove('hidden');
+
+  if (results.length === 0) {
+    box.innerHTML = `<div class="search-none">Nothing matches "${escapeHtml(q)}"</div>`;
+    return;
+  }
+
+  box.innerHTML = results.map((r, i) => `
+    <div class="search-item${i === 0 ? ' active' : ''}"
+         data-staff="${escapeHtml(r.staffName)}"
+         data-task="${escapeHtml(r.taskName || '')}"
+         data-phase="${escapeHtml(r.phaseName || '')}">
+      <span class="search-kind">${r.kind}</span>
+      <span>${escapeHtml(r.label)}</span>
+      ${r.sub ? `<span class="search-sub">${escapeHtml(r.sub)}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function clearSearchBoxes() {
+  ['search-staff', 'search-workspace'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  ['search-staff-results', 'search-workspace-results'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('hidden'); el.innerHTML = ""; }
+  });
+}
+
+function applySearchItem(el) {
+  const staffName = el.getAttribute('data-staff');
+  const taskName = el.getAttribute('data-task');
+  const phaseName = el.getAttribute('data-phase');
+  if (!staffName) return;
+
+  clearSearchBoxes();
+
+  if (taskName) {
+    window.location.hash = '#/staff/' + encodeURIComponent(staffName) +
+                           '/' + encodeURIComponent(taskName);
+    return;
+  }
+
+  // Phase or bare staff result. Set the phase first so route() and
+  // renderEntryScreen pick it up rather than resetting to "Select a Phase".
+  currentPhase = phaseName || null;
+  currentTask = null;
+
+  const target = '#/staff/' + encodeURIComponent(staffName);
+  if (window.location.hash === target) {
+    profile = { name: staffName, ...STAFF[staffName] };
+    renderEntryScreen();
+  } else {
+    window.location.hash = target;
+  }
+}
+
+// Delegated: result rows are rebuilt on every keystroke.
+document.addEventListener('click', function (e) {
+  const item = e.target.closest ? e.target.closest('.search-item') : null;
+  if (item) { applySearchItem(item); return; }
+  // Clicking anywhere else closes open result lists.
+  if (!e.target.closest || !e.target.closest('.search-wrap')) {
+    ['search-staff-results', 'search-workspace-results'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+  }
+});
 
 /* =========================
    ROUTING
@@ -1032,15 +1244,20 @@ function route() {
 
     if (segments[2] && staffTaskList().includes(segments[2])) {
       currentTask = segments[2];
-      if (user.level === 0) currentPhase = getPhaseForTask(currentTask);
+      // Deep link straight to a task: light up the phase that task belongs to.
+      currentPhase = getPhaseForTask(currentTask);
       renderEntryScreen();
     } else {
       currentTask = null;
-      if (user.level === 0) {
-        renderEntryScreen();
-      } else {
-        renderProfileScreen();
+      // Drop a phase that this workspace doesn't have.
+      if (currentPhase && phasesForStaff().indexOf(currentPhase) === -1) {
+        currentPhase = null;
       }
+      if (AUTO_SELECT_FIRST_PHASE && !currentPhase) {
+        const present = phasesForStaff();
+        if (present.length > 0) currentPhase = present[0];
+      }
+      renderEntryScreen();
     }
   } else {
     redirectToDefault();
@@ -1074,34 +1291,23 @@ function renderSelectionScreen() {
   });
 }
 
-function renderProfileScreen() {
-  hideAll();
-  document.getElementById('scr-tasks').classList.remove('hidden');
-  document.getElementById('workspace-label').innerText = profile.name + "'s Workspace";
-  if (user.level === 0 || user.level === 1) {
-    document.getElementById('nav-back').classList.remove('hidden');
-  } else {
-    document.getElementById('nav-back').classList.add('hidden');
-  }
-  const grid = document.getElementById('task-grid');
-  grid.innerHTML = "";
-  staffTaskList().forEach(t => {
-    const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
-    grid.insertAdjacentHTML('beforeend', `<a class="dashboard-item" href="${href}"><strong>${t}</strong></a>`);
-  });
-}
-
 async function renderEntryScreen() {
   hideAll();
   document.getElementById('scr-entry').classList.remove('hidden');
-  document.getElementById('nav-back').classList.remove('hidden');
+
+  // Level 2 sits on their own workspace, so there's nowhere to go back to
+  // until they've opened a task.
+  const backBtn = document.getElementById('nav-back');
+  if (user.level === 2 && !currentTask) backBtn.classList.add('hidden');
+  else backBtn.classList.remove('hidden');
+
   renderPhaseBar();
   renderTaskSidebar();
 
   const header = document.getElementById('bold-task-header');
   const tile = document.getElementById('empty-tile');
 
-  // EMPTY STATE — Level 0 only, before a task is chosen.
+  // EMPTY STATE — before a task is chosen.
   if (!currentTask) {
     hideAllForms();
     document.getElementById('template-tile').classList.add('hidden');
@@ -1127,7 +1333,8 @@ function renderTaskSidebar() {
   const sb = document.getElementById('task-sidebar');
   sb.innerHTML = "";
 
-  const list = (user.level === 0) ? tasksInPhase(currentPhase) : staffTaskList();
+  // Everyone now sees only the tasks in the selected phase.
+  const list = tasksInPhase(currentPhase);
 
   if (list.length === 0) {
     sb.innerHTML = `<span class="sidebar-empty">${
@@ -1157,6 +1364,7 @@ function renderFormInterface() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
 
+  // Shared message tile — shows on any task listed in TEMPLATE_TASKS.
   renderTemplateTile();
 
   const commentFields = document.querySelectorAll('.comment-field');
@@ -1725,10 +1933,11 @@ function copyToClipboard(elementId) {
 }
 
 /* =========================
-   ENTER KEY SHORTCUTS
-   Comment  -> Temp Save (only where a Temp Save button is visible)
-   Ref/Case -> Final Save
-   Row inputs in the temp table -> finalize that row
+   KEYBOARD SHORTCUTS
+   In search: Enter opens the first result, Escape closes the list.
+   In forms:  Comment  -> Temp Save (where a Temp Save button is visible)
+              Ref/Case -> Final Save
+              Row inputs in the temp table -> finalize that row
    ========================= */
 const FORM_ACTIONS = {
   'form-default':          { save: saveData,            tempBtn: 'btn-temp-save-default' },
@@ -1739,9 +1948,22 @@ const FORM_ACTIONS = {
 };
 
 function handleEnterKey(e) {
-  if (e.key !== 'Enter') return;
   const el = e.target;
   if (!el || el.tagName !== 'INPUT') return;
+
+  const isSearch = el.id === 'search-staff' || el.id === 'search-workspace';
+
+  if (isSearch) {
+    if (e.key === 'Escape') { clearSearchBoxes(); return; }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const boxId = el.id === 'search-staff' ? 'search-staff-results' : 'search-workspace-results';
+    const first = document.querySelector('#' + boxId + ' .search-item');
+    if (first) applySearchItem(first);
+    return;
+  }
+
+  if (e.key !== 'Enter') return;
 
   // Rows inside the Recent Temporary Entries table.
   if (el.classList.contains('row-ref') || el.classList.contains('row-case')) {
