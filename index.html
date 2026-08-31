@@ -60,6 +60,7 @@ transition: all 0.2s ease;
 white-space: nowrap;
 }
 .btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ===== HEADER ICON BUTTONS ===== */
 .icon-action {
@@ -178,6 +179,25 @@ font-family: inherit; line-height: 1.5;
 font-size: 0.75rem; text-transform: uppercase; }
 .data-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
 .data-table input { margin: 0; padding: 6px 8px; width: 90px; font-size: 0.8rem; }
+/* Checkboxes must escape the global full-width input styling. */
+.data-table input[type="checkbox"] {
+width: 16px; height: 16px; padding: 0; margin: 0; cursor: pointer;
+accent-color: var(--accent-color);
+}
+.data-table tr.row-selected td { background: rgba(0,121,107,0.18); }
+.select-col { width: 36px; }
+
+/* ===== BULK ACTION BAR ===== */
+.bulk-bar {
+display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+margin-top: 15px; padding: 12px 15px;
+background: rgba(0,121,107,0.15);
+border: 1px solid var(--accent-color);
+border-radius: 8px;
+}
+.bulk-count { font-size: 0.85rem; color: var(--text-main); font-weight: 600; }
+.bulk-note { font-size: 0.75rem; color: var(--text-dim); }
+
 .copyable-tile {
 background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px;
 padding: 15px; margin-bottom: 20px; position: relative;
@@ -205,6 +225,7 @@ header { padding: 10px 15px; }
 .data-table { font-size: 0.8rem; }
 .data-table td { padding: 8px; }
 .data-table input { width: 70px; padding: 4px; }
+.data-table input[type="checkbox"] { width: 16px; padding: 0; }
 .empty-tile { padding: 40px 15px; }
 }
 
@@ -490,10 +511,20 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 <button class="btn btn-small" onclick="loadTemp()">Refresh</button>
 </div>
 </div>
+
+<!-- BULK ACTION BAR (appears only when rows are ticked) -->
+<div id="bulk-bar" class="bulk-bar hidden">
+<span class="bulk-count" id="bulk-count">0 selected</span>
+<button class="btn btn-primary btn-small" id="btn-bulk-finalize" onclick="finalizeSelected()">Finalize Selected</button>
+<button class="btn btn-small" onclick="clearSelection()">Clear</button>
+<span class="bulk-note">Rows with no Ref No and no Case No will be skipped.</span>
+</div>
+
 <div style="overflow-x:auto;">
 <table class="data-table">
 <thead>
 <tr>
+<th class="select-col"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
 <th>Staff Member</th>
 <th>Timestamp</th>
 <th>Comment</th>
@@ -565,15 +596,15 @@ const STAFF = {
 };
 
 const TASK_CONFIG = {
+  "Sale Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
+  "Voucher Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Save Contacts": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Poll To Thank You Msg": { tempOrPerm: "PERMANENT", interface: "default" },
   "Initial Documents": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
   "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
   "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
   "Approve/Reject Case": { tempOrPerm: "TEMP OR PERMANENT", interface: "approval" },
-  "Sale Input": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Voucher Input": { tempOrPerm: "PERMANENT", interface: "default" },
-  "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
+ "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
   "Supporting Save In Soft": { tempOrPerm: "PERMANENT", interface: "default" },
   "Supporting Save In Hard": { tempOrPerm: "PERMANENT", interface: "default" },
   "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
@@ -597,8 +628,6 @@ const TASK_CONFIG = {
 
 /* =========================
    TEMPLATE_TASKS — tasks that show Jawad's editable message tile.
-   Add or remove a task name here and both the tile and Jawad's
-   editor screen update automatically.
    ========================= */
 const TEMPLATE_TASKS = [
   "Poll To Thank You Msg",
@@ -666,6 +695,13 @@ let currentPhase = null;
 let tempEntries = [];
 let templates = {};
 let templatesLoaded = false;
+
+// Ticked rows, kept by tempId so selection survives search filtering
+// and table re-renders.
+let selectedIds = {};
+
+// Edits typed into row Ref/Case boxes, kept so they survive a re-render.
+let rowEdits = {};
 
 async function apiCall(action, payload = {}) {
   const res = await fetch(APPS_SCRIPT_URL, {
@@ -753,6 +789,8 @@ function doLogout() {
   currentPhase = null;
   templates = {};
   templatesLoaded = false;
+  selectedIds = {};
+  rowEdits = {};
   google.accounts.id.disableAutoSelect();
   history.replaceState(null, '', window.location.pathname);
   location.reload();
@@ -809,7 +847,6 @@ async function loadTemplates() {
     if (result.ok) {
       templates = result.templates || {};
       templatesLoaded = true;
-      // If a template task is already open, refresh its tile.
       if (currentTask && TEMPLATE_TASKS.includes(currentTask)) renderTemplateTile();
       if (currentTask === "Message Templates") renderTemplateEditor();
     }
@@ -916,7 +953,6 @@ function allTaskNames() {
       if (TASK_CONFIG[t] && out.indexOf(t) === -1) out.push(t);
     });
   });
-  // Safety net: anything in TASK_CONFIG not yet placed in PHASES.
   Object.keys(TASK_CONFIG).forEach(t => {
     if (out.indexOf(t) === -1) out.push(t);
   });
@@ -944,7 +980,6 @@ function phasesForStaff() {
 
 function setPhase(phase) {
   currentPhase = phase;
-  // Switching phase while a task is open clears the task and returns to the empty tile.
   if (currentTask && !tasksInPhase(phase).includes(currentTask)) {
     currentTask = null;
     window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
@@ -997,7 +1032,6 @@ function route() {
 
     if (segments[2] && staffTaskList().includes(segments[2])) {
       currentTask = segments[2];
-      // Deep link straight to a task: light up the phase that task belongs to.
       if (user.level === 0) currentPhase = getPhaseForTask(currentTask);
       renderEntryScreen();
     } else {
@@ -1093,7 +1127,6 @@ function renderTaskSidebar() {
   const sb = document.getElementById('task-sidebar');
   sb.innerHTML = "";
 
-  // Level 0 sees only the current phase's tasks. Everyone else sees the full list.
   const list = (user.level === 0) ? tasksInPhase(currentPhase) : staffTaskList();
 
   if (list.length === 0) {
@@ -1124,16 +1157,13 @@ function renderFormInterface() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
 
-  // Shared message tile — shows on any task listed in TEMPLATE_TASKS.
   renderTemplateTile();
 
-  // Hide/show comment fields based on task type
   const commentFields = document.querySelectorAll('.comment-field');
   commentFields.forEach(field => {
     field.style.display = isTempOrPerm ? 'block' : 'none';
   });
 
-  // Hide/show temp entries table based on task type
   const dataSection = document.getElementById('data-section-container');
   if (dataSection) {
     dataSection.style.display = isTempOrPerm ? 'block' : 'none';
@@ -1175,18 +1205,22 @@ async function loadTemp() {
   // Don't load temp entries for PERMANENT-only tasks
   if (!isTempOrPerm) return;
 
+  // A fresh load invalidates any ticks and typed-in values.
+  selectedIds = {};
+  rowEdits = {};
+
   const body = document.getElementById('data-body');
-  body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">Loading...</td></tr>`;
+  body.innerHTML = `<tr><td colspan="7" style="color:var(--text-dim)">Loading...</td></tr>`;
   try {
     const result = await apiCall('tempList', { targetStaffName: profile.name, taskName: currentTask });
     if (!result.ok) {
-      body.innerHTML = `<tr><td colspan="6">${result.error || 'Could not load entries'}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="7">${result.error || 'Could not load entries'}</td></tr>`;
       return;
     }
     tempEntries = result.items || [];
     renderTable();
   } catch (e) {
-    body.innerHTML = `<tr><td colspan="6">Network error</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7">Network error</td></tr>`;
   }
 }
 
@@ -1202,27 +1236,168 @@ function filterTable() {
   renderTable(filtered);
 }
 
+/* =========================
+   TEMP TABLE
+   ========================= */
+
+// Remember what's typed into a row box, so filtering or a re-render
+// doesn't wipe it.
+function noteRowEdit(tempId, field, value) {
+  if (!rowEdits[tempId]) rowEdits[tempId] = {};
+  rowEdits[tempId][field] = value;
+}
+
+function rowValue(item, field) {
+  const edit = rowEdits[item.tempId];
+  if (edit && typeof edit[field] === 'string') return edit[field];
+  return item[field] || "";
+}
+
 function renderTable(list) {
   const items = list || tempEntries;
   const body = document.getElementById('data-body');
   body.innerHTML = "";
   if (items.length === 0) {
-    body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim)">No matching entries</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" style="color:var(--text-dim)">No matching entries</td></tr>`;
+    updateBulkBar();
     return;
   }
   items.forEach(item => {
-    body.insertAdjacentHTML('beforeend', `<tr>
+    const id = item.tempId;
+    const checked = selectedIds[id] ? ' checked' : '';
+    const rowCls = selectedIds[id] ? ' class="row-selected"' : '';
+    body.insertAdjacentHTML('beforeend', `<tr${rowCls} data-row="${id}">
+      <td class="select-col"><input type="checkbox" class="row-select" data-id="${id}"${checked} onchange="toggleRowSelect('${id}', this.checked)"></td>
       <td>${item.staffName}</td>
       <td style="color:var(--text-dim); font-size:0.85rem;">${item.createdAt || ''}</td>
       <td>${item.comment || ''}</td>
-      <td><input type="text" class="row-ref" data-id="${item.tempId}" value="${item.refNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
-      <td><input type="text" class="row-case" data-id="${item.tempId}" value="${item.caseNo || ''}" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+      <td><input type="text" class="row-ref" data-id="${id}" value="${rowValue(item, 'refNo')}" oninput="noteRowEdit('${id}','refNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+      <td><input type="text" class="row-case" data-id="${id}" value="${rowValue(item, 'caseNo')}" oninput="noteRowEdit('${id}','caseNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td style="text-align:right; white-space:nowrap;">
-        <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${item.tempId}')" title="Finalize">&#10003;</button>
-        <button class="btn icon-btn icon-cross" onclick="removeEntry('${item.tempId}')" title="Delete">&#10005;</button>
+        <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${id}')" title="Finalize">&#10003;</button>
+        <button class="btn icon-btn icon-cross" onclick="removeEntry('${id}')" title="Delete">&#10005;</button>
       </td>
     </tr>`);
   });
+  updateBulkBar();
+}
+
+function toggleRowSelect(tempId, checked) {
+  if (checked) selectedIds[tempId] = true;
+  else delete selectedIds[tempId];
+
+  const tr = document.querySelector(`tr[data-row="${tempId}"]`);
+  if (tr) tr.classList.toggle('row-selected', !!checked);
+
+  updateBulkBar();
+}
+
+// Applies to the rows currently on screen, so it respects an active search.
+function toggleSelectAll(checked) {
+  document.querySelectorAll('#data-body .row-select').forEach(cb => {
+    cb.checked = checked;
+    toggleRowSelect(cb.getAttribute('data-id'), checked);
+  });
+}
+
+function clearSelection() {
+  selectedIds = {};
+  document.querySelectorAll('#data-body .row-select').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('#data-body tr').forEach(tr => tr.classList.remove('row-selected'));
+  const all = document.getElementById('select-all');
+  if (all) all.checked = false;
+  updateBulkBar();
+}
+
+function selectedCount() {
+  return Object.keys(selectedIds).length;
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const n = selectedCount();
+  if (n === 0) {
+    bar.classList.add('hidden');
+  } else {
+    bar.classList.remove('hidden');
+    document.getElementById('bulk-count').innerText =
+      n + (n === 1 ? ' entry selected' : ' entries selected');
+  }
+
+  // Keep the header checkbox honest about what's on screen.
+  const boxes = document.querySelectorAll('#data-body .row-select');
+  const all = document.getElementById('select-all');
+  if (all) {
+    const total = boxes.length;
+    let ticked = 0;
+    boxes.forEach(cb => { if (cb.checked) ticked++; });
+    all.checked = total > 0 && ticked === total;
+    all.indeterminate = ticked > 0 && ticked < total;
+  }
+}
+
+async function finalizeSelected() {
+  const ids = Object.keys(selectedIds);
+  if (ids.length === 0) return;
+
+  const ready = [];
+  const skipped = [];
+
+  ids.forEach(id => {
+    const refInput = document.querySelector(`.row-ref[data-id="${id}"]`);
+    const caseInput = document.querySelector(`.row-case[data-id="${id}"]`);
+    // Fall back to remembered edits if the row is filtered off screen.
+    const edit = rowEdits[id] || {};
+    const stored = tempEntries.filter(x => String(x.tempId) === String(id))[0] || {};
+    const refNo = (refInput ? refInput.value : (edit.refNo !== undefined ? edit.refNo : stored.refNo || "")).trim();
+    const caseNo = (caseInput ? caseInput.value : (edit.caseNo !== undefined ? edit.caseNo : stored.caseNo || "")).trim();
+
+    if (!refNo && !caseNo) skipped.push(id);
+    else ready.push({ tempId: id, refNo: refNo, caseNo: caseNo });
+  });
+
+  if (ready.length === 0) {
+    alert("None of the selected rows have a Ref No or Case No. Fill at least one in.");
+    return;
+  }
+
+  const msg = skipped.length > 0
+    ? `Push ${ready.length} entr${ready.length === 1 ? 'y' : 'ies'} to Final records?\n` +
+      `${skipped.length} will be skipped (no Ref No or Case No).`
+    : `Push ${ready.length} entr${ready.length === 1 ? 'y' : 'ies'} to Final records?`;
+  if (!confirm(msg)) return;
+
+  const btn = document.getElementById('btn-bulk-finalize');
+  btn.disabled = true;
+  btn.innerText = "Saving...";
+
+  try {
+    const result = await apiCall('tempFinalizeBulk', { items: ready });
+    if (!result.ok) {
+      alert(result.error || "Could not finalize");
+      return;
+    }
+
+    const done = result.finalized || [];
+    done.forEach(id => {
+      delete selectedIds[id];
+      delete rowEdits[id];
+      tempEntries = tempEntries.filter(x => String(x.tempId) !== String(id));
+    });
+    renderTable();
+
+    let note = `${done.length} saved to Final.`;
+    if (skipped.length > 0) note += ` ${skipped.length} skipped (no Ref No or Case No).`;
+    if (result.failed && result.failed.length > 0) {
+      note += ` ${result.failed.length} could not be saved.`;
+    }
+    alert(note);
+  } catch (e) {
+    alert("Network error");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Finalize Selected";
+  }
 }
 
 function addLocalTempEntry(entry) {
@@ -1231,9 +1406,15 @@ function addLocalTempEntry(entry) {
 }
 
 function removeLocalTempEntry(tempId) {
+  delete selectedIds[tempId];
+  delete rowEdits[tempId];
   tempEntries = tempEntries.filter(item => String(item.tempId) !== String(tempId));
   renderTable();
 }
+
+/* =========================
+   SAVE HANDLERS
+   ========================= */
 
 async function saveData(type) {
   if (type === 'Temp') {
