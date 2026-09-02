@@ -46,7 +46,7 @@ border-radius: 8px; cursor: pointer; transition: 0.2s ease; }
 .logo-group img { height: 28px; width: auto; }
 .site-title { font-weight: 500; font-size: 1rem; letter-spacing: 0.5px; border-left: 1px solid var(--border-color);
 padding-left: 15px; }
-.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; }
 .user-meta { font-size: 0.8rem; color: var(--text-dim); }
 .btn {
 background: var(--panel-color);
@@ -87,6 +87,58 @@ border-radius: 8px; font-size: 0.65rem; font-weight: 700;
 display: flex; align-items: center; justify-content: center;
 }
 
+/* ===== NOTIFICATION PANEL ===== */
+.notif-panel {
+position: absolute; top: calc(100% + 10px); right: 0;
+width: 320px; max-width: 90vw; max-height: 400px; overflow-y: auto;
+background: #0a2f2b; border: 1px solid var(--border-color);
+border-radius: 12px; z-index: 1100;
+box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+.notif-head {
+padding: 12px 15px; border-bottom: 1px solid var(--border-color);
+font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+display: flex; justify-content: space-between; align-items: center;
+}
+.notif-item {
+padding: 11px 15px; border-bottom: 1px solid rgba(255,255,255,0.06);
+cursor: pointer; transition: 0.15s ease;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: rgba(0,121,107,0.3); }
+.notif-task { font-size: 0.88rem; font-weight: 600; }
+.notif-meta { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; }
+.notif-empty { padding: 22px 15px; color: var(--text-dim); font-size: 0.85rem; text-align: center; }
+
+/* ===== PENDING STRIP ON TASK SCREEN ===== */
+.pending-strip {
+background: rgba(0,121,107,0.18); border: 1px solid var(--accent-color);
+border-radius: 10px; padding: 12px 15px; margin-bottom: 20px;
+}
+.pending-strip-head { font-size: 0.8rem; font-weight: 600; margin-bottom: 9px; }
+.pending-cases { display: flex; flex-wrap: wrap; gap: 8px; }
+.case-chip {
+background: rgba(255,255,255,0.08); border: 1px solid var(--border-color);
+border-radius: 20px; padding: 5px 13px; font-size: 0.8rem;
+cursor: pointer; transition: 0.15s ease; white-space: nowrap;
+}
+.case-chip:hover { background: var(--accent-color); border-color: var(--accent-color); }
+.case-chip small { color: var(--text-dim); margin-left: 5px; }
+.case-chip:hover small { color: rgba(255,255,255,0.85); }
+
+/* ===== TOAST ===== */
+#toast {
+position: fixed; bottom: 26px; left: 50%;
+transform: translateX(-50%) translateY(18px);
+background: rgba(0,60,52,0.97); border: 1px solid var(--accent-color);
+color: var(--text-main); padding: 13px 24px; border-radius: 10px;
+font-size: 0.9rem; z-index: 3000; opacity: 0; pointer-events: none;
+transition: opacity 0.25s ease, transform 0.25s ease;
+box-shadow: 0 12px 34px rgba(0,0,0,0.5); max-width: 90vw; text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.error { border-color: #ff8a80; background: rgba(72,20,18,0.97); }
+
 .btn-primary { background: var(--accent-color); border: none; font-weight: 600; }
 .btn-primary:hover { background: #00897b; }
 .btn-small { padding: 6px 12px; font-size: 0.75rem; }
@@ -122,9 +174,7 @@ select { cursor: pointer; }
 
 /* ===== SEARCH ===== */
 .search-wrap { position: relative; margin-bottom: 20px; }
-.search-wrap input {
-margin-bottom: 0; padding: 10px 12px 10px 36px; font-size: 0.9rem;
-}
+.search-wrap input { margin-bottom: 0; padding: 10px 12px 10px 36px; font-size: 0.9rem; }
 .search-icon {
 position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
 color: var(--text-dim); font-size: 0.85rem; pointer-events: none;
@@ -165,10 +215,14 @@ cursor: pointer; transition: 0.2s ease;
 .task-sidebar-item {
 cursor: pointer; padding: 10px 12px; border-radius: 8px; font-size: 0.85rem;
 background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
-transition: 0.15s ease;
+transition: 0.15s ease; position: relative;
 }
 .task-sidebar-item:hover { background: rgba(255,255,255,0.08); }
 .task-sidebar-item.active { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+.sidebar-count {
+display: inline-block; margin-left: 6px; background: #ff5252; color: #fff;
+border-radius: 9px; padding: 1px 6px; font-size: 0.68rem; font-weight: 700;
+}
 
 /* ===== PHASE SYSTEM (all user levels) ===== */
 .phase-bar {
@@ -191,7 +245,7 @@ color: var(--text-dim); font-size: 0.9rem;
 }
 .sidebar-empty { color: var(--text-dim); font-size: 0.8rem; padding: 10px 2px; }
 
-/* ===== MESSAGE TEMPLATES ===== */
+/* ===== MESSAGE TEMPLATES + CHAIN EDITOR ===== */
 .template-editor-row {
 background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
 border-radius: 10px; padding: 16px; margin-bottom: 16px;
@@ -205,13 +259,27 @@ font-family: inherit; line-height: 1.5;
 #template-tile { margin-bottom: 24px; }
 #template-tile .copyable-text { white-space: pre-wrap; word-break: normal; }
 
+.chain-row {
+display: grid; grid-template-columns: 1fr 24px 1fr; gap: 12px; align-items: center;
+padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.chain-row:last-of-type { border-bottom: none; }
+.chain-from { font-size: 0.87rem; }
+.chain-arrow { text-align: center; color: var(--text-dim); }
+.chain-row select { margin-bottom: 0; padding: 8px 10px; font-size: 0.85rem; }
+.chain-preview {
+background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
+border-radius: 10px; padding: 15px; margin-top: 20px;
+font-size: 0.85rem; line-height: 1.9; color: var(--text-dim);
+}
+.chain-preview b { color: var(--text-main); font-weight: 600; }
+
 .data-section { margin-top: 40px; }
 .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
 font-size: 0.75rem; text-transform: uppercase; }
 .data-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
 .data-table input { margin: 0; padding: 6px 8px; width: 90px; font-size: 0.8rem; }
-/* Checkboxes must escape the global full-width input styling. */
 .data-table input[type="checkbox"] {
 width: 16px; height: 16px; padding: 0; margin: 0; cursor: pointer;
 accent-color: var(--accent-color);
@@ -248,6 +316,8 @@ gap: 15px; margin-bottom: 20px; }
 .entry-layout { grid-template-columns: 1fr; }
 .task-sidebar { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border-color);
 padding-right: 0; padding-bottom: 16px; }
+.chain-row { grid-template-columns: 1fr; gap: 6px; }
+.chain-arrow { display: none; }
 }
 @media (max-width: 600px) {
 header { padding: 10px 15px; }
@@ -283,13 +353,14 @@ a.dashboard-item, a.task-sidebar-item {
 </div>
 <div class="header-right">
 <span id="active-user-display" class="user-meta hidden"></span>
-<button id="btn-notifications" class="icon-action hidden" onclick="openNotifications()" title="Notifications" aria-label="Notifications">
+<button id="btn-notifications" class="icon-action hidden" onclick="toggleNotifications()" title="Notifications" aria-label="Notifications">
 <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 <span id="notif-count" class="notif-dot hidden">0</span>
 </button>
 <button id="btn-logout" class="icon-action hidden" onclick="doLogout()" title="Sign Out" aria-label="Sign Out">
 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
 </button>
+<div id="notif-panel" class="notif-panel hidden"></div>
 </div>
 </header>
 
@@ -345,6 +416,12 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 
 <!-- EMPTY TILE (before a task is chosen) -->
 <div id="empty-tile" class="empty-tile hidden"></div>
+
+<!-- PENDING CASES FOR THIS TASK -->
+<div id="pending-strip" class="pending-strip hidden">
+<div class="pending-strip-head" id="pending-strip-head"></div>
+<div class="pending-cases" id="pending-cases"></div>
+</div>
 
 <!-- SHARED MESSAGE TEMPLATE TILE (read-only, set by Jawad) -->
 <div id="template-tile" class="copyable-tile hidden">
@@ -545,6 +622,21 @@ These messages appear as a copyable tile on each task below. Only you can edit t
 </div>
 </div>
 
+<!-- TASK CHAIN EDITOR (Jawad / Level 0 only) -->
+<div id="form-chain" class="hidden">
+<p style="color:var(--text-dim); font-size:0.85rem; margin-top:0; margin-bottom:20px;">
+Pick what becomes pending after each task is finalised. Leave a task on
+&ldquo;Ends here&rdquo; if nothing follows it.
+</p>
+<div id="chain-editor-list"></div>
+<div class="chain-preview" id="chain-preview"></div>
+<div style="display:flex; align-items:center; gap:12px; margin-top:18px;">
+<button class="btn btn-primary" id="btn-save-chain" onclick="saveChain()">Save Chain</button>
+<button class="btn btn-small" onclick="resetChainToDefault()">Reset to default</button>
+<span id="chain-save-status" style="color:var(--text-dim); font-size:0.8rem;"></span>
+</div>
+</div>
+
 <!-- DATA TABLE -->
 <div id="data-section-container" class="data-section">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -592,6 +684,8 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 
 </div>
 
+<div id="toast"></div>
+
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyNDZgj-jFeTQFDSd2JdD_ls-qoqrIcP4Ni0_t-B02inJTEtoTndGjUCEA/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
@@ -600,10 +694,13 @@ const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.goo
    the "Select a Phase" screen. Saves Level 2 staff a tap. */
 const AUTO_SELECT_FIRST_PHASE = false;
 
+/* Hours (24h) at which the bell refetches, if the page is open. */
+const BELL_REFRESH_HOURS = [11, 14, 17, 19];
+
 const STAFF = {
   "Jawad": {
     role: "Director",
-    tasks: ["Message Templates","Gift To Customer If Inst Paid Earlier"]
+    tasks: ["Message Templates","Task Chain","Gift To Customer If Inst Paid Earlier"]
   },
   "Uzair": {
     role: "Manager HP",
@@ -675,26 +772,27 @@ const TASK_CONFIG = {
   "Delivery Linkage & Aliens": { tempOrPerm: "PERMANENT", interface: "default" },
   "Empty Mahana Temp Vir W": { tempOrPerm: "PERMANENT", interface: "default" },
   "Gift To Customer If Inst Paid Earlier": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Message Templates": { tempOrPerm: "PERMANENT", interface: "templates" }
+  "Message Templates": { tempOrPerm: "PERMANENT", interface: "templates" },
+  "Task Chain": { tempOrPerm: "PERMANENT", interface: "chain" }
 };
 
-/* =========================
-   TEMPLATE_TASKS — tasks that show Jawad's editable message tile.
-   ========================= */
+/* Tasks that show Jawad's editable message tile. */
 const TEMPLATE_TASKS = [
   "Poll To Thank You Msg",
   "Visit Time Tieup",
   "Approve/Reject Case"
 ];
 
+/* Jawad's own screens. Never part of the chain. */
+const ADMIN_TASKS = ["Message Templates", "Task Chain"];
+
 /* =========================
    PHASES — the single source of truth for task grouping.
-   To move a task, move its name between these arrays. Nothing else to update.
-   Any task missing from here shows up automatically under an "Other" chip.
    ========================= */
 const PHASES = {
   "Admin": [
     "Message Templates",
+    "Task Chain",
     "Gift To Customer If Inst Paid Earlier"
   ],
   "Interaction": [
@@ -739,6 +837,22 @@ const PHASES = {
   ]
 };
 
+/* Used when the Chain tab is empty, and by "Reset to default". */
+const DEFAULT_CHAIN = {
+  "Save Contacts": "Poll To Thank You Msg",
+  "Poll To Thank You Msg": "Initial Documents",
+  "Initial Documents": "Visit Time Tieup",
+  "Visit Time Tieup": "Rate To Visit",
+  "Rate To Visit": "Approve/Reject Case",
+  "Approve/Reject Case": "Sale Input",
+  "Sale Input": "Voucher Input",
+  "Voucher Input": "File Update",
+  "File Update": "Supporting Save In Soft",
+  "Supporting Save In Soft": "Supporting Save In Hard",
+  "Supporting Save In Hard": "Plan Share",
+  "Plan Share": "Chq Management"
+};
+
 let idToken = localStorage.getItem('mahana_idToken') || null;
 let user = null;
 let profile = null;
@@ -747,6 +861,10 @@ let currentPhase = null;
 let tempEntries = [];
 let templates = {};
 let templatesLoaded = false;
+let chain = {};
+let chainLoaded = false;
+let pendingItems = [];
+let lastBellHour = -1;
 
 // Ticked rows, kept by tempId so selection survives search filtering
 // and table re-renders.
@@ -763,6 +881,26 @@ async function apiCall(action, payload = {}) {
   });
   return res.json();
 }
+
+/* =========================
+   TOAST
+   Replaces every alert. Fades on its own, nothing to click.
+   ========================= */
+
+let toastTimer = null;
+function toast(message, isError) {
+  const el = document.getElementById('toast');
+  el.innerText = message;
+  el.classList.toggle('error', !!isError);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  // Errors linger a little so they are not missed.
+  toastTimer = setTimeout(() => el.classList.remove('show'), isError ? 3800 : 2200);
+}
+
+/* =========================
+   AUTH
+   ========================= */
 
 function initGoogleSignIn() {
   if (typeof google === 'undefined') {
@@ -816,6 +954,9 @@ async function completeLogin() {
     document.getElementById('active-user-display').innerText = user.name;
 
     loadTemplates();
+    loadChain();
+    loadPending();
+    startBellTimer();
 
     window.addEventListener('hashchange', route);
 
@@ -841,16 +982,14 @@ function doLogout() {
   currentPhase = null;
   templates = {};
   templatesLoaded = false;
+  chain = {};
+  chainLoaded = false;
+  pendingItems = [];
   selectedIds = {};
   rowEdits = {};
   google.accounts.id.disableAutoSelect();
   history.replaceState(null, '', window.location.pathname);
   location.reload();
-}
-
-// Placeholder until the pending queue exists.
-function openNotifications() {
-  alert("Notifications are not set up yet.");
 }
 
 function goHome() {
@@ -890,6 +1029,185 @@ function formatDateDMY(iso) {
 }
 
 /* =========================
+   PENDING QUEUE
+   Rows are filed against a task, not a person, so a shared task clears
+   for everyone the moment one person finalises it.
+   ========================= */
+
+async function loadPending() {
+  if (!user) return;
+  try {
+    const result = await apiCall('pendingList', { taskNames: visibleTaskNames() });
+    if (result.ok) {
+      pendingItems = result.items || [];
+      updateBell();
+      if (currentTask) renderPendingStrip();
+      renderTaskSidebar();
+    }
+  } catch (e) {
+    // Non-fatal. The bell simply keeps its previous count.
+  }
+}
+
+// Every task this person can act on. Level 0 sees everything.
+function visibleTaskNames() {
+  if (!user) return [];
+  if (user.level === 0) return Object.keys(TASK_CONFIG);
+  const out = [];
+  Object.keys(STAFF).forEach(name => {
+    if (!canAccessStaffFrontend(name)) return;
+    STAFF[name].tasks.filter(Boolean).forEach(t => {
+      if (out.indexOf(t) === -1) out.push(t);
+    });
+  });
+  return out;
+}
+
+function pendingForTask(taskName) {
+  return pendingItems.filter(p => p.taskName === taskName);
+}
+
+function updateBell() {
+  const badge = document.getElementById('notif-count');
+  const n = pendingItems.length;
+  if (n === 0) {
+    badge.classList.add('hidden');
+  } else {
+    badge.classList.remove('hidden');
+    badge.innerText = n > 99 ? '99+' : n;
+  }
+}
+
+function toggleNotifications() {
+  const panel = document.getElementById('notif-panel');
+  if (!panel.classList.contains('hidden')) {
+    panel.classList.add('hidden');
+    return;
+  }
+  renderNotifPanel();
+  panel.classList.remove('hidden');
+  loadPending();
+}
+
+function renderNotifPanel() {
+  const panel = document.getElementById('notif-panel');
+  const shown = pendingItems.slice(0, 30);
+
+  let html = `<div class="notif-head">
+    <span>Pending${pendingItems.length ? ' (' + pendingItems.length + ')' : ''}</span>
+    <span style="cursor:pointer" onclick="loadPending()">Refresh</span>
+  </div>`;
+
+  if (shown.length === 0) {
+    html += `<div class="notif-empty">Nothing waiting on you.</div>`;
+  } else {
+    html += shown.map(p => `
+      <div class="notif-item" data-task="${escapeHtml(p.taskName)}" data-case="${escapeHtml(p.caseKey)}">
+        <div class="notif-task">${escapeHtml(p.taskName)}</div>
+        <div class="notif-meta">Case ${escapeHtml(p.caseKey)} &middot; ${escapeHtml(p.createdAt || '')}</div>
+      </div>`).join('');
+    if (pendingItems.length > shown.length) {
+      html += `<div class="notif-empty">+ ${pendingItems.length - shown.length} more</div>`;
+    }
+  }
+  panel.innerHTML = html;
+}
+
+// Delegated: notification rows are rebuilt on every open.
+document.addEventListener('click', function (e) {
+  const item = e.target.closest ? e.target.closest('.notif-item') : null;
+  if (item) {
+    openPendingItem(item.getAttribute('data-task'), item.getAttribute('data-case'));
+    return;
+  }
+  // Clicking outside closes the panel.
+  if (!e.target.closest || (!e.target.closest('#notif-panel') && !e.target.closest('#btn-notifications'))) {
+    const panel = document.getElementById('notif-panel');
+    if (panel) panel.classList.add('hidden');
+  }
+});
+
+// Jumps to the first workspace that actually owns the task.
+function openPendingItem(taskName, caseKey) {
+  document.getElementById('notif-panel').classList.add('hidden');
+
+  let target = null;
+  if (user.level !== 0 && STAFF[user.name] &&
+      STAFF[user.name].tasks.indexOf(taskName) !== -1) {
+    target = user.name;
+  } else {
+    const names = Object.keys(STAFF).filter(canAccessStaffFrontend);
+    for (let i = 0; i < names.length; i++) {
+      if (STAFF[names[i]].tasks.indexOf(taskName) !== -1) { target = names[i]; break; }
+    }
+    if (!target && user.level === 0) target = user.name;
+  }
+  if (!target) { toast("That task is not in any workspace you can open.", true); return; }
+
+  pendingCaseToFill = caseKey;
+  window.location.hash = '#/staff/' + encodeURIComponent(target) +
+                         '/' + encodeURIComponent(taskName);
+}
+
+// Set when arriving from a notification, consumed once the form renders.
+let pendingCaseToFill = null;
+
+function renderPendingStrip() {
+  const strip = document.getElementById('pending-strip');
+  const head = document.getElementById('pending-strip-head');
+  const list = document.getElementById('pending-cases');
+
+  const items = currentTask ? pendingForTask(currentTask) : [];
+  if (items.length === 0) {
+    strip.classList.add('hidden');
+    return;
+  }
+
+  strip.classList.remove('hidden');
+  head.innerText = items.length === 1
+    ? '1 case waiting on this task'
+    : items.length + ' cases waiting on this task';
+
+  list.innerHTML = items.map(p => `
+    <span class="case-chip" onclick="fillCase('${escapeHtml(p.caseKey).replace(/'/g, "\\'")}')">
+      ${escapeHtml(p.caseKey)}<small>${escapeHtml(p.createdAt || '')}</small>
+    </span>`).join('');
+}
+
+// Case field differs per form interface.
+const CASE_FIELD_BY_INTERFACE = {
+  'default': 'field-case',
+  'rider-scheduling': 'field-case-rider',
+  'visit-rating': 'field-case-rating',
+  'approval': 'field-case-approval',
+  'copyable-tile': 'field-case-tile'
+};
+
+function fillCase(caseKey) {
+  const config = TASK_CONFIG[currentTask];
+  if (!config) return;
+  const id = CASE_FIELD_BY_INTERFACE[config.interface];
+  if (!id) return;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = caseKey;
+  el.focus();
+}
+
+// Checks the clock each minute and refetches when it crosses one of the
+// scheduled hours. Only fires while the page is actually open.
+function startBellTimer() {
+  setInterval(() => {
+    const h = new Date().getHours();
+    if (BELL_REFRESH_HOURS.indexOf(h) !== -1 && h !== lastBellHour) {
+      lastBellHour = h;
+      loadPending();
+    }
+    if (BELL_REFRESH_HOURS.indexOf(h) === -1) lastBellHour = -1;
+  }, 60000);
+}
+
+/* =========================
    MESSAGE TEMPLATES
    ========================= */
 
@@ -921,9 +1239,7 @@ function renderTemplateTile() {
   const text = String(templates[currentTask] || "").trim();
 
   if (!text) {
-    textEl.innerText = templatesLoaded
-      ? "No message set yet."
-      : "Loading message...";
+    textEl.innerText = templatesLoaded ? "No message set yet." : "Loading message...";
     textEl.classList.add('template-empty-note');
     copyBtn.style.display = 'none';
   } else {
@@ -967,15 +1283,136 @@ async function saveTemplates() {
   try {
     const result = await apiCall('templateSave', { templates: payload });
     if (!result.ok) {
-      status.innerText = result.error || "Could not save";
+      status.innerText = "";
+      toast(result.error || "Could not save", true);
       btn.disabled = false;
       return;
     }
     templates = payload;
     templatesLoaded = true;
-    status.innerText = "Saved.";
+    status.innerText = "";
+    toast("Messages saved.");
   } catch (e) {
-    status.innerText = "Network error";
+    status.innerText = "";
+    toast("Network error", true);
+  }
+  btn.disabled = false;
+}
+
+/* =========================
+   TASK CHAIN EDITOR
+   ========================= */
+
+// Every task that can take part in the chain, in phase order.
+function chainableTasks() {
+  const out = [];
+  Object.keys(PHASES).forEach(p => {
+    PHASES[p].forEach(t => {
+      if (ADMIN_TASKS.indexOf(t) !== -1) return;
+      if (TASK_CONFIG[t] && out.indexOf(t) === -1) out.push(t);
+    });
+  });
+  return out;
+}
+
+async function loadChain() {
+  try {
+    const result = await apiCall('chainList');
+    if (result.ok) {
+      const c = result.chain || {};
+      // First run: the Chain tab is empty, so start from the agreed order.
+      chain = Object.keys(c).length ? c : Object.assign({}, DEFAULT_CHAIN);
+      chainLoaded = true;
+      if (currentTask === "Task Chain") renderChainEditor();
+    }
+  } catch (e) {
+    // Non-fatal. Nothing advances until the chain loads.
+  }
+}
+
+function renderChainEditor() {
+  const list = document.getElementById('chain-editor-list');
+  const tasks = chainableTasks();
+
+  list.innerHTML = tasks.map(t => {
+    const options = ['<option value="">Ends here</option>'].concat(
+      tasks.filter(o => o !== t).map(o =>
+        `<option value="${escapeHtml(o)}"${chain[t] === o ? ' selected' : ''}>${escapeHtml(o)}</option>`)
+    ).join('');
+    return `<div class="chain-row">
+      <span class="chain-from">${escapeHtml(t)}</span>
+      <span class="chain-arrow">&rarr;</span>
+      <select data-task="${escapeHtml(t)}" onchange="onChainChange(this)">${options}</select>
+    </div>`;
+  }).join('');
+
+  renderChainPreview();
+  document.getElementById('chain-save-status').innerText = "";
+}
+
+function onChainChange(sel) {
+  const task = sel.getAttribute('data-task');
+  const next = sel.value;
+  if (next) chain[task] = next;
+  else delete chain[task];
+  renderChainPreview();
+}
+
+// Walks the links and prints each run as a readable line. Any task that
+// nothing points at starts a run, so a broken link is visible immediately.
+function renderChainPreview() {
+  const box = document.getElementById('chain-preview');
+  const tasks = chainableTasks();
+
+  const pointedAt = {};
+  Object.keys(chain).forEach(t => { if (chain[t]) pointedAt[chain[t]] = true; });
+
+  const starts = tasks.filter(t => !pointedAt[t] && chain[t]);
+  if (starts.length === 0) {
+    box.innerHTML = '<span style="font-style:italic">No chain set. Every task ends where it is.</span>';
+    return;
+  }
+
+  const lines = starts.map(start => {
+    const seen = {};
+    const parts = [];
+    let cur = start;
+    while (cur && !seen[cur]) {
+      seen[cur] = true;
+      parts.push(escapeHtml(cur));
+      cur = chain[cur];
+    }
+    if (cur) parts.push('<span style="color:#ff8a80">loops back to ' + escapeHtml(cur) + '</span>');
+    return parts.join(' &rarr; ');
+  });
+
+  const loose = tasks.filter(t => !pointedAt[t] && !chain[t]);
+  let html = '<b>Chain</b><br>' + lines.join('<br><br>');
+  if (loose.length) {
+    html += '<br><br><b>Outside the chain</b><br>' + loose.map(escapeHtml).join(', ');
+  }
+  box.innerHTML = html;
+}
+
+function resetChainToDefault() {
+  chain = Object.assign({}, DEFAULT_CHAIN);
+  renderChainEditor();
+  toast("Reset to the default order. Not saved yet.");
+}
+
+async function saveChain() {
+  const btn = document.getElementById('btn-save-chain');
+  btn.disabled = true;
+  try {
+    const result = await apiCall('chainSave', { chain: chain });
+    if (!result.ok) {
+      toast(result.error || "Could not save the chain", true);
+      btn.disabled = false;
+      return;
+    }
+    toast("Chain saved.");
+  } catch (e) {
+    toast("Network error", true);
   }
   btn.disabled = false;
 }
@@ -983,6 +1420,14 @@ async function saveTemplates() {
 /* =========================
    PHASE HELPERS
    ========================= */
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 function getPhaseForTask(taskName) {
   for (const phase in PHASES) {
@@ -997,7 +1442,6 @@ function isAdminPanel() {
   return !!(user && user.level === 0 && profile && profile.name === user.name);
 }
 
-// Every task in the system, in phase order, deduped.
 function allTaskNames() {
   const out = [];
   Object.keys(PHASES).forEach(p => {
@@ -1011,8 +1455,6 @@ function allTaskNames() {
   return out;
 }
 
-// Task list for any staff member, not just the one on screen.
-// Level 0 viewing their own workspace sees every task in the system.
 function taskListFor(staffName) {
   if (user && user.level === 0 && staffName === user.name) return allTaskNames();
   const s = STAFF[staffName];
@@ -1039,7 +1481,6 @@ function phasesForStaff() {
 
 function setPhase(phase) {
   currentPhase = phase;
-  // Switching phase while a task is open clears the task and returns to the empty tile.
   if (currentTask && !tasksInPhase(phase).includes(currentTask)) {
     currentTask = null;
     window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
@@ -1069,20 +1510,9 @@ function renderPhaseBar() {
 
 /* =========================
    SEARCH
-   Scope 'staff'     -> every workspace the viewer can reach.
-   Scope 'workspace' -> the workspace currently open.
-   Matches staff names, phase names and task names.
    ========================= */
 
 const SEARCH_LIMIT = 12;
-
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function accessibleStaffNames() {
   return Object.keys(STAFF).filter(canAccessStaffFrontend);
@@ -1106,7 +1536,6 @@ function buildSearchResults(scope, q) {
     ? [profile.name]
     : accessibleStaffNames();
 
-  // Staff names — only meaningful when searching across workspaces.
   if (scope === 'staff') {
     names.forEach(n => {
       if (n.toLowerCase().includes(needle)) {
@@ -1115,7 +1544,6 @@ function buildSearchResults(scope, q) {
     });
   }
 
-  // Phases the person actually has tasks in.
   names.forEach(n => {
     const tasks = taskListFor(n);
     Object.keys(PHASES).forEach(p => {
@@ -1125,7 +1553,6 @@ function buildSearchResults(scope, q) {
     });
   });
 
-  // Tasks.
   names.forEach(n => {
     taskListFor(n).forEach(t => {
       if (!t.toLowerCase().includes(needle)) return;
@@ -1192,8 +1619,6 @@ function applySearchItem(el) {
     return;
   }
 
-  // Phase or bare staff result. Set the phase first so route() and
-  // renderEntryScreen pick it up rather than resetting to "Select a Phase".
   currentPhase = phaseName || null;
   currentTask = null;
 
@@ -1206,11 +1631,9 @@ function applySearchItem(el) {
   }
 }
 
-// Delegated: result rows are rebuilt on every keystroke.
 document.addEventListener('click', function (e) {
   const item = e.target.closest ? e.target.closest('.search-item') : null;
   if (item) { applySearchItem(item); return; }
-  // Clicking anywhere else closes open result lists.
   if (!e.target.closest || !e.target.closest('.search-wrap')) {
     ['search-staff-results', 'search-workspace-results'].forEach(id => {
       const el = document.getElementById(id);
@@ -1244,12 +1667,10 @@ function route() {
 
     if (segments[2] && staffTaskList().includes(segments[2])) {
       currentTask = segments[2];
-      // Deep link straight to a task: light up the phase that task belongs to.
       currentPhase = getPhaseForTask(currentTask);
       renderEntryScreen();
     } else {
       currentTask = null;
-      // Drop a phase that this workspace doesn't have.
       if (currentPhase && phasesForStaff().indexOf(currentPhase) === -1) {
         currentPhase = null;
       }
@@ -1295,8 +1716,6 @@ async function renderEntryScreen() {
   hideAll();
   document.getElementById('scr-entry').classList.remove('hidden');
 
-  // Level 2 sits on their own workspace, so there's nowhere to go back to
-  // until they've opened a task.
   const backBtn = document.getElementById('nav-back');
   if (user.level === 2 && !currentTask) backBtn.classList.add('hidden');
   else backBtn.classList.remove('hidden');
@@ -1311,6 +1730,7 @@ async function renderEntryScreen() {
   if (!currentTask) {
     hideAllForms();
     document.getElementById('template-tile').classList.add('hidden');
+    document.getElementById('pending-strip').classList.add('hidden');
     document.getElementById('data-section-container').style.display = 'none';
     tile.classList.remove('hidden');
     if (!currentPhase) {
@@ -1326,14 +1746,22 @@ async function renderEntryScreen() {
   tile.classList.add('hidden');
   header.innerText = currentTask;
   renderFormInterface();
+  renderPendingStrip();
+
+  // Arrived from a notification: drop the case number straight in.
+  if (pendingCaseToFill) {
+    fillCase(pendingCaseToFill);
+    pendingCaseToFill = null;
+  }
+
   await loadTemp();
 }
 
 function renderTaskSidebar() {
   const sb = document.getElementById('task-sidebar');
+  if (!profile) return;
   sb.innerHTML = "";
 
-  // Everyone now sees only the tasks in the selected phase.
   const list = tasksInPhase(currentPhase);
 
   if (list.length === 0) {
@@ -1345,16 +1773,18 @@ function renderTaskSidebar() {
 
   list.forEach(t => {
     const active = t === currentTask;
+    const n = pendingForTask(t).length;
+    const badge = n > 0 ? `<span class="sidebar-count">${n}</span>` : '';
     const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
     sb.insertAdjacentHTML('beforeend', `
-      <a class="task-sidebar-item${active ? ' active' : ''}" href="${href}">${t}</a>
+      <a class="task-sidebar-item${active ? ' active' : ''}" href="${href}">${escapeHtml(t)}${badge}</a>
     `);
   });
 }
 
 function hideAllForms() {
   ['form-default','form-rider-scheduling','form-visit-rating','form-approval',
-   'form-copyable-tile','form-templates']
+   'form-copyable-tile','form-templates','form-chain']
     .forEach(id => document.getElementById(id).classList.add('hidden'));
 }
 
@@ -1364,7 +1794,6 @@ function renderFormInterface() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
 
-  // Shared message tile — shows on any task listed in TEMPLATE_TASKS.
   renderTemplateTile();
 
   const commentFields = document.querySelectorAll('.comment-field');
@@ -1381,28 +1810,28 @@ function renderFormInterface() {
     document.getElementById('form-templates').classList.remove('hidden');
     renderTemplateEditor();
     if (!templatesLoaded) loadTemplates();
+  } else if (config.interface === "chain") {
+    document.getElementById('form-chain').classList.remove('hidden');
+    if (!chainLoaded) loadChain();
+    else renderChainEditor();
   } else if (config.interface === "rider-scheduling") {
     document.getElementById('form-rider-scheduling').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-rider');
-    if (isTempOrPerm) tempBtn.style.display = 'block';
-    else tempBtn.style.display = 'none';
+    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
   } else if (config.interface === "visit-rating") {
     document.getElementById('form-visit-rating').classList.remove('hidden');
   } else if (config.interface === "approval") {
     document.getElementById('form-approval').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-approval');
-    if (isTempOrPerm) tempBtn.style.display = 'block';
-    else tempBtn.style.display = 'none';
+    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
   } else if (config.interface === "copyable-tile") {
     document.getElementById('form-copyable-tile').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-tile');
-    if (isTempOrPerm) tempBtn.style.display = 'block';
-    else tempBtn.style.display = 'none';
+    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
   } else {
     document.getElementById('form-default').classList.remove('hidden');
     const tempBtn = document.getElementById('btn-temp-save-default');
-    if (isTempOrPerm) tempBtn.style.display = 'block';
-    else tempBtn.style.display = 'none';
+    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
   }
 }
 
@@ -1410,10 +1839,8 @@ async function loadTemp() {
   const config = TASK_CONFIG[currentTask];
   const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
 
-  // Don't load temp entries for PERMANENT-only tasks
   if (!isTempOrPerm) return;
 
-  // A fresh load invalidates any ticks and typed-in values.
   selectedIds = {};
   rowEdits = {};
 
@@ -1422,7 +1849,7 @@ async function loadTemp() {
   try {
     const result = await apiCall('tempList', { targetStaffName: profile.name, taskName: currentTask });
     if (!result.ok) {
-      body.innerHTML = `<tr><td colspan="7">${result.error || 'Could not load entries'}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="7">${escapeHtml(result.error || 'Could not load entries')}</td></tr>`;
       return;
     }
     tempEntries = result.items || [];
@@ -1448,8 +1875,6 @@ function filterTable() {
    TEMP TABLE
    ========================= */
 
-// Remember what's typed into a row box, so filtering or a re-render
-// doesn't wipe it.
 function noteRowEdit(tempId, field, value) {
   if (!rowEdits[tempId]) rowEdits[tempId] = {};
   rowEdits[tempId][field] = value;
@@ -1476,11 +1901,11 @@ function renderTable(list) {
     const rowCls = selectedIds[id] ? ' class="row-selected"' : '';
     body.insertAdjacentHTML('beforeend', `<tr${rowCls} data-row="${id}">
       <td class="select-col"><input type="checkbox" class="row-select" data-id="${id}"${checked} onchange="toggleRowSelect('${id}', this.checked)"></td>
-      <td>${item.staffName}</td>
-      <td style="color:var(--text-dim); font-size:0.85rem;">${item.createdAt || ''}</td>
-      <td>${item.comment || ''}</td>
-      <td><input type="text" class="row-ref" data-id="${id}" value="${rowValue(item, 'refNo')}" oninput="noteRowEdit('${id}','refNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
-      <td><input type="text" class="row-case" data-id="${id}" value="${rowValue(item, 'caseNo')}" oninput="noteRowEdit('${id}','caseNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+      <td>${escapeHtml(item.staffName)}</td>
+      <td style="color:var(--text-dim); font-size:0.85rem;">${escapeHtml(item.createdAt || '')}</td>
+      <td>${escapeHtml(item.comment || '')}</td>
+      <td><input type="text" class="row-ref" data-id="${id}" value="${escapeHtml(rowValue(item, 'refNo'))}" oninput="noteRowEdit('${id}','refNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
+      <td><input type="text" class="row-case" data-id="${id}" value="${escapeHtml(rowValue(item, 'caseNo'))}" oninput="noteRowEdit('${id}','caseNo',this.value)" style="margin:0; padding:6px 8px; width:90px; font-size:0.8rem;"></td>
       <td style="text-align:right; white-space:nowrap;">
         <button class="btn icon-btn icon-tick" onclick="finalizeEntryWithInputs('${id}')" title="Finalize">&#10003;</button>
         <button class="btn icon-btn icon-cross" onclick="removeEntry('${id}')" title="Delete">&#10005;</button>
@@ -1500,7 +1925,6 @@ function toggleRowSelect(tempId, checked) {
   updateBulkBar();
 }
 
-// Applies to the rows currently on screen, so it respects an active search.
 function toggleSelectAll(checked) {
   document.querySelectorAll('#data-body .row-select').forEach(cb => {
     cb.checked = checked;
@@ -1532,7 +1956,6 @@ function updateBulkBar() {
       n + (n === 1 ? ' entry selected' : ' entries selected');
   }
 
-  // Keep the header checkbox honest about what's on screen.
   const boxes = document.querySelectorAll('#data-body .row-select');
   const all = document.getElementById('select-all');
   if (all) {
@@ -1554,7 +1977,6 @@ async function finalizeSelected() {
   ids.forEach(id => {
     const refInput = document.querySelector(`.row-ref[data-id="${id}"]`);
     const caseInput = document.querySelector(`.row-case[data-id="${id}"]`);
-    // Fall back to remembered edits if the row is filtered off screen.
     const edit = rowEdits[id] || {};
     const stored = tempEntries.filter(x => String(x.tempId) === String(id))[0] || {};
     const refNo = (refInput ? refInput.value : (edit.refNo !== undefined ? edit.refNo : stored.refNo || "")).trim();
@@ -1565,10 +1987,11 @@ async function finalizeSelected() {
   });
 
   if (ready.length === 0) {
-    alert("None of the selected rows have a Ref No or Case No. Fill at least one in.");
+    toast("None of the selected rows have a Ref No or Case No.", true);
     return;
   }
 
+  // Destructive and irreversible, so this one still asks first.
   const msg = skipped.length > 0
     ? `Push ${ready.length} entr${ready.length === 1 ? 'y' : 'ies'} to Final records?\n` +
       `${skipped.length} will be skipped (no Ref No or Case No).`
@@ -1582,7 +2005,7 @@ async function finalizeSelected() {
   try {
     const result = await apiCall('tempFinalizeBulk', { items: ready });
     if (!result.ok) {
-      alert(result.error || "Could not finalize");
+      toast(result.error || "Could not finalize", true);
       return;
     }
 
@@ -1595,13 +2018,14 @@ async function finalizeSelected() {
     renderTable();
 
     let note = `${done.length} saved to Final.`;
-    if (skipped.length > 0) note += ` ${skipped.length} skipped (no Ref No or Case No).`;
+    if (skipped.length > 0) note += ` ${skipped.length} skipped.`;
     if (result.failed && result.failed.length > 0) {
       note += ` ${result.failed.length} could not be saved.`;
     }
-    alert(note);
+    toast(note);
+    loadPending();
   } catch (e) {
-    alert("Network error");
+    toast("Network error", true);
   } finally {
     btn.disabled = false;
     btn.innerText = "Finalize Selected";
@@ -1630,7 +2054,7 @@ async function saveData(type) {
     const ref = document.getElementById('field-ref').value.trim();
     const cas = document.getElementById('field-case').value.trim();
 
-    if (!comment) return alert("Comment required for Temp Save");
+    if (!comment) return toast("Comment required for Temp Save", true);
 
     try {
       const result = await apiCall('tempAdd', {
@@ -1638,7 +2062,7 @@ async function saveData(type) {
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error || "Could not save entry");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
 
       addLocalTempEntry({
         tempId: result.tempId,
@@ -1652,15 +2076,16 @@ async function saveData(type) {
       document.getElementById('field-ref').value = "";
       document.getElementById('field-case').value = "";
       document.getElementById('field-comment').value = "";
+      toast("Draft saved.");
     } catch (e) {
-      alert("Network error while saving.");
+      toast("Network error while saving.", true);
     }
   } else {
     const ref = document.getElementById('field-ref').value.trim();
     const cas = document.getElementById('field-case').value.trim();
     const comment = document.getElementById('field-comment').value.trim();
 
-    if (!ref && !cas) return alert("Reference No OR Case No required for Final Save");
+    if (!ref && !cas) return toast("Reference No OR Case No required", true);
 
     try {
       const result = await apiCall('finalAdd', {
@@ -1668,15 +2093,22 @@ async function saveData(type) {
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error || "Could not save entry");
-      alert("Confirmed. Data pushed to central records.");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
+      toast(savedMessage(result));
       document.getElementById('field-ref').value = "";
       document.getElementById('field-case').value = "";
       document.getElementById('field-comment').value = "";
+      loadPending();
     } catch (e) {
-      alert("Network error while saving.");
+      toast("Network error while saving.", true);
     }
   }
+}
+
+// Tells the person what the save just triggered, if anything.
+function savedMessage(result) {
+  if (result && result.nextTask) return "Saved. " + result.nextTask + " is now pending.";
+  return "Saved to central records.";
 }
 
 async function saveRiderScheduling(type) {
@@ -1690,7 +2122,7 @@ async function saveRiderScheduling(type) {
   const remarks = document.getElementById('field-remarks-rider').value.trim();
 
   if (type === 'Temp') {
-    if (!comment) return alert("Comment required for Temp Save");
+    if (!comment) return toast("Comment required for Temp Save", true);
     try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
@@ -1700,7 +2132,7 @@ async function saveRiderScheduling(type) {
         scheduledTime: (hour && min && ampm) ? `${hour}:${min} ${ampm}` : "",
         remarks: remarks
       });
-      if (!result.ok) return alert(result.error);
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
 
       addLocalTempEntry({
         tempId: result.tempId,
@@ -1713,20 +2145,20 @@ async function saveRiderScheduling(type) {
       });
 
       clearRiderForm();
+      toast("Draft saved.");
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   } else {
-    if (!ref && !cas) return alert("Reference No OR Case No required");
-    if (!date) return alert("Date required");
-    if (!hour || !min || !ampm) return alert("Time required");
+    if (!ref && !cas) return toast("Reference No OR Case No required", true);
+    if (!date) return toast("Date required", true);
+    if (!hour || !min || !ampm) return toast("Time required", true);
 
-    // Build the date from parts so it is compared in local time, not UTC.
     const dp = date.split('-');
     const selectedDate = new Date(+dp[0], +dp[1] - 1, +dp[2]);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (selectedDate < today) return alert("Date cannot be in the past");
+    if (selectedDate < today) return toast("Date cannot be in the past", true);
 
     try {
       const result = await apiCall('finalAdd', {
@@ -1737,11 +2169,12 @@ async function saveRiderScheduling(type) {
         scheduledTime: `${hour}:${min} ${ampm}`,
         remarks: remarks
       });
-      if (!result.ok) return alert(result.error);
-      alert("Rider scheduling saved!");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
       clearRiderForm();
+      toast(savedMessage(result));
+      loadPending();
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   }
 }
@@ -1763,8 +2196,8 @@ async function saveVisitRating(type) {
   const comment = document.getElementById('field-comment-rating').value.trim();
   const rating = document.getElementById('field-rating').value;
 
-  if (!ref && !cas) return alert("Reference No OR Case No required");
-  if (!rating) return alert("Rating required");
+  if (!ref && !cas) return toast("Reference No OR Case No required", true);
+  if (!rating) return toast("Rating required", true);
 
   try {
     const result = await apiCall('finalAdd', {
@@ -1773,14 +2206,15 @@ async function saveVisitRating(type) {
       comment, refNo: ref, caseNo: cas,
       rating: rating
     });
-    if (!result.ok) return alert(result.error);
-    alert("Rating saved!");
+    if (!result.ok) return toast(result.error || "Could not save entry", true);
     document.getElementById('field-ref-rating').value = "";
     document.getElementById('field-case-rating').value = "";
     document.getElementById('field-comment-rating').value = "";
     document.getElementById('field-rating').value = "";
+    toast(savedMessage(result));
+    loadPending();
   } catch (e) {
-    alert("Network error");
+    toast("Network error", true);
   }
 }
 
@@ -1790,10 +2224,10 @@ async function saveApproval(type) {
   const comment = document.getElementById('field-comment-approval').value.trim();
   const status = document.querySelector('input[name="approval-status"]:checked');
 
-  if (!status) return alert("Approval status required");
+  if (!status) return toast("Approval status required", true);
 
   if (type === 'Temp') {
-    if (!comment) return alert("Comment required for Temp Save");
+    if (!comment) return toast("Comment required for Temp Save", true);
     try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
@@ -1801,7 +2235,7 @@ async function saveApproval(type) {
         comment, refNo: ref, caseNo: cas,
         approvalStatus: status.value
       });
-      if (!result.ok) return alert(result.error || "Could not save entry");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
 
       addLocalTempEntry({
         tempId: result.tempId,
@@ -1813,11 +2247,12 @@ async function saveApproval(type) {
         createdBy: result.createdBy || user.name
       });
       clearApprovalForm();
+      toast("Draft saved.");
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   } else {
-    if (!ref && !cas) return alert("Reference No OR Case No required");
+    if (!ref && !cas) return toast("Reference No OR Case No required", true);
     try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
@@ -1825,11 +2260,12 @@ async function saveApproval(type) {
         comment, refNo: ref, caseNo: cas,
         approvalStatus: status.value
       });
-      if (!result.ok) return alert(result.error);
-      alert("Approval saved!");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
       clearApprovalForm();
+      toast(savedMessage(result));
+      loadPending();
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   }
 }
@@ -1847,14 +2283,14 @@ async function saveCopyableTile(type) {
   const comment = document.getElementById('field-comment-tile').value.trim();
 
   if (type === 'Temp') {
-    if (!comment) return alert("Comment required for Temp Save");
+    if (!comment) return toast("Comment required for Temp Save", true);
     try {
       const result = await apiCall('tempAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error);
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
 
       addLocalTempEntry({
         tempId: result.tempId,
@@ -1868,24 +2304,26 @@ async function saveCopyableTile(type) {
       document.getElementById('field-ref-tile').value = "";
       document.getElementById('field-case-tile').value = "";
       document.getElementById('field-comment-tile').value = "";
+      toast("Draft saved.");
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   } else {
-    if (!ref && !cas) return alert("Reference No OR Case No required");
+    if (!ref && !cas) return toast("Reference No OR Case No required", true);
     try {
       const result = await apiCall('finalAdd', {
         targetStaffName: profile.name,
         taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
-      if (!result.ok) return alert(result.error);
-      alert("Saved!");
+      if (!result.ok) return toast(result.error || "Could not save entry", true);
       document.getElementById('field-ref-tile').value = "";
       document.getElementById('field-case-tile').value = "";
       document.getElementById('field-comment-tile').value = "";
+      toast(savedMessage(result));
+      loadPending();
     } catch (e) {
-      alert("Network error");
+      toast("Network error", true);
     }
   }
 }
@@ -1897,47 +2335,48 @@ async function finalizeEntryWithInputs(tempId) {
   const caseNo = caseInput ? caseInput.value.trim() : "";
 
   if (!refNo && !caseNo) {
-    alert("Fill in Reference No OR Case No before finalizing.");
+    toast("Fill in Reference No OR Case No before finalizing.", true);
     return;
   }
 
+  // Destructive and irreversible, so this one still asks first.
   if (!confirm("Push this entry to Final records?")) return;
 
   try {
     const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
-    if (!result.ok) return alert(result.error || "Could not finalize");
+    if (!result.ok) return toast(result.error || "Could not finalize", true);
     removeLocalTempEntry(tempId);
+    toast("Pushed to Final records.");
+    loadPending();
   } catch (e) {
-    alert("Network error");
+    toast("Network error", true);
   }
 }
 
 async function removeEntry(tempId) {
+  // Destructive and irreversible, so this one still asks first.
   if (!confirm("Permanently delete this entry?")) return;
   try {
     const result = await apiCall('tempDelete', { tempId });
-    if (!result.ok) return alert(result.error || "Could not delete");
+    if (!result.ok) return toast(result.error || "Could not delete", true);
     removeLocalTempEntry(tempId);
+    toast("Entry deleted.");
   } catch (e) {
-    alert("Network error");
+    toast("Network error", true);
   }
 }
 
 function copyToClipboard(elementId) {
   const text = document.getElementById(elementId).innerText;
   navigator.clipboard.writeText(text).then(() => {
-    alert('Copied to clipboard!');
+    toast('Copied to clipboard.');
   }).catch(() => {
-    alert('Failed to copy');
+    toast('Could not copy.', true);
   });
 }
 
 /* =========================
    KEYBOARD SHORTCUTS
-   In search: Enter opens the first result, Escape closes the list.
-   In forms:  Comment  -> Temp Save (where a Temp Save button is visible)
-              Ref/Case -> Final Save
-              Row inputs in the temp table -> finalize that row
    ========================= */
 const FORM_ACTIONS = {
   'form-default':          { save: saveData,            tempBtn: 'btn-temp-save-default' },
@@ -1965,7 +2404,6 @@ function handleEnterKey(e) {
 
   if (e.key !== 'Enter') return;
 
-  // Rows inside the Recent Temporary Entries table.
   if (el.classList.contains('row-ref') || el.classList.contains('row-case')) {
     e.preventDefault();
     finalizeEntryWithInputs(el.getAttribute('data-id'));
@@ -1981,7 +2419,6 @@ function handleEnterKey(e) {
 
   if (id.indexOf('field-comment') === 0) {
     e.preventDefault();
-    // Only fire if this task actually offers a Temp Save.
     const btn = cfg.tempBtn ? document.getElementById(cfg.tempBtn) : null;
     if (btn && btn.style.display !== 'none') cfg.save('Temp');
     return;
