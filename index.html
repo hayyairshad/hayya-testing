@@ -577,6 +577,10 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <option value="10">10 - Excellent</option>
 </select>
 </div>
+<div>
+<label>Remarks</label>
+<input type="text" id="field-remarks-rating" placeholder="Anything worth noting about this rating">
+</div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
 <button class="btn btn-primary" onclick="saveVisitRating('Final')">Final Save</button>
 </div>
@@ -2349,6 +2353,7 @@ async function saveVisitRating(type) {
   const cas = document.getElementById('field-case-rating').value.trim();
   const comment = document.getElementById('field-comment-rating').value.trim();
   const rating = document.getElementById('field-rating').value;
+  const remarks = document.getElementById('field-remarks-rating').value.trim();
 
   if (!ref && !cas) return toast("Reference No OR Case No required", true);
   if (!rating) return toast("Rating required", true);
@@ -2358,13 +2363,15 @@ async function saveVisitRating(type) {
       targetStaffName: profile.name,
       taskName: currentTask,
       comment, refNo: ref, caseNo: cas,
-      rating: rating
+      rating: rating,
+      remarks: remarks
     });
     if (!result.ok) return toast(result.error || "Could not save entry", true);
     document.getElementById('field-ref-rating').value = "";
     document.getElementById('field-case-rating').value = "";
     document.getElementById('field-comment-rating').value = "";
     document.getElementById('field-rating').value = "";
+    document.getElementById('field-remarks-rating').value = "";
     toast(savedMessage(result));
     loadPending();
   } catch (e) {
