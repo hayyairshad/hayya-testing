@@ -1105,8 +1105,9 @@ function renderTaskIndex() {
     html += `<div class="task-index-phase">${escapeHtml(p)}</div>`;
     builderTasks.forEach((t, i) => {
       if (t.phase !== p) return;
+      const label = t.name || 'Untitled task';
       html += `<div class="task-index-item${i === builderIndex ? ' active' : ''}${t.active ? '' : ' off'}"
-        onclick="openBuilderTask(${i})">${escapeHtml(t.name)}</div>`;
+        onclick="openBuilderTask(${i})">${escapeHtml(label)}</div>`;
     });
   });
   box.innerHTML = html || '<div class="chain-empty">No tasks yet.</div>';
@@ -1213,7 +1214,32 @@ function renderBuilderForm() {
     </div>
     <div class="builder-hint">
       Switching a task off hides it everywhere. Past entries stay in the sheet.
+    </div>
+
+    <div style="border-top:1px solid var(--border-color); padding-top:16px; margin-top:4px;">
+      <button class="btn btn-small icon-cross" onclick="deleteBuilderTask(${builderIndex})">
+        Delete this task
+      </button>
+      <div class="builder-hint" style="margin:10px 0 0;">
+        Removes it from the list here. Nothing changes in the sheet until you
+        press Save All, so leaving this screen without saving undoes it.
+        Entries already in Final and Temp are never touched.
+      </div>
     </div>`;
+}
+
+function deleteBuilderTask(i) {
+  if (i < 0 || i >= builderTasks.length) return;
+  const name = builderTasks[i].name || 'Untitled task';
+  builderTasks.splice(i, 1);
+
+  // Keep the selection sensible rather than pointing past the end.
+  if (builderIndex >= builderTasks.length) builderIndex = builderTasks.length - 1;
+
+  markBuilderDirty();
+  renderTaskIndex();
+  renderBuilderForm();
+  toast('"' + name + '" removed. Press Save All to confirm.');
 }
 
 function updateBuilder(field, value) {
