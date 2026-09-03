@@ -259,14 +259,38 @@ font-family: inherit; line-height: 1.5;
 #template-tile { margin-bottom: 24px; }
 #template-tile .copyable-text { white-space: pre-wrap; word-break: normal; }
 
-.chain-row {
-display: grid; grid-template-columns: 1fr 24px 1fr; gap: 12px; align-items: center;
-padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+.chain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.chain-col {
+background: rgba(0,0,0,0.18); border: 1px solid var(--border-color);
+border-radius: 12px; padding: 14px; min-height: 140px;
 }
-.chain-row:last-of-type { border-bottom: none; }
-.chain-from { font-size: 0.87rem; }
-.chain-arrow { text-align: center; color: var(--text-dim); }
-.chain-row select { margin-bottom: 0; padding: 8px 10px; font-size: 0.85rem; }
+.chain-col.drop-target { border-color: var(--accent-color); background: rgba(0,121,107,0.16); }
+.chain-col-head { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px;
+color: var(--text-dim); margin-bottom: 4px; }
+.chain-col-note { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
+.chain-item {
+background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+border-radius: 8px; padding: 9px 10px; margin-bottom: 7px;
+font-size: 0.84rem; display: flex; align-items: center; gap: 8px;
+cursor: grab; transition: 0.12s ease;
+}
+.chain-item:hover { background: rgba(255,255,255,0.09); }
+.chain-item.dragging { opacity: 0.4; }
+.chain-pos {
+min-width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+background: var(--accent-color); color: #fff; font-size: 0.68rem; font-weight: 700;
+display: flex; align-items: center; justify-content: center;
+}
+.chain-name { flex: 1; min-width: 0; word-break: break-word; }
+.chain-btns { display: flex; gap: 3px; flex-shrink: 0; }
+.chain-btn {
+background: rgba(255,255,255,0.07); border: 1px solid var(--border-color);
+color: var(--text-dim); width: 24px; height: 24px; border-radius: 5px;
+font-size: 0.72rem; cursor: pointer; line-height: 1; padding: 0;
+display: flex; align-items: center; justify-content: center;
+}
+.chain-btn:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+.chain-empty { color: var(--text-dim); font-size: 0.8rem; font-style: italic; padding: 12px 2px; }
 .chain-preview {
 background: rgba(0,0,0,0.2); border: 1px solid var(--border-color);
 border-radius: 10px; padding: 15px; margin-top: 20px;
@@ -625,10 +649,21 @@ These messages appear as a copyable tile on each task below. Only you can edit t
 <!-- TASK CHAIN EDITOR (Jawad / Level 0 only) -->
 <div id="form-chain" class="hidden">
 <p style="color:var(--text-dim); font-size:0.85rem; margin-top:0; margin-bottom:20px;">
-Pick what becomes pending after each task is finalised. Leave a task on
-&ldquo;Ends here&rdquo; if nothing follows it.
+Drag tasks between the two lists, or use the arrows. The order of the chain
+list is the order cases move through.
 </p>
-<div id="chain-editor-list"></div>
+<div class="chain-cols">
+<div class="chain-col" id="col-chain" data-group="chain">
+<div class="chain-col-head">Chain</div>
+<div class="chain-col-note">Finishing one makes the next pending, in this order.</div>
+<div id="chain-list"></div>
+</div>
+<div class="chain-col" id="col-recurring" data-group="recurring">
+<div class="chain-col-head">Recurring</div>
+<div class="chain-col-note">Standing work. Never enters the queue.</div>
+<div id="recurring-list"></div>
+</div>
+</div>
 <div class="chain-preview" id="chain-preview"></div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:18px;">
 <button class="btn btn-primary" id="btn-save-chain" onclick="saveChain()">Save Chain</button>
@@ -838,20 +873,38 @@ const PHASES = {
 };
 
 /* Used when the Chain tab is empty, and by "Reset to default". */
-const DEFAULT_CHAIN = {
-  "Save Contacts": "Poll To Thank You Msg",
-  "Poll To Thank You Msg": "Initial Documents",
-  "Initial Documents": "Visit Time Tieup",
-  "Visit Time Tieup": "Rate To Visit",
-  "Rate To Visit": "Approve/Reject Case",
-  "Approve/Reject Case": "Sale Input",
-  "Sale Input": "Voucher Input",
-  "Voucher Input": "File Update",
-  "File Update": "Supporting Save In Soft",
-  "Supporting Save In Soft": "Supporting Save In Hard",
-  "Supporting Save In Hard": "Plan Share",
-  "Plan Share": "Chq Management"
-};
+const DEFAULT_CHAIN = [
+  "Save Contacts",
+  "Poll To Thank You Msg",
+  "Initial Documents",
+  "Visit Time Tieup",
+  "Rate To Visit",
+  "Approve/Reject Case",
+  "Sale Input",
+  "Voucher Input",
+  "File Update",
+  "Supporting Save In Soft",
+  "Supporting Save In Hard",
+  "Plan Share",
+  "Chq Management"
+];
+
+/* Everything else starts as standing work. */
+const DEFAULT_RECURRING = [
+  "Recovery Follow Ups",
+  "Exmpt And Red Cases",
+  "Recovery Presentation",
+  "Instalment Recd",
+  "Instalment Voucher",
+  "Inst File Update",
+  "Updated Plan Share",
+  "File Tele",
+  "Six Month Report To Taha",
+  "Branch Wise And Salesman Wise To Taha",
+  "Case Closure Msg",
+  "Delivery Linkage & Aliens",
+  "Empty Mahana Temp Vir W"
+];
 
 let idToken = localStorage.getItem('mahana_idToken') || null;
 let user = null;
@@ -861,7 +914,8 @@ let currentPhase = null;
 let tempEntries = [];
 let templates = {};
 let templatesLoaded = false;
-let chain = {};
+let chainList = [];
+let recurringList = [];
 let chainLoaded = false;
 let pendingItems = [];
 let lastBellHour = -1;
@@ -982,7 +1036,8 @@ function doLogout() {
   currentPhase = null;
   templates = {};
   templatesLoaded = false;
-  chain = {};
+  chainList = [];
+  recurringList = [];
   chainLoaded = false;
   pendingItems = [];
   selectedIds = {};
@@ -1319,9 +1374,17 @@ async function loadChain() {
   try {
     const result = await apiCall('chainList');
     if (result.ok) {
-      const c = result.chain || {};
+      const c = result.chain || [];
+      const r = result.recurring || [];
       // First run: the Chain tab is empty, so start from the agreed order.
-      chain = Object.keys(c).length ? c : Object.assign({}, DEFAULT_CHAIN);
+      if (!c.length && !r.length) {
+        chainList = DEFAULT_CHAIN.slice();
+        recurringList = DEFAULT_RECURRING.slice();
+      } else {
+        chainList = c.slice();
+        recurringList = r.slice();
+      }
+      reconcileChainWithTasks();
       chainLoaded = true;
       if (currentTask === "Task Chain") renderChainEditor();
     }
@@ -1330,72 +1393,142 @@ async function loadChain() {
   }
 }
 
+// Drops tasks that no longer exist and files any new task under Recurring,
+// so adding a task to TASK_CONFIG can never leave it invisible here.
+function reconcileChainWithTasks() {
+  const known = chainableTasks();
+  chainList = chainList.filter(t => known.indexOf(t) !== -1);
+  recurringList = recurringList.filter(t => known.indexOf(t) !== -1);
+  known.forEach(t => {
+    if (chainList.indexOf(t) === -1 && recurringList.indexOf(t) === -1) {
+      recurringList.push(t);
+    }
+  });
+}
+
 function renderChainEditor() {
-  const list = document.getElementById('chain-editor-list');
-  const tasks = chainableTasks();
-
-  list.innerHTML = tasks.map(t => {
-    const options = ['<option value="">Ends here</option>'].concat(
-      tasks.filter(o => o !== t).map(o =>
-        `<option value="${escapeHtml(o)}"${chain[t] === o ? ' selected' : ''}>${escapeHtml(o)}</option>`)
-    ).join('');
-    return `<div class="chain-row">
-      <span class="chain-from">${escapeHtml(t)}</span>
-      <span class="chain-arrow">&rarr;</span>
-      <select data-task="${escapeHtml(t)}" onchange="onChainChange(this)">${options}</select>
-    </div>`;
-  }).join('');
-
+  renderChainColumn('chain-list', chainList, 'chain');
+  renderChainColumn('recurring-list', recurringList, 'recurring');
   renderChainPreview();
   document.getElementById('chain-save-status').innerText = "";
 }
 
-function onChainChange(sel) {
-  const task = sel.getAttribute('data-task');
-  const next = sel.value;
-  if (next) chain[task] = next;
-  else delete chain[task];
-  renderChainPreview();
-}
-
-// Walks the links and prints each run as a readable line. Any task that
-// nothing points at starts a run, so a broken link is visible immediately.
-function renderChainPreview() {
-  const box = document.getElementById('chain-preview');
-  const tasks = chainableTasks();
-
-  const pointedAt = {};
-  Object.keys(chain).forEach(t => { if (chain[t]) pointedAt[chain[t]] = true; });
-
-  const starts = tasks.filter(t => !pointedAt[t] && chain[t]);
-  if (starts.length === 0) {
-    box.innerHTML = '<span style="font-style:italic">No chain set. Every task ends where it is.</span>';
+function renderChainColumn(elId, items, group) {
+  const box = document.getElementById(elId);
+  if (items.length === 0) {
+    box.innerHTML = `<div class="chain-empty">Drop tasks here.</div>`;
     return;
   }
+  const isChain = group === 'chain';
+  box.innerHTML = items.map((t, i) => `
+    <div class="chain-item" draggable="true" data-task="${escapeHtml(t)}" data-group="${group}">
+      ${isChain ? `<span class="chain-pos">${i + 1}</span>` : ''}
+      <span class="chain-name">${escapeHtml(t)}</span>
+      <span class="chain-btns">
+        ${isChain ? `
+          <button class="chain-btn" onclick="moveChainItem('${group}',${i},-1)" title="Move up">&#9650;</button>
+          <button class="chain-btn" onclick="moveChainItem('${group}',${i},1)" title="Move down">&#9660;</button>` : ''}
+        <button class="chain-btn" onclick="switchChainGroup('${group}',${i})"
+          title="${isChain ? 'Move to Recurring' : 'Move to Chain'}">${isChain ? '&rarr;' : '&larr;'}</button>
+      </span>
+    </div>`).join('');
+}
 
-  const lines = starts.map(start => {
-    const seen = {};
-    const parts = [];
-    let cur = start;
-    while (cur && !seen[cur]) {
-      seen[cur] = true;
-      parts.push(escapeHtml(cur));
-      cur = chain[cur];
-    }
-    if (cur) parts.push('<span style="color:#ff8a80">loops back to ' + escapeHtml(cur) + '</span>');
-    return parts.join(' &rarr; ');
-  });
+function moveChainItem(group, index, delta) {
+  const arr = group === 'chain' ? chainList : recurringList;
+  const to = index + delta;
+  if (to < 0 || to >= arr.length) return;
+  const moved = arr.splice(index, 1)[0];
+  arr.splice(to, 0, moved);
+  renderChainEditor();
+}
 
-  const loose = tasks.filter(t => !pointedAt[t] && !chain[t]);
-  let html = '<b>Chain</b><br>' + lines.join('<br><br>');
-  if (loose.length) {
-    html += '<br><br><b>Outside the chain</b><br>' + loose.map(escapeHtml).join(', ');
+function switchChainGroup(group, index) {
+  const from = group === 'chain' ? chainList : recurringList;
+  const to = group === 'chain' ? recurringList : chainList;
+  const moved = from.splice(index, 1)[0];
+  if (moved) to.push(moved);
+  renderChainEditor();
+}
+
+/* Drag and drop. Touch screens get nothing from the HTML5 drag events,
+   which is why every row also carries arrow buttons. */
+let dragTask = null;
+let dragFromGroup = null;
+
+document.addEventListener('dragstart', function (e) {
+  const item = e.target.closest ? e.target.closest('.chain-item') : null;
+  if (!item) return;
+  dragTask = item.getAttribute('data-task');
+  dragFromGroup = item.getAttribute('data-group');
+  item.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  // Firefox needs something set or the drag never starts.
+  try { e.dataTransfer.setData('text/plain', dragTask); } catch (err) {}
+});
+
+document.addEventListener('dragend', function (e) {
+  document.querySelectorAll('.chain-item.dragging').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.chain-col.drop-target').forEach(el => el.classList.remove('drop-target'));
+  dragTask = null;
+  dragFromGroup = null;
+});
+
+document.addEventListener('dragover', function (e) {
+  const col = e.target.closest ? e.target.closest('.chain-col') : null;
+  if (!col || !dragTask) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.chain-col').forEach(c => c.classList.toggle('drop-target', c === col));
+});
+
+document.addEventListener('drop', function (e) {
+  const col = e.target.closest ? e.target.closest('.chain-col') : null;
+  if (!col || !dragTask) return;
+  e.preventDefault();
+
+  const toGroup = col.getAttribute('data-group');
+  const overItem = e.target.closest ? e.target.closest('.chain-item') : null;
+
+  const fromArr = dragFromGroup === 'chain' ? chainList : recurringList;
+  const toArr = toGroup === 'chain' ? chainList : recurringList;
+
+  const fromIdx = fromArr.indexOf(dragTask);
+  if (fromIdx === -1) return;
+  fromArr.splice(fromIdx, 1);
+
+  // Dropped onto a row: land above it. Dropped on empty space: land at the end.
+  let insertAt = toArr.length;
+  if (overItem && overItem.getAttribute('data-task') !== dragTask) {
+    const overIdx = toArr.indexOf(overItem.getAttribute('data-task'));
+    if (overIdx !== -1) insertAt = overIdx;
+  }
+  toArr.splice(insertAt, 0, dragTask);
+
+  renderChainEditor();
+});
+
+function renderChainPreview() {
+  const box = document.getElementById('chain-preview');
+  let html = '';
+
+  if (chainList.length === 0) {
+    html = '<span style="font-style:italic">No chain set. Nothing will ever become pending.</span>';
+  } else {
+    html = '<b>Cases move through</b><br>' +
+           chainList.map(escapeHtml).join(' &rarr; ');
+  }
+
+  if (recurringList.length) {
+    html += '<br><br><b>Recurring</b><br>' + recurringList.map(escapeHtml).join(', ');
   }
   box.innerHTML = html;
 }
 
 function resetChainToDefault() {
-  chain = Object.assign({}, DEFAULT_CHAIN);
+  chainList = DEFAULT_CHAIN.slice();
+  recurringList = DEFAULT_RECURRING.slice();
+  reconcileChainWithTasks();
   renderChainEditor();
   toast("Reset to the default order. Not saved yet.");
 }
@@ -1404,13 +1537,13 @@ async function saveChain() {
   const btn = document.getElementById('btn-save-chain');
   btn.disabled = true;
   try {
-    const result = await apiCall('chainSave', { chain: chain });
+    const result = await apiCall('chainSave', { chain: chainList, recurring: recurringList });
     if (!result.ok) {
       toast(result.error || "Could not save the chain", true);
       btn.disabled = false;
       return;
     }
-    toast("Chain saved.");
+    toast("Chain saved. " + chainList.length + " in the chain.");
   } catch (e) {
     toast("Network error", true);
   }
