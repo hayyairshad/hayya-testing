@@ -256,8 +256,13 @@ margin-bottom: 0; min-height: 80px; font-size: 0.9rem; resize: vertical;
 font-family: inherit; line-height: 1.5;
 }
 .template-empty-note { color: var(--text-dim); font-size: 0.85rem; font-style: italic; }
-#template-tile { margin-bottom: 24px; }
-#template-tile .copyable-text { white-space: pre-wrap; word-break: normal; }
+.tile-label {
+font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;
+color: var(--accent-color); font-weight: 700; margin-bottom: 8px;
+}
+#template-tiles .copyable-tile { margin-bottom: 14px; }
+#template-tiles .copyable-tile:last-child { margin-bottom: 24px; }
+#template-tiles .copyable-text { white-space: pre-wrap; word-break: normal; }
 
 .chain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .chain-col {
@@ -447,11 +452,8 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <div class="pending-cases" id="pending-cases"></div>
 </div>
 
-<!-- SHARED MESSAGE TEMPLATE TILE (read-only, set by Jawad) -->
-<div id="template-tile" class="copyable-tile hidden">
-<span class="copyable-text" id="template-tile-text"></span>
-<button class="btn btn-small copy-btn" id="template-copy-btn" onclick="copyToClipboard('template-tile-text')">Copy</button>
-</div>
+<!-- MESSAGE TEMPLATE TILES (read-only, set by Jawad) -->
+<div id="template-tiles"></div>
 
 <!-- DEFAULT FORM -->
 <div id="form-default" class="hidden">
@@ -811,12 +813,26 @@ const TASK_CONFIG = {
   "Task Chain": { tempOrPerm: "PERMANENT", interface: "chain" }
 };
 
-/* Tasks that show Jawad's editable message tile. */
+/* Tasks that show Jawad's editable message tiles.
+   A task can carry more than one message - each slot gets its own tile
+   with its own Copy button, and its own box in Jawad's editor.
+   Slot labels are free text; rename them here and both screens follow. */
 const TEMPLATE_TASKS = [
-  "Poll To Thank You Msg",
-  "Visit Time Tieup",
-  "Approve/Reject Case"
+  { task: "Poll To Thank You Msg", slots: ["Poll Message", "Thank You Message"] },
+  { task: "Visit Time Tieup", slots: ["Message"] },
+  { task: "Approve/Reject Case", slots: ["Message"] }
 ];
+
+// Single-slot tasks keep the plain task name as their key, so any message
+// Jawad has already saved stays exactly where it is.
+function templateKey(task, slot, slotCount) {
+  return slotCount > 1 ? task + " :: " + slot : task;
+}
+
+function templateSlotsFor(task) {
+  const entry = TEMPLATE_TASKS.filter(t => t.task === task)[0];
+  return entry ? entry.slots : null;
+}
 
 /* Jawad's own screens. Never part of the chain. */
 const ADMIN_TASKS = ["Message Templates", "Task Chain"];
@@ -1272,7 +1288,7 @@ async function loadTemplates() {
     if (result.ok) {
       templates = result.templates || {};
       templatesLoaded = true;
-      if (currentTask && TEMPLATE_TASKS.includes(currentTask)) renderTemplateTile();
+      if (currentTask && templateSlotsFor(currentTask)) renderTemplateTile();
       if (currentTask === "Message Templates") renderTemplateEditor();
     }
   } catch (e) {
@@ -1281,47 +1297,59 @@ async function loadTemplates() {
 }
 
 function renderTemplateTile() {
-  const tile = document.getElementById('template-tile');
-  const textEl = document.getElementById('template-tile-text');
-  const copyBtn = document.getElementById('template-copy-btn');
+  const box = document.getElementById('template-tiles');
+  const slots = currentTask ? templateSlotsFor(currentTask) : null;
 
-  if (!currentTask || !TEMPLATE_TASKS.includes(currentTask)) {
-    tile.classList.add('hidden');
-    return;
-  }
+  if (!slots) { box.innerHTML = ""; return; }
 
-  tile.classList.remove('hidden');
-  const text = String(templates[currentTask] || "").trim();
+  box.innerHTML = slots.map((slot, i) => {
+    const key = templateKey(currentTask, slot, slots.length);
+    const text = String(templates[key] || "").trim();
+    const id = 'tpl-tile-' + i;
 
-  if (!text) {
-    textEl.innerText = templatesLoaded ? "No message set yet." : "Loading message...";
-    textEl.classList.add('template-empty-note');
-    copyBtn.style.display = 'none';
-  } else {
-    textEl.innerText = text;
-    textEl.classList.remove('template-empty-note');
-    copyBtn.style.display = 'block';
-  }
+    if (!text) {
+      return `<div class="copyable-tile">
+        ${slots.length > 1 ? `<div class="tile-label">${escapeHtml(slot)}</div>` : ''}
+        <span class="copyable-text template-empty-note">${
+          templatesLoaded ? 'No message set yet.' : 'Loading message...'
+        }</span>
+      </div>`;
+    }
+
+    return `<div class="copyable-tile">
+      ${slots.length > 1 ? `<div class="tile-label">${escapeHtml(slot)}</div>` : ''}
+      <span class="copyable-text" id="${id}">${escapeHtml(text)}</span>
+      <button class="btn btn-small copy-btn" onclick="copyToClipboard('${id}')">Copy</button>
+    </div>`;
+  }).join('');
 }
 
 function renderTemplateEditor() {
   const list = document.getElementById('template-editor-list');
   list.innerHTML = "";
-  TEMPLATE_TASKS.forEach((task, i) => {
-    const val = String(templates[task] || "");
-    const div = document.createElement('div');
-    div.className = 'template-editor-row';
-    const lbl = document.createElement('label');
-    lbl.innerText = task;
-    const ta = document.createElement('textarea');
-    ta.id = 'tpl-' + i;
-    ta.setAttribute('data-task', task);
-    ta.value = val;
-    ta.placeholder = 'Message staff will copy for this task';
-    div.appendChild(lbl);
-    div.appendChild(ta);
-    list.appendChild(div);
+
+  TEMPLATE_TASKS.forEach(entry => {
+    entry.slots.forEach(slot => {
+      const key = templateKey(entry.task, slot, entry.slots.length);
+      const div = document.createElement('div');
+      div.className = 'template-editor-row';
+
+      const lbl = document.createElement('label');
+      lbl.innerText = entry.slots.length > 1
+        ? entry.task + " — " + slot
+        : entry.task;
+
+      const ta = document.createElement('textarea');
+      ta.setAttribute('data-key', key);
+      ta.value = String(templates[key] || "");
+      ta.placeholder = 'Message staff will copy for this task';
+
+      div.appendChild(lbl);
+      div.appendChild(ta);
+      list.appendChild(div);
+    });
   });
+
   document.getElementById('template-save-status').innerText = "";
 }
 
@@ -1330,7 +1358,7 @@ async function saveTemplates() {
   const btn = document.getElementById('btn-save-templates');
   const payload = {};
   document.querySelectorAll('#template-editor-list textarea').forEach(ta => {
-    payload[ta.getAttribute('data-task')] = ta.value.trim();
+    payload[ta.getAttribute('data-key')] = ta.value.trim();
   });
 
   btn.disabled = true;
@@ -1862,7 +1890,7 @@ async function renderEntryScreen() {
   // EMPTY STATE — before a task is chosen.
   if (!currentTask) {
     hideAllForms();
-    document.getElementById('template-tile').classList.add('hidden');
+    document.getElementById('template-tiles').innerHTML = "";
     document.getElementById('pending-strip').classList.add('hidden');
     document.getElementById('data-section-container').style.display = 'none';
     tile.classList.remove('hidden');
