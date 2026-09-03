@@ -224,7 +224,7 @@ display: inline-block; margin-left: 6px; background: #ff5252; color: #fff;
 border-radius: 9px; padding: 1px 6px; font-size: 0.68rem; font-weight: 700;
 }
 
-/* ===== PHASE SYSTEM (all user levels) ===== */
+/* ===== PHASE SYSTEM ===== */
 .phase-bar {
 display: flex; flex-wrap: wrap; gap: 8px;
 margin-bottom: 25px; padding-bottom: 20px;
@@ -245,7 +245,7 @@ color: var(--text-dim); font-size: 0.9rem;
 }
 .sidebar-empty { color: var(--text-dim); font-size: 0.8rem; padding: 10px 2px; }
 
-/* ===== MESSAGE TEMPLATES + CHAIN EDITOR ===== */
+/* ===== MESSAGE TEMPLATES ===== */
 .template-editor-row {
 background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
 border-radius: 10px; padding: 16px; margin-bottom: 16px;
@@ -264,6 +264,7 @@ color: var(--accent-color); font-weight: 700; margin-bottom: 8px;
 #template-tiles .copyable-tile:last-child { margin-bottom: 24px; }
 #template-tiles .copyable-text { white-space: pre-wrap; word-break: normal; }
 
+/* ===== CHAIN EDITOR ===== */
 .chain-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .chain-col {
 background: rgba(0,0,0,0.18); border: 1px solid var(--border-color);
@@ -303,6 +304,40 @@ font-size: 0.85rem; line-height: 1.9; color: var(--text-dim);
 }
 .chain-preview b { color: var(--text-main); font-weight: 600; }
 
+/* ===== TASK BUILDER ===== */
+.builder-cols { display: grid; grid-template-columns: 260px 1fr; gap: 22px; }
+.task-index {
+background: rgba(0,0,0,0.18); border: 1px solid var(--border-color);
+border-radius: 12px; padding: 12px; max-height: 520px; overflow-y: auto;
+}
+.task-index-phase {
+font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;
+color: var(--text-dim); padding: 12px 4px 6px; font-weight: 700;
+}
+.task-index-item {
+padding: 8px 10px; border-radius: 7px; font-size: 0.82rem; cursor: pointer;
+border: 1px solid transparent; margin-bottom: 3px; transition: 0.12s ease;
+display: flex; align-items: center; gap: 7px;
+}
+.task-index-item:hover { background: rgba(255,255,255,0.07); }
+.task-index-item.active { background: var(--accent-color); font-weight: 600; }
+.task-index-item.off { opacity: 0.45; text-decoration: line-through; }
+.builder-form { background: rgba(0,0,0,0.14); border: 1px solid var(--border-color);
+border-radius: 12px; padding: 20px; }
+.builder-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+.builder-form input, .builder-form select { margin-bottom: 16px; }
+.owner-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.owner-pick {
+display: flex; align-items: center; gap: 7px; padding: 7px 12px;
+background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+border-radius: 20px; font-size: 0.82rem; cursor: pointer; margin-bottom: 0;
+text-transform: none; letter-spacing: normal; color: var(--text-main);
+}
+.owner-pick input { width: auto; margin: 0; accent-color: var(--accent-color); }
+.owner-pick.on { background: var(--accent-color); border-color: var(--accent-color); }
+.builder-hint { font-size: 0.75rem; color: var(--text-dim); margin: -10px 0 18px; line-height: 1.5; }
+.builder-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+
 .data-section { margin-top: 40px; }
 .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border-color); color: var(--text-dim);
@@ -341,12 +376,14 @@ padding-right: 70px; }
 gap: 15px; margin-bottom: 20px; }
 .time-inputs input, .time-inputs select { margin-bottom: 0; }
 
+@media (max-width: 820px) {
+.builder-cols { grid-template-columns: 1fr; }
+.task-index { max-height: 240px; }
+}
 @media (max-width: 700px) {
 .entry-layout { grid-template-columns: 1fr; }
 .task-sidebar { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border-color);
 padding-right: 0; padding-bottom: 16px; }
-.chain-row { grid-template-columns: 1fr; gap: 6px; }
-.chain-arrow { display: none; }
 }
 @media (max-width: 600px) {
 header { padding: 10px 15px; }
@@ -418,13 +455,7 @@ oninput="runSearch('staff')" onfocus="runSearch('staff')">
 <div id="staff-grid" class="dashboard-grid"></div>
 </div>
 
-<!-- 3. TASK SELECT (kept for reference - no longer routed to) -->
-<div id="scr-tasks" class="glass-panel wide-panel hidden">
-<h2 id="workspace-label">Workspace</h2>
-<div id="task-grid" class="dashboard-grid"></div>
-</div>
-
-<!-- 4. DATA ENTRY -->
+<!-- 3. DATA ENTRY -->
 <div id="scr-entry" class="glass-panel entry-panel hidden">
 
 <div class="search-wrap">
@@ -435,7 +466,6 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <div id="search-workspace-results" class="search-results hidden"></div>
 </div>
 
-<!-- PHASE SELECTOR -->
 <div id="phase-bar" class="phase-bar hidden"></div>
 
 <div class="entry-layout">
@@ -443,7 +473,6 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <div>
 <h2 id="bold-task-header" style="font-weight: 600;"></h2>
 
-<!-- EMPTY TILE (before a task is chosen) -->
 <div id="empty-tile" class="empty-tile hidden"></div>
 
 <!-- PENDING CASES FOR THIS TASK -->
@@ -458,11 +487,11 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <!-- DEFAULT FORM -->
 <div id="form-default" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-<div>
+<div class="ref-field">
 <label>Reference Number</label>
 <input type="number" id="field-ref" inputmode="numeric">
 </div>
-<div>
+<div class="case-field">
 <label>Case Number</label>
 <input type="number" id="field-case" inputmode="numeric">
 </div>
@@ -480,11 +509,11 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <!-- RIDER SCHEDULING FORM -->
 <div id="form-rider-scheduling" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-<div>
+<div class="ref-field">
 <label>Reference Number</label>
 <input type="number" id="field-ref-rider" inputmode="numeric">
 </div>
-<div>
+<div class="case-field">
 <label>Case Number</label>
 <input type="number" id="field-case-rider" inputmode="numeric">
 </div>
@@ -548,11 +577,11 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <!-- VISIT RATING FORM -->
 <div id="form-visit-rating" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-<div>
+<div class="ref-field">
 <label>Reference Number</label>
 <input type="number" id="field-ref-rating" inputmode="numeric">
 </div>
-<div>
+<div class="case-field">
 <label>Case Number</label>
 <input type="number" id="field-case-rating" inputmode="numeric">
 </div>
@@ -589,11 +618,11 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 <!-- APPROVAL FORM -->
 <div id="form-approval" class="hidden">
 <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-<div>
+<div class="ref-field">
 <label>Reference Number</label>
 <input type="number" id="field-ref-approval" inputmode="numeric">
 </div>
-<div>
+<div class="case-field">
 <label>Case Number</label>
 <input type="number" id="field-case-approval" inputmode="numeric">
 </div>
@@ -618,32 +647,11 @@ oninput="runSearch('workspace')" onfocus="runSearch('workspace')">
 </div>
 </div>
 
-<!-- COPYABLE TILE FORM (currently unused - kept for future tasks) -->
-<div id="form-copyable-tile" class="hidden">
-<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-<div>
-<label>Reference Number</label>
-<input type="number" id="field-ref-tile" inputmode="numeric">
-</div>
-<div>
-<label>Case Number</label>
-<input type="number" id="field-case-tile" inputmode="numeric">
-</div>
-<div class="comment-field">
-<label>Comment</label>
-<input type="text" id="field-comment-tile">
-</div>
-</div>
-<div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
-<button class="btn btn-primary" id="btn-temp-save-tile" onclick="saveCopyableTile('Temp')" style="display:none;">Temp Save</button>
-<button class="btn btn-primary" id="btn-final-save-tile" onclick="saveCopyableTile('Final')">Final Save</button>
-</div>
-</div>
-
-<!-- MESSAGE TEMPLATES EDITOR (Jawad / Level 0 only) -->
+<!-- MESSAGE TEMPLATES EDITOR (Jawad only) -->
 <div id="form-templates" class="hidden">
 <p style="color:var(--text-dim); font-size:0.85rem; margin-top:0; margin-bottom:20px;">
-These messages appear as a copyable tile on each task below. Only you can edit them.
+These messages appear as copyable tiles on the tasks below. Add or remove
+message boxes for a task from Add / Edit Tasks.
 </p>
 <div id="template-editor-list"></div>
 <div style="display:flex; align-items:center; gap:12px; margin-top:10px;">
@@ -652,7 +660,7 @@ These messages appear as a copyable tile on each task below. Only you can edit t
 </div>
 </div>
 
-<!-- TASK CHAIN EDITOR (Jawad / Level 0 only) -->
+<!-- TASK CHAIN EDITOR (Jawad only) -->
 <div id="form-chain" class="hidden">
 <p style="color:var(--text-dim); font-size:0.85rem; margin-top:0; margin-bottom:20px;">
 Drag tasks between the two lists, or use the arrows. The order of the chain
@@ -674,7 +682,23 @@ list is the order cases move through.
 <div style="display:flex; align-items:center; gap:12px; margin-top:18px;">
 <button class="btn btn-primary" id="btn-save-chain" onclick="saveChain()">Save Chain</button>
 <button class="btn btn-small" onclick="resetChainToDefault()">Reset to default</button>
-<span id="chain-save-status" style="color:var(--text-dim); font-size:0.8rem;"></span>
+</div>
+</div>
+
+<!-- TASK BUILDER (Jawad only) -->
+<div id="form-tasks" class="hidden">
+<p style="color:var(--text-dim); font-size:0.85rem; margin-top:0; margin-bottom:20px;">
+Pick a task on the left to edit it, or add a new one. Changes are saved
+together when you press Save All.
+</p>
+<div class="builder-cols">
+<div class="task-index" id="task-index"></div>
+<div class="builder-form" id="builder-form"></div>
+</div>
+<div class="builder-actions" style="margin-top:18px;">
+<button class="btn btn-primary" id="btn-save-tasks" onclick="saveTasks()">Save All</button>
+<button class="btn btn-small" onclick="startNewTask()">+ New task</button>
+<span id="tasks-dirty" style="color:#ffcc80; font-size:0.78rem;"></span>
 </div>
 </div>
 
@@ -693,7 +717,6 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 </div>
 </div>
 
-<!-- BULK ACTION BAR (appears only when rows are ticked) -->
 <div id="bulk-bar" class="bulk-bar hidden">
 <span class="bulk-count" id="bulk-count">0 selected</span>
 <button class="btn btn-primary btn-small" id="btn-bulk-finalize" onclick="finalizeSelected()">Finalize Selected</button>
@@ -731,199 +754,80 @@ style="margin:0; padding:8px 12px 8px 30px; width:180px; font-size:0.8rem;">
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxn-JCO5-neqyNDZgj-jFeTQFDSd2JdD_ls-qoqrIcP4Ni0_t-B02inJTEtoTndGjUCEA/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
-/* Set to true to land people straight on their first phase instead of
-   the "Select a Phase" screen. Saves Level 2 staff a tap. */
 const AUTO_SELECT_FIRST_PHASE = false;
-
-/* Hours (24h) at which the bell refetches, if the page is open. */
 const BELL_REFRESH_HOURS = [11, 14, 17, 19];
 
+/* Staff names and roles. Who can sign in is decided by the Users tab;
+   this only controls which workspaces appear and what they are called. */
 const STAFF = {
-  "Jawad": {
-    role: "Director",
-    tasks: ["Message Templates","Task Chain","Gift To Customer If Inst Paid Earlier"]
-  },
-  "Uzair": {
-    role: "Manager HP",
-    tasks: ["Visit Time Tieup","Rate To Visit","Approve/Reject Case",
-      "Sale Input","Voucher Input",
-      "File Update","File Tele","Instalment Recd","Inst File Update",
-      "Empty Mahana Temp Vir W"]
-  },
-  "Ahmed": {
-    role: "Head of Recovery",
-    tasks: ["Recovery Presentation"]
-  },
-  "Waqas": {
-    role: "Rider",
-    tasks: ["Visit Time Tieup","Rate To Visit","Sale Input",
-      "Voucher Input","Empty Mahana Temp Vir W"]
-  },
-  "Junaid": {
-    role: "Clerk",
-    tasks: ["Visit Time Tieup","Rate To Visit","Supporting Save In Hard",
-      "Sale Input","Voucher Input","Delivery Linkage & Aliens","Empty Mahana Temp Vir W"]
-  },
-  "Zuni": {
-    role: "Manager Recovery",
-    tasks: ["Supporting Save In Soft","Instalment Voucher","Instalment Recd"]
-  },
-  "Samiya": {
-    role: "Call Center",
-    tasks: ["Save Contacts","Poll To Thank You Msg",
-      "Initial Documents","Instalment Recd"]
-  },
- "Nabiha": {
-  role: "Operations",
-  tasks: ["Chq Management","Plan Share","Six Month Report To Taha",
-    "Branch Wise And Salesman Wise To Taha","Exmpt And Red Cases","Case Closure Msg",
-    "Updated Plan Share","Delivery Linkage & Aliens"]
-},
-  "Sumaira": {
-    role: "Recovery Officer",
-    tasks: ["Recovery Follow Ups"]
-  }
+  "Jawad":   { role: "Director" },
+  "Uzair":   { role: "Manager HP" },
+  "Ahmed":   { role: "Head of Recovery" },
+  "Waqas":   { role: "Rider" },
+  "Junaid":  { role: "Clerk" },
+  "Zuni":    { role: "Manager Recovery" },
+  "Samiya":  { role: "Call Center" },
+  "Nabiha":  { role: "Operations" },
+  "Sumaira": { role: "Recovery Officer" }
 };
 
-const TASK_CONFIG = {
-  "Save Contacts": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Poll To Thank You Msg": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Initial Documents": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Visit Time Tieup": { tempOrPerm: "PERMANENT", interface: "rider-scheduling" },
-  "Rate To Visit": { tempOrPerm: "PERMANENT", interface: "visit-rating" },
-  "Approve/Reject Case": { tempOrPerm: "TEMP OR PERMANENT", interface: "approval" },
-  "Sale Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Voucher Input": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "File Update": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Supporting Save In Soft": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Supporting Save In Hard": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Chq Management": { tempOrPerm: "TEMP OR PERMANENT", interface: "default" },
-  "Recovery Follow Ups": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Exmpt And Red Cases": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Recovery Presentation": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Instalment Recd": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Instalment Voucher": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Inst File Update": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Updated Plan Share": { tempOrPerm: "PERMANENT", interface: "default" },
-  "File Tele": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Six Month Report To Taha": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Branch Wise And Salesman Wise To Taha": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Case Closure Msg": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Delivery Linkage & Aliens": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Empty Mahana Temp Vir W": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Gift To Customer If Inst Paid Earlier": { tempOrPerm: "PERMANENT", interface: "default" },
-  "Message Templates": { tempOrPerm: "PERMANENT", interface: "templates" },
-  "Task Chain": { tempOrPerm: "PERMANENT", interface: "chain" }
-};
-
-/* Tasks that show Jawad's editable message tiles.
-   A task can carry more than one message - each slot gets its own tile
-   with its own Copy button, and its own box in Jawad's editor.
-   Slot labels are free text; rename them here and both screens follow. */
-const TEMPLATE_TASKS = [
-  { task: "Poll To Thank You Msg", slots: ["Poll Message", "Thank You Message"] },
-  { task: "Visit Time Tieup", slots: ["Message"] },
-  { task: "Approve/Reject Case", slots: ["Message"] }
+/* The form layouts Jawad can pick from. A new arrangement of fields
+   still needs code; everything else is configurable. */
+const LAYOUTS = [
+  { id: "default", label: "Plain (Ref / Case / Comment)" },
+  { id: "rider-scheduling", label: "Scheduling (date, time, remarks)" },
+  { id: "visit-rating", label: "Rating 1-10 (with remarks)" },
+  { id: "approval", label: "Approve / Reject" }
 ];
 
-// Single-slot tasks keep the plain task name as their key, so any message
-// Jawad has already saved stays exactly where it is.
-function templateKey(task, slot, slotCount) {
-  return slotCount > 1 ? task + " :: " + slot : task;
-}
+/* Jawad's own screens. Kept in code so they can never be switched off
+   from the very screen used to switch things off. */
+const ADMIN_TASKS = [
+  { name: "Add / Edit Tasks", phase: "Admin", layout: "tasks",
+    temp: false, ref: "off", caseNo: "off", owners: [], slots: [], active: true, admin: true },
+  { name: "Task Chain", phase: "Admin", layout: "chain",
+    temp: false, ref: "off", caseNo: "off", owners: [], slots: [], active: true, admin: true },
+  { name: "Message Templates", phase: "Admin", layout: "templates",
+    temp: false, ref: "off", caseNo: "off", owners: [], slots: [], active: true, admin: true }
+];
 
-function templateSlotsFor(task) {
-  const entry = TEMPLATE_TASKS.filter(t => t.task === task)[0];
-  return entry ? entry.slots : null;
-}
+/* Seeded into the Tasks tab the first time it is empty. After that the
+   sheet is the only source of truth. */
+const DEFAULT_TASKS = [
+  { name: "Save Contacts", phase: "Interaction", layout: "default", temp: true, ref: "optional", caseNo: "optional", owners: ["Samiya"], slots: [] },
+  { name: "Poll To Thank You Msg", phase: "Interaction", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Samiya"], slots: ["Poll Message", "Thank You Message"] },
+  { name: "Initial Documents", phase: "Interaction", layout: "default", temp: true, ref: "optional", caseNo: "optional", owners: ["Samiya"], slots: [] },
+  { name: "Visit Time Tieup", phase: "Interaction", layout: "rider-scheduling", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair","Waqas","Junaid"], slots: ["Message"] },
+  { name: "Rate To Visit", phase: "Pre Sales", layout: "visit-rating", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair","Waqas","Junaid"], slots: [] },
+  { name: "Approve/Reject Case", phase: "Pre Sales", layout: "approval", temp: true, ref: "optional", caseNo: "optional", owners: ["Uzair"], slots: ["Message"] },
+  { name: "Sale Input", phase: "Sales", layout: "default", temp: true, ref: "optional", caseNo: "optional", owners: ["Uzair","Waqas","Junaid"], slots: [] },
+  { name: "Voucher Input", phase: "Sales", layout: "default", temp: true, ref: "optional", caseNo: "optional", owners: ["Uzair","Waqas","Junaid"], slots: [] },
+  { name: "File Update", phase: "Sales", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair"], slots: [] },
+  { name: "Supporting Save In Soft", phase: "Sales", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Zuni"], slots: [] },
+  { name: "Supporting Save In Hard", phase: "Sales", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Junaid"], slots: [] },
+  { name: "Plan Share", phase: "Post Sale", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Chq Management", phase: "Post Sale", layout: "default", temp: true, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Recovery Follow Ups", phase: "Recovery", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Sumaira"], slots: [] },
+  { name: "Exmpt And Red Cases", phase: "Recovery", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Recovery Presentation", phase: "Recovery", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Ahmed"], slots: [] },
+  { name: "Instalment Recd", phase: "Entries", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair","Samiya","Zuni"], slots: [] },
+  { name: "Instalment Voucher", phase: "Entries", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Zuni"], slots: [] },
+  { name: "Inst File Update", phase: "Entries", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair"], slots: [] },
+  { name: "Updated Plan Share", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "File Tele", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair"], slots: [] },
+  { name: "Six Month Report To Taha", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Branch Wise And Salesman Wise To Taha", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Case Closure Msg", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Nabiha"], slots: [] },
+  { name: "Delivery Linkage & Aliens", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Junaid","Nabiha"], slots: [] },
+  { name: "Empty Mahana Temp Vir W", phase: "Recurring Tasks", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Uzair","Waqas","Junaid"], slots: [] },
+  { name: "Gift To Customer If Inst Paid Earlier", phase: "Admin", layout: "default", temp: false, ref: "optional", caseNo: "optional", owners: ["Jawad"], slots: [] }
+];
 
-/* Jawad's own screens. Never part of the chain. */
-const ADMIN_TASKS = ["Message Templates", "Task Chain"];
-
-/* =========================
-   PHASES — the single source of truth for task grouping.
-   ========================= */
-const PHASES = {
-  "Admin": [
-    "Message Templates",
-    "Task Chain",
-    "Gift To Customer If Inst Paid Earlier"
-  ],
-  "Interaction": [
-    "Save Contacts",
-    "Poll To Thank You Msg",
-    "Initial Documents",
-    "Visit Time Tieup"
-  ],
-  "Pre Sales": [
-    "Rate To Visit",
-    "Approve/Reject Case"
-  ],
-  "Sales": [
-    "Sale Input",
-    "Voucher Input",
-    "File Update",
-    "Supporting Save In Soft",
-    "Supporting Save In Hard"
-  ],
-  "Post Sale": [
-    "Plan Share",
-    "Chq Management"
-  ],
-  "Recovery": [
-    "Recovery Follow Ups",
-    "Exmpt And Red Cases",
-    "Recovery Presentation"
-  ],
-  "Entries": [
-    "Instalment Recd",
-    "Instalment Voucher",
-    "Inst File Update"
-  ],
-  "Recurring Tasks": [
-    "Updated Plan Share",
-    "File Tele",
-    "Six Month Report To Taha",
-    "Branch Wise And Salesman Wise To Taha",
-    "Case Closure Msg",
-    "Delivery Linkage & Aliens",
-    "Empty Mahana Temp Vir W"
-  ]
-};
-
-/* Used when the Chain tab is empty, and by "Reset to default". */
 const DEFAULT_CHAIN = [
-  "Save Contacts",
-  "Poll To Thank You Msg",
-  "Initial Documents",
-  "Visit Time Tieup",
-  "Rate To Visit",
-  "Approve/Reject Case",
-  "Sale Input",
-  "Voucher Input",
-  "File Update",
-  "Supporting Save In Soft",
-  "Supporting Save In Hard",
-  "Plan Share",
-  "Chq Management"
-];
-
-/* Everything else starts as standing work. */
-const DEFAULT_RECURRING = [
-  "Recovery Follow Ups",
-  "Exmpt And Red Cases",
-  "Recovery Presentation",
-  "Instalment Recd",
-  "Instalment Voucher",
-  "Inst File Update",
-  "Updated Plan Share",
-  "File Tele",
-  "Six Month Report To Taha",
-  "Branch Wise And Salesman Wise To Taha",
-  "Case Closure Msg",
-  "Delivery Linkage & Aliens",
-  "Empty Mahana Temp Vir W"
+  "Save Contacts", "Poll To Thank You Msg", "Initial Documents", "Visit Time Tieup",
+  "Rate To Visit", "Approve/Reject Case", "Sale Input", "Voucher Input",
+  "File Update", "Supporting Save In Soft", "Supporting Save In Hard",
+  "Plan Share", "Chq Management"
 ];
 
 let idToken = localStorage.getItem('mahana_idToken') || null;
@@ -940,11 +844,13 @@ let chainLoaded = false;
 let pendingItems = [];
 let lastBellHour = -1;
 
-// Ticked rows, kept by tempId so selection survives search filtering
-// and table re-renders.
-let selectedIds = {};
+let TASKS = [];            // everything from the Tasks tab
+let tasksLoaded = false;
+let builderTasks = [];     // working copy inside the builder
+let builderIndex = -1;     // which task is open, -1 for none
+let builderDirty = false;
 
-// Edits typed into row Ref/Case boxes, kept so they survive a re-render.
+let selectedIds = {};
 let rowEdits = {};
 
 async function apiCall(action, payload = {}) {
@@ -958,7 +864,6 @@ async function apiCall(action, payload = {}) {
 
 /* =========================
    TOAST
-   Replaces every alert. Fades on its own, nothing to click.
    ========================= */
 
 let toastTimer = null;
@@ -968,8 +873,77 @@ function toast(message, isError) {
   el.classList.toggle('error', !!isError);
   el.classList.add('show');
   clearTimeout(toastTimer);
-  // Errors linger a little so they are not missed.
   toastTimer = setTimeout(() => el.classList.remove('show'), isError ? 3800 : 2200);
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* =========================
+   TASK MODEL
+   Everything below reads from TASKS, which comes from the sheet.
+   ========================= */
+
+// Admin screens plus whatever is in the sheet.
+function allTasks() {
+  return ADMIN_TASKS.concat(TASKS);
+}
+
+function taskByName(name) {
+  const all = allTasks();
+  for (let i = 0; i < all.length; i++) {
+    if (all[i].name === name) return all[i];
+  }
+  return null;
+}
+
+// Phases in the order their first task appears, so reordering tasks in
+// the builder also reorders the phase chips.
+function phaseOrder() {
+  const out = [];
+  allTasks().forEach(t => {
+    if (out.indexOf(t.phase) === -1) out.push(t.phase);
+  });
+  return out;
+}
+
+// Level 0 in their own workspace sees every task plus the admin screens.
+// Everyone else sees the active tasks they own.
+function taskListFor(staffName) {
+  if (user && user.level === 0 && staffName === user.name) {
+    return allTasks().filter(t => t.admin || t.active).map(t => t.name);
+  }
+  return TASKS
+    .filter(t => t.active && t.owners.indexOf(staffName) !== -1)
+    .map(t => t.name);
+}
+
+function staffTaskList() {
+  return profile ? taskListFor(profile.name) : [];
+}
+
+function getPhaseForTask(taskName) {
+  const t = taskByName(taskName);
+  return t ? t.phase : "Other";
+}
+
+function tasksInPhase(phase) {
+  if (!phase) return [];
+  return staffTaskList().filter(t => getPhaseForTask(t) === phase);
+}
+
+function phasesForStaff() {
+  const mine = staffTaskList();
+  return phaseOrder().filter(p => mine.some(t => getPhaseForTask(t) === p));
+}
+
+function isAdminPanel() {
+  return !!(user && user.level === 0 && profile && profile.name === user.name);
 }
 
 /* =========================
@@ -977,10 +951,7 @@ function toast(message, isError) {
    ========================= */
 
 function initGoogleSignIn() {
-  if (typeof google === 'undefined') {
-    handleGsiLoadError();
-    return;
-  }
+  if (typeof google === 'undefined') { handleGsiLoadError(); return; }
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleCredentialResponse
@@ -989,11 +960,8 @@ function initGoogleSignIn() {
     document.getElementById('g_id_signin'),
     { theme: 'filled_black', size: 'large', width: 260 }
   );
-  if (idToken) {
-    completeLogin();
-  } else {
-    google.accounts.id.prompt();
-  }
+  if (idToken) completeLogin();
+  else google.accounts.id.prompt();
 }
 
 function handleGsiLoadError() {
@@ -1020,6 +988,11 @@ async function completeLogin() {
       return;
     }
     user = { name: result.name, email: result.email, level: result.level };
+
+    // Nothing can render until the task list is in, so this one is awaited.
+    statusEl.innerText = "Loading tasks...";
+    await loadTasks();
+
     statusEl.innerText = "";
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('btn-logout').classList.remove('hidden');
@@ -1034,11 +1007,8 @@ async function completeLogin() {
 
     window.addEventListener('hashchange', route);
 
-    if (window.location.hash && window.location.hash !== '#') {
-      route();
-    } else {
-      redirectToDefault();
-    }
+    if (window.location.hash && window.location.hash !== '#') route();
+    else redirectToDefault();
   } catch (e) {
     statusEl.innerText = "Could not reach the server. Please try again.";
     idToken = null;
@@ -1050,18 +1020,11 @@ function doLogout() {
   window.removeEventListener('hashchange', route);
   idToken = null;
   localStorage.removeItem('mahana_idToken');
-  user = null;
-  profile = null;
-  currentTask = null;
-  currentPhase = null;
-  templates = {};
-  templatesLoaded = false;
-  chainList = [];
-  recurringList = [];
-  chainLoaded = false;
-  pendingItems = [];
-  selectedIds = {};
-  rowEdits = {};
+  user = null; profile = null; currentTask = null; currentPhase = null;
+  templates = {}; templatesLoaded = false;
+  chainList = []; recurringList = []; chainLoaded = false;
+  pendingItems = []; TASKS = []; tasksLoaded = false;
+  selectedIds = {}; rowEdits = {};
   google.accounts.id.disableAutoSelect();
   history.replaceState(null, '', window.location.pathname);
   location.reload();
@@ -1088,25 +1051,246 @@ function redirectToDefault() {
 }
 
 /* =========================
-   DATE / TIME FORMATTING
+   TASKS FROM THE SHEET
    ========================= */
 
-// "2026-08-29" -> "29 Aug 26"
-// Split as text rather than using new Date(), because new Date("2026-08-29")
-// is parsed as UTC midnight and can shift back a day in local time.
-function formatDateDMY(iso) {
-  if (!iso) return "";
-  const p = String(iso).split('-');
-  if (p.length !== 3) return iso;
-  const months = ["Jan","Feb","Mar","Apr","May","Jun",
-                  "Jul","Aug","Sep","Oct","Nov","Dec"];
-  return parseInt(p[2], 10) + " " + (months[parseInt(p[1], 10) - 1] || p[1]) + " " + p[0].slice(2);
+async function loadTasks() {
+  try {
+    const result = await apiCall('taskList');
+    if (result.ok) {
+      const rows = result.tasks || [];
+      // First run: the Tasks tab is empty, so start from the current setup.
+      TASKS = rows.length ? rows : DEFAULT_TASKS.map(normaliseTask);
+      TASKS = TASKS.map(normaliseTask);
+      tasksLoaded = true;
+    }
+  } catch (e) {
+    // Falling back keeps the app usable if the sheet call fails.
+    if (!TASKS.length) TASKS = DEFAULT_TASKS.map(normaliseTask);
+  }
+}
+
+function normaliseTask(t) {
+  return {
+    name: String(t.name || "").trim(),
+    phase: String(t.phase || "Other").trim() || "Other",
+    layout: String(t.layout || "default").trim() || "default",
+    temp: !!t.temp,
+    ref: String(t.ref || "optional").toLowerCase(),
+    caseNo: String(t.caseNo || "optional").toLowerCase(),
+    owners: (t.owners || []).slice(),
+    slots: (t.slots || []).slice(),
+    active: t.active !== false
+  };
+}
+
+/* =========================
+   TASK BUILDER
+   ========================= */
+
+function renderTaskBuilder() {
+  if (!builderTasks.length) builderTasks = TASKS.map(normaliseTask);
+  renderTaskIndex();
+  renderBuilderForm();
+  markBuilderClean();
+}
+
+function renderTaskIndex() {
+  const box = document.getElementById('task-index');
+  const phases = [];
+  builderTasks.forEach(t => { if (phases.indexOf(t.phase) === -1) phases.push(t.phase); });
+
+  let html = '';
+  phases.forEach(p => {
+    html += `<div class="task-index-phase">${escapeHtml(p)}</div>`;
+    builderTasks.forEach((t, i) => {
+      if (t.phase !== p) return;
+      html += `<div class="task-index-item${i === builderIndex ? ' active' : ''}${t.active ? '' : ' off'}"
+        onclick="openBuilderTask(${i})">${escapeHtml(t.name)}</div>`;
+    });
+  });
+  box.innerHTML = html || '<div class="chain-empty">No tasks yet.</div>';
+}
+
+function openBuilderTask(i) {
+  builderIndex = i;
+  renderTaskIndex();
+  renderBuilderForm();
+}
+
+function startNewTask() {
+  builderTasks.push({
+    name: "", phase: "", layout: "default", temp: false,
+    ref: "optional", caseNo: "optional", owners: [], slots: [], active: true
+  });
+  builderIndex = builderTasks.length - 1;
+  markBuilderDirty();
+  renderTaskIndex();
+  renderBuilderForm();
+}
+
+function renderBuilderForm() {
+  const box = document.getElementById('builder-form');
+
+  if (builderIndex < 0 || builderIndex >= builderTasks.length) {
+    box.innerHTML = `<div class="chain-empty">Pick a task on the left, or add a new one.</div>`;
+    return;
+  }
+
+  const t = builderTasks[builderIndex];
+  const phases = [];
+  builderTasks.forEach(x => { if (x.phase && phases.indexOf(x.phase) === -1) phases.push(x.phase); });
+
+  const modeOptions = (val) => ['required','optional','off'].map(m =>
+    `<option value="${m}"${val === m ? ' selected' : ''}>${m.charAt(0).toUpperCase() + m.slice(1)}</option>`
+  ).join('');
+
+  box.innerHTML = `
+    <div class="builder-row">
+      <div>
+        <label>Task name</label>
+        <input type="text" id="b-name" value="${escapeHtml(t.name)}"
+          placeholder="What staff will see" oninput="updateBuilder('name', this.value)">
+      </div>
+      <div>
+        <label>Phase</label>
+        <input type="text" id="b-phase" value="${escapeHtml(t.phase)}" list="phase-options"
+          placeholder="New or existing" oninput="updateBuilder('phase', this.value)">
+        <datalist id="phase-options">
+          ${phases.map(p => `<option value="${escapeHtml(p)}"></option>`).join('')}
+        </datalist>
+      </div>
+    </div>
+
+    <label>Form layout</label>
+    <select id="b-layout" onchange="updateBuilder('layout', this.value)">
+      ${LAYOUTS.map(l => `<option value="${l.id}"${t.layout === l.id ? ' selected' : ''}>${escapeHtml(l.label)}</option>`).join('')}
+    </select>
+
+    <div class="builder-row">
+      <div>
+        <label>Reference Number</label>
+        <select onchange="updateBuilder('ref', this.value)">${modeOptions(t.ref)}</select>
+      </div>
+      <div>
+        <label>Case Number</label>
+        <select onchange="updateBuilder('caseNo', this.value)">${modeOptions(t.caseNo)}</select>
+      </div>
+    </div>
+    <div class="builder-hint">
+      If both are Optional, at least one still has to be filled &mdash; the queue
+      needs a number to follow the case by. Set one to Off to hide it entirely.
+    </div>
+
+    <label>Who does this task</label>
+    <div class="owner-grid">
+      ${Object.keys(STAFF).map(n => `
+        <label class="owner-pick${t.owners.indexOf(n) !== -1 ? ' on' : ''}">
+          <input type="checkbox"${t.owners.indexOf(n) !== -1 ? ' checked' : ''}
+            onchange="toggleOwner('${escapeHtml(n).replace(/'/g, "\\'")}', this.checked)">
+          ${escapeHtml(n)}
+        </label>`).join('')}
+    </div>
+
+    <label>Message boxes</label>
+    <input type="text" value="${escapeHtml(t.slots.join(', '))}"
+      placeholder="Leave blank for none. Two boxes: Poll Message, Thank You Message"
+      oninput="updateBuilderSlots(this.value)">
+    <div class="builder-hint">
+      Each name here becomes a copyable tile on this task, and a box on the
+      Message Templates screen.
+    </div>
+
+    <div class="owner-grid">
+      <label class="owner-pick${t.temp ? ' on' : ''}">
+        <input type="checkbox"${t.temp ? ' checked' : ''} onchange="updateBuilder('temp', this.checked)">
+        Temp Save (adds the draft grid)
+      </label>
+      <label class="owner-pick${t.active ? ' on' : ''}">
+        <input type="checkbox"${t.active ? ' checked' : ''} onchange="updateBuilder('active', this.checked)">
+        Active
+      </label>
+    </div>
+    <div class="builder-hint">
+      Switching a task off hides it everywhere. Past entries stay in the sheet.
+    </div>`;
+}
+
+function updateBuilder(field, value) {
+  if (builderIndex < 0) return;
+  builderTasks[builderIndex][field] = value;
+  markBuilderDirty();
+  if (field === 'name' || field === 'phase' || field === 'active') renderTaskIndex();
+}
+
+function updateBuilderSlots(value) {
+  if (builderIndex < 0) return;
+  builderTasks[builderIndex].slots =
+    value.split(',').map(s => s.trim()).filter(Boolean);
+  markBuilderDirty();
+}
+
+function toggleOwner(name, on) {
+  if (builderIndex < 0) return;
+  const owners = builderTasks[builderIndex].owners;
+  const i = owners.indexOf(name);
+  if (on && i === -1) owners.push(name);
+  if (!on && i !== -1) owners.splice(i, 1);
+  markBuilderDirty();
+  renderBuilderForm();
+}
+
+function markBuilderDirty() {
+  builderDirty = true;
+  document.getElementById('tasks-dirty').innerText = "Unsaved changes";
+}
+
+function markBuilderClean() {
+  builderDirty = false;
+  document.getElementById('tasks-dirty').innerText = "";
+}
+
+async function saveTasks() {
+  const cleaned = builderTasks
+    .map(normaliseTask)
+    .filter(t => t.name);
+
+  if (!cleaned.length) return toast("Add at least one task first.", true);
+
+  // A duplicate name would make two different tasks share pending rows
+  // and message templates, so it is blocked here rather than later.
+  const seen = {};
+  for (let i = 0; i < cleaned.length; i++) {
+    if (seen[cleaned[i].name]) {
+      return toast('Two tasks are both called "' + cleaned[i].name + '".', true);
+    }
+    seen[cleaned[i].name] = true;
+  }
+
+  const btn = document.getElementById('btn-save-tasks');
+  btn.disabled = true;
+  try {
+    const result = await apiCall('taskSave', { tasks: cleaned });
+    if (!result.ok) {
+      toast(result.error || "Could not save tasks", true);
+      btn.disabled = false;
+      return;
+    }
+    TASKS = cleaned;
+    builderTasks = TASKS.map(normaliseTask);
+    markBuilderClean();
+    renderTaskIndex();
+    renderPhaseBar();
+    renderTaskSidebar();
+    toast(cleaned.length + " tasks saved.");
+  } catch (e) {
+    toast("Network error", true);
+  }
+  btn.disabled = false;
 }
 
 /* =========================
    PENDING QUEUE
-   Rows are filed against a task, not a person, so a shared task clears
-   for everyone the moment one person finalises it.
    ========================= */
 
 async function loadPending() {
@@ -1120,20 +1304,17 @@ async function loadPending() {
       renderTaskSidebar();
     }
   } catch (e) {
-    // Non-fatal. The bell simply keeps its previous count.
+    // Non-fatal. The bell keeps its previous count.
   }
 }
 
-// Every task this person can act on. Level 0 sees everything.
 function visibleTaskNames() {
   if (!user) return [];
-  if (user.level === 0) return Object.keys(TASK_CONFIG);
+  if (user.level === 0) return allTasks().map(t => t.name);
   const out = [];
   Object.keys(STAFF).forEach(name => {
     if (!canAccessStaffFrontend(name)) return;
-    STAFF[name].tasks.filter(Boolean).forEach(t => {
-      if (out.indexOf(t) === -1) out.push(t);
-    });
+    taskListFor(name).forEach(t => { if (out.indexOf(t) === -1) out.push(t); });
   });
   return out;
 }
@@ -1145,9 +1326,8 @@ function pendingForTask(taskName) {
 function updateBell() {
   const badge = document.getElementById('notif-count');
   const n = pendingItems.length;
-  if (n === 0) {
-    badge.classList.add('hidden');
-  } else {
+  if (n === 0) badge.classList.add('hidden');
+  else {
     badge.classList.remove('hidden');
     badge.innerText = n > 99 ? '99+' : n;
   }
@@ -1155,10 +1335,7 @@ function updateBell() {
 
 function toggleNotifications() {
   const panel = document.getElementById('notif-panel');
-  if (!panel.classList.contains('hidden')) {
-    panel.classList.add('hidden');
-    return;
-  }
+  if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); return; }
   renderNotifPanel();
   panel.classList.remove('hidden');
   loadPending();
@@ -1188,32 +1365,28 @@ function renderNotifPanel() {
   panel.innerHTML = html;
 }
 
-// Delegated: notification rows are rebuilt on every open.
 document.addEventListener('click', function (e) {
   const item = e.target.closest ? e.target.closest('.notif-item') : null;
   if (item) {
     openPendingItem(item.getAttribute('data-task'), item.getAttribute('data-case'));
     return;
   }
-  // Clicking outside closes the panel.
   if (!e.target.closest || (!e.target.closest('#notif-panel') && !e.target.closest('#btn-notifications'))) {
     const panel = document.getElementById('notif-panel');
     if (panel) panel.classList.add('hidden');
   }
 });
 
-// Jumps to the first workspace that actually owns the task.
 function openPendingItem(taskName, caseKey) {
   document.getElementById('notif-panel').classList.add('hidden');
 
   let target = null;
-  if (user.level !== 0 && STAFF[user.name] &&
-      STAFF[user.name].tasks.indexOf(taskName) !== -1) {
+  if (user.level !== 0 && taskListFor(user.name).indexOf(taskName) !== -1) {
     target = user.name;
   } else {
     const names = Object.keys(STAFF).filter(canAccessStaffFrontend);
     for (let i = 0; i < names.length; i++) {
-      if (STAFF[names[i]].tasks.indexOf(taskName) !== -1) { target = names[i]; break; }
+      if (taskListFor(names[i]).indexOf(taskName) !== -1) { target = names[i]; break; }
     }
     if (!target && user.level === 0) target = user.name;
   }
@@ -1224,7 +1397,6 @@ function openPendingItem(taskName, caseKey) {
                          '/' + encodeURIComponent(taskName);
 }
 
-// Set when arriving from a notification, consumed once the form renders.
 let pendingCaseToFill = null;
 
 function renderPendingStrip() {
@@ -1233,10 +1405,7 @@ function renderPendingStrip() {
   const list = document.getElementById('pending-cases');
 
   const items = currentTask ? pendingForTask(currentTask) : [];
-  if (items.length === 0) {
-    strip.classList.add('hidden');
-    return;
-  }
+  if (items.length === 0) { strip.classList.add('hidden'); return; }
 
   strip.classList.remove('hidden');
   head.innerText = items.length === 1
@@ -1249,19 +1418,24 @@ function renderPendingStrip() {
     </span>`).join('');
 }
 
-// Case field differs per form interface.
-const CASE_FIELD_BY_INTERFACE = {
+const CASE_FIELD_BY_LAYOUT = {
   'default': 'field-case',
   'rider-scheduling': 'field-case-rider',
   'visit-rating': 'field-case-rating',
-  'approval': 'field-case-approval',
-  'copyable-tile': 'field-case-tile'
+  'approval': 'field-case-approval'
+};
+const REF_FIELD_BY_LAYOUT = {
+  'default': 'field-ref',
+  'rider-scheduling': 'field-ref-rider',
+  'visit-rating': 'field-ref-rating',
+  'approval': 'field-ref-approval'
 };
 
+// Drops the case number into whichever field is actually usable.
 function fillCase(caseKey) {
-  const config = TASK_CONFIG[currentTask];
-  if (!config) return;
-  const id = CASE_FIELD_BY_INTERFACE[config.interface];
+  const t = taskByName(currentTask);
+  if (!t) return;
+  let id = t.caseNo !== 'off' ? CASE_FIELD_BY_LAYOUT[t.layout] : REF_FIELD_BY_LAYOUT[t.layout];
   if (!id) return;
   const el = document.getElementById(id);
   if (!el) return;
@@ -1269,8 +1443,6 @@ function fillCase(caseKey) {
   el.focus();
 }
 
-// Checks the clock each minute and refetches when it crosses one of the
-// scheduled hours. Only fires while the page is actually open.
 function startBellTimer() {
   setInterval(() => {
     const h = new Date().getHours();
@@ -1285,6 +1457,19 @@ function startBellTimer() {
 /* =========================
    MESSAGE TEMPLATES
    ========================= */
+
+function templateKey(task, slot, slotCount) {
+  return slotCount > 1 ? task + " :: " + slot : task;
+}
+
+function templateSlotsFor(task) {
+  const t = taskByName(task);
+  return (t && t.slots && t.slots.length) ? t.slots : null;
+}
+
+function tasksWithSlots() {
+  return allTasks().filter(t => t.slots && t.slots.length);
+}
 
 async function loadTemplates() {
   try {
@@ -1303,7 +1488,6 @@ async function loadTemplates() {
 function renderTemplateTile() {
   const box = document.getElementById('template-tiles');
   const slots = currentTask ? templateSlotsFor(currentTask) : null;
-
   if (!slots) { box.innerHTML = ""; return; }
 
   box.innerHTML = slots.map((slot, i) => {
@@ -1332,16 +1516,20 @@ function renderTemplateEditor() {
   const list = document.getElementById('template-editor-list');
   list.innerHTML = "";
 
-  TEMPLATE_TASKS.forEach(entry => {
+  const withSlots = tasksWithSlots();
+  if (!withSlots.length) {
+    list.innerHTML = `<div class="chain-empty">No task has message boxes yet. Add one from Add / Edit Tasks.</div>`;
+    return;
+  }
+
+  withSlots.forEach(entry => {
     entry.slots.forEach(slot => {
-      const key = templateKey(entry.task, slot, entry.slots.length);
+      const key = templateKey(entry.name, slot, entry.slots.length);
       const div = document.createElement('div');
       div.className = 'template-editor-row';
 
       const lbl = document.createElement('label');
-      lbl.innerText = entry.slots.length > 1
-        ? entry.task + " — " + slot
-        : entry.task;
+      lbl.innerText = entry.slots.length > 1 ? entry.name + " — " + slot : entry.name;
 
       const ta = document.createElement('textarea');
       ta.setAttribute('data-key', key);
@@ -1390,16 +1578,8 @@ async function saveTemplates() {
    TASK CHAIN EDITOR
    ========================= */
 
-// Every task that can take part in the chain, in phase order.
 function chainableTasks() {
-  const out = [];
-  Object.keys(PHASES).forEach(p => {
-    PHASES[p].forEach(t => {
-      if (ADMIN_TASKS.indexOf(t) !== -1) return;
-      if (TASK_CONFIG[t] && out.indexOf(t) === -1) out.push(t);
-    });
-  });
-  return out;
+  return TASKS.filter(t => t.active).map(t => t.name);
 }
 
 async function loadChain() {
@@ -1408,10 +1588,9 @@ async function loadChain() {
     if (result.ok) {
       const c = result.chain || [];
       const r = result.recurring || [];
-      // First run: the Chain tab is empty, so start from the agreed order.
       if (!c.length && !r.length) {
         chainList = DEFAULT_CHAIN.slice();
-        recurringList = DEFAULT_RECURRING.slice();
+        recurringList = [];
       } else {
         chainList = c.slice();
         recurringList = r.slice();
@@ -1426,7 +1605,7 @@ async function loadChain() {
 }
 
 // Drops tasks that no longer exist and files any new task under Recurring,
-// so adding a task to TASK_CONFIG can never leave it invisible here.
+// so a task added in the builder can never be invisible here.
 function reconcileChainWithTasks() {
   const known = chainableTasks();
   chainList = chainList.filter(t => known.indexOf(t) !== -1);
@@ -1439,18 +1618,15 @@ function reconcileChainWithTasks() {
 }
 
 function renderChainEditor() {
+  reconcileChainWithTasks();
   renderChainColumn('chain-list', chainList, 'chain');
   renderChainColumn('recurring-list', recurringList, 'recurring');
   renderChainPreview();
-  document.getElementById('chain-save-status').innerText = "";
 }
 
 function renderChainColumn(elId, items, group) {
   const box = document.getElementById(elId);
-  if (items.length === 0) {
-    box.innerHTML = `<div class="chain-empty">Drop tasks here.</div>`;
-    return;
-  }
+  if (items.length === 0) { box.innerHTML = `<div class="chain-empty">Drop tasks here.</div>`; return; }
   const isChain = group === 'chain';
   box.innerHTML = items.map((t, i) => `
     <div class="chain-item" draggable="true" data-task="${escapeHtml(t)}" data-group="${group}">
@@ -1495,11 +1671,10 @@ document.addEventListener('dragstart', function (e) {
   dragFromGroup = item.getAttribute('data-group');
   item.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
-  // Firefox needs something set or the drag never starts.
   try { e.dataTransfer.setData('text/plain', dragTask); } catch (err) {}
 });
 
-document.addEventListener('dragend', function (e) {
+document.addEventListener('dragend', function () {
   document.querySelectorAll('.chain-item.dragging').forEach(el => el.classList.remove('dragging'));
   document.querySelectorAll('.chain-col.drop-target').forEach(el => el.classList.remove('drop-target'));
   dragTask = null;
@@ -1529,7 +1704,6 @@ document.addEventListener('drop', function (e) {
   if (fromIdx === -1) return;
   fromArr.splice(fromIdx, 1);
 
-  // Dropped onto a row: land above it. Dropped on empty space: land at the end.
   let insertAt = toArr.length;
   if (overItem && overItem.getAttribute('data-task') !== dragTask) {
     const overIdx = toArr.indexOf(overItem.getAttribute('data-task'));
@@ -1547,10 +1721,8 @@ function renderChainPreview() {
   if (chainList.length === 0) {
     html = '<span style="font-style:italic">No chain set. Nothing will ever become pending.</span>';
   } else {
-    html = '<b>Cases move through</b><br>' +
-           chainList.map(escapeHtml).join(' &rarr; ');
+    html = '<b>Cases move through</b><br>' + chainList.map(escapeHtml).join(' &rarr; ');
   }
-
   if (recurringList.length) {
     html += '<br><br><b>Recurring</b><br>' + recurringList.map(escapeHtml).join(', ');
   }
@@ -1559,8 +1731,7 @@ function renderChainPreview() {
 
 function resetChainToDefault() {
   chainList = DEFAULT_CHAIN.slice();
-  recurringList = DEFAULT_RECURRING.slice();
-  reconcileChainWithTasks();
+  recurringList = [];
   renderChainEditor();
   toast("Reset to the default order. Not saved yet.");
 }
@@ -1580,97 +1751,6 @@ async function saveChain() {
     toast("Network error", true);
   }
   btn.disabled = false;
-}
-
-/* =========================
-   PHASE HELPERS
-   ========================= */
-
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function getPhaseForTask(taskName) {
-  for (const phase in PHASES) {
-    if (PHASES[phase].includes(taskName)) return phase;
-  }
-  return "Other";
-}
-
-// True when a Level 0 user is standing in their OWN workspace.
-// That workspace becomes a full map of every task in the system.
-function isAdminPanel() {
-  return !!(user && user.level === 0 && profile && profile.name === user.name);
-}
-
-function allTaskNames() {
-  const out = [];
-  Object.keys(PHASES).forEach(p => {
-    PHASES[p].forEach(t => {
-      if (TASK_CONFIG[t] && out.indexOf(t) === -1) out.push(t);
-    });
-  });
-  Object.keys(TASK_CONFIG).forEach(t => {
-    if (out.indexOf(t) === -1) out.push(t);
-  });
-  return out;
-}
-
-function taskListFor(staffName) {
-  if (user && user.level === 0 && staffName === user.name) return allTaskNames();
-  const s = STAFF[staffName];
-  return (s && s.tasks) ? s.tasks.filter(Boolean) : [];
-}
-
-function staffTaskList() {
-  return profile ? taskListFor(profile.name) : [];
-}
-
-function tasksInPhase(phase) {
-  if (!phase) return [];
-  const all = staffTaskList();
-  if (phase === "Other") return all.filter(t => getPhaseForTask(t) === "Other");
-  return all.filter(t => (PHASES[phase] || []).includes(t));
-}
-
-function phasesForStaff() {
-  const all = staffTaskList();
-  const present = Object.keys(PHASES).filter(p => all.some(t => PHASES[p].includes(t)));
-  if (all.some(t => getPhaseForTask(t) === "Other")) present.push("Other");
-  return present;
-}
-
-function setPhase(phase) {
-  currentPhase = phase;
-  if (currentTask && !tasksInPhase(phase).includes(currentTask)) {
-    currentTask = null;
-    window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
-    return;
-  }
-  renderEntryScreen();
-}
-
-function renderPhaseBar() {
-  const bar = document.getElementById('phase-bar');
-  if (!user || !profile) {
-    bar.classList.add('hidden');
-    bar.innerHTML = "";
-    return;
-  }
-  bar.classList.remove('hidden');
-  const present = phasesForStaff();
-  if (present.length === 0) {
-    bar.innerHTML = `<span class="sidebar-empty">No phases available for this workspace.</span>`;
-    return;
-  }
-  bar.innerHTML = present.map(p =>
-    `<button class="phase-btn${p === currentPhase ? ' active' : ''}" ` +
-    `onclick="setPhase('${p.replace(/'/g, "\\'")}')">${p}</button>`
-  ).join('');
 }
 
 /* =========================
@@ -1697,23 +1777,19 @@ function buildSearchResults(scope, q) {
     results.push({ kind, label, sub, staffName, taskName, phaseName });
   }
 
-  const names = (scope === 'workspace' && profile)
-    ? [profile.name]
-    : accessibleStaffNames();
+  const names = (scope === 'workspace' && profile) ? [profile.name] : accessibleStaffNames();
 
   if (scope === 'staff') {
     names.forEach(n => {
-      if (n.toLowerCase().includes(needle)) {
-        push('Staff', n, STAFF[n].role, n, null, null);
-      }
+      if (n.toLowerCase().includes(needle)) push('Staff', n, STAFF[n].role, n, null, null);
     });
   }
 
   names.forEach(n => {
     const tasks = taskListFor(n);
-    Object.keys(PHASES).forEach(p => {
+    phaseOrder().forEach(p => {
       if (!p.toLowerCase().includes(needle)) return;
-      if (!tasks.some(t => PHASES[p].includes(t))) return;
+      if (!tasks.some(t => getPhaseForTask(t) === p)) return;
       push('Phase', p, scope === 'staff' ? n : '', n, null, p);
     });
   });
@@ -1733,11 +1809,7 @@ function runSearch(scope) {
   const box = document.getElementById(scope === 'staff' ? 'search-staff-results' : 'search-workspace-results');
   const q = input.value;
 
-  if (!q.trim()) {
-    box.classList.add('hidden');
-    box.innerHTML = "";
-    return;
-  }
+  if (!q.trim()) { box.classList.add('hidden'); box.innerHTML = ""; return; }
 
   const results = buildSearchResults(scope, q);
   box.classList.remove('hidden');
@@ -1755,8 +1827,7 @@ function runSearch(scope) {
       <span class="search-kind">${r.kind}</span>
       <span>${escapeHtml(r.label)}</span>
       ${r.sub ? `<span class="search-sub">${escapeHtml(r.sub)}</span>` : ''}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function clearSearchBoxes() {
@@ -1789,7 +1860,7 @@ function applySearchItem(el) {
 
   const target = '#/staff/' + encodeURIComponent(staffName);
   if (window.location.hash === target) {
-    profile = { name: staffName, ...STAFF[staffName] };
+    profile = { name: staffName };
     renderEntryScreen();
   } else {
     window.location.hash = target;
@@ -1817,28 +1888,23 @@ function route() {
   const segments = raw.split('/').filter(Boolean).map(decodeURIComponent);
 
   if (segments[0] === 'select') {
-    if (user.level === 0 || user.level === 1) {
-      renderSelectionScreen();
-    } else {
-      redirectToDefault();
-    }
+    if (user.level === 0 || user.level === 1) renderSelectionScreen();
+    else redirectToDefault();
   } else if (segments[0] === 'staff' && segments[1]) {
     const staffName = segments[1];
     if (!STAFF[staffName] || !canAccessStaffFrontend(staffName)) {
       redirectToDefault();
       return;
     }
-    profile = { name: staffName, ...STAFF[staffName] };
+    profile = { name: staffName };
 
-    if (segments[2] && staffTaskList().includes(segments[2])) {
+    if (segments[2] && staffTaskList().indexOf(segments[2]) !== -1) {
       currentTask = segments[2];
       currentPhase = getPhaseForTask(currentTask);
       renderEntryScreen();
     } else {
       currentTask = null;
-      if (currentPhase && phasesForStaff().indexOf(currentPhase) === -1) {
-        currentPhase = null;
-      }
+      if (currentPhase && phasesForStaff().indexOf(currentPhase) === -1) currentPhase = null;
       if (AUTO_SELECT_FIRST_PHASE && !currentPhase) {
         const present = phasesForStaff();
         if (present.length > 0) currentPhase = present[0];
@@ -1850,9 +1916,7 @@ function route() {
   }
 }
 
-function navigateBack() {
-  history.back();
-}
+function navigateBack() { history.back(); }
 
 /* =========================
    SCREENS
@@ -1864,16 +1928,14 @@ function renderSelectionScreen() {
   document.getElementById('nav-back').classList.add('hidden');
   const grid = document.getElementById('staff-grid');
   grid.innerHTML = "";
-  Object.entries(STAFF).forEach(([name, s]) => {
-    if (canAccessStaffFrontend(name)) {
-      const href = '#/staff/' + encodeURIComponent(name);
-      grid.insertAdjacentHTML('beforeend', `
-        <a class="dashboard-item" href="${href}">
-          <strong>${name}</strong>
-          <small>${s.role}</small>
-        </a>
-      `);
-    }
+  Object.keys(STAFF).forEach(name => {
+    if (!canAccessStaffFrontend(name)) return;
+    const href = '#/staff/' + encodeURIComponent(name);
+    grid.insertAdjacentHTML('beforeend', `
+      <a class="dashboard-item" href="${href}">
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(STAFF[name].role)}</small>
+      </a>`);
   });
 }
 
@@ -1891,7 +1953,6 @@ async function renderEntryScreen() {
   const header = document.getElementById('bold-task-header');
   const tile = document.getElementById('empty-tile');
 
-  // EMPTY STATE — before a task is chosen.
   if (!currentTask) {
     hideAllForms();
     document.getElementById('template-tiles').innerHTML = "";
@@ -1913,13 +1974,37 @@ async function renderEntryScreen() {
   renderFormInterface();
   renderPendingStrip();
 
-  // Arrived from a notification: drop the case number straight in.
   if (pendingCaseToFill) {
     fillCase(pendingCaseToFill);
     pendingCaseToFill = null;
   }
 
   await loadTemp();
+}
+
+function renderPhaseBar() {
+  const bar = document.getElementById('phase-bar');
+  if (!user || !profile) { bar.classList.add('hidden'); bar.innerHTML = ""; return; }
+  bar.classList.remove('hidden');
+  const present = phasesForStaff();
+  if (present.length === 0) {
+    bar.innerHTML = `<span class="sidebar-empty">No tasks assigned to this workspace yet.</span>`;
+    return;
+  }
+  bar.innerHTML = present.map(p =>
+    `<button class="phase-btn${p === currentPhase ? ' active' : ''}" ` +
+    `onclick="setPhase('${p.replace(/'/g, "\\'")}')">${escapeHtml(p)}</button>`
+  ).join('');
+}
+
+function setPhase(phase) {
+  currentPhase = phase;
+  if (currentTask && tasksInPhase(phase).indexOf(currentTask) === -1) {
+    currentTask = null;
+    window.location.hash = '#/staff/' + encodeURIComponent(profile.name);
+    return;
+  }
+  renderEntryScreen();
 }
 
 function renderTaskSidebar() {
@@ -1942,69 +2027,101 @@ function renderTaskSidebar() {
     const badge = n > 0 ? `<span class="sidebar-count">${n}</span>` : '';
     const href = '#/staff/' + encodeURIComponent(profile.name) + '/' + encodeURIComponent(t);
     sb.insertAdjacentHTML('beforeend', `
-      <a class="task-sidebar-item${active ? ' active' : ''}" href="${href}">${escapeHtml(t)}${badge}</a>
-    `);
+      <a class="task-sidebar-item${active ? ' active' : ''}" href="${href}">${escapeHtml(t)}${badge}</a>`);
   });
 }
 
 function hideAllForms() {
   ['form-default','form-rider-scheduling','form-visit-rating','form-approval',
-   'form-copyable-tile','form-templates','form-chain']
+   'form-templates','form-chain','form-tasks']
     .forEach(id => document.getElementById(id).classList.add('hidden'));
 }
 
 function renderFormInterface() {
   hideAllForms();
 
-  const config = TASK_CONFIG[currentTask];
-  const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
+  const t = taskByName(currentTask);
+  if (!t) return;
 
   renderTemplateTile();
 
-  const commentFields = document.querySelectorAll('.comment-field');
-  commentFields.forEach(field => {
-    field.style.display = isTempOrPerm ? 'block' : 'none';
-  });
-
   const dataSection = document.getElementById('data-section-container');
-  if (dataSection) {
-    dataSection.style.display = isTempOrPerm ? 'block' : 'none';
-  }
+  if (dataSection) dataSection.style.display = t.temp ? 'block' : 'none';
 
-  if (config.interface === "templates") {
+  // Admin screens.
+  if (t.layout === "templates") {
     document.getElementById('form-templates').classList.remove('hidden');
     renderTemplateEditor();
     if (!templatesLoaded) loadTemplates();
-  } else if (config.interface === "chain") {
+    return;
+  }
+  if (t.layout === "chain") {
     document.getElementById('form-chain').classList.remove('hidden');
     if (!chainLoaded) loadChain();
     else renderChainEditor();
-  } else if (config.interface === "rider-scheduling") {
-    document.getElementById('form-rider-scheduling').classList.remove('hidden');
-    const tempBtn = document.getElementById('btn-temp-save-rider');
-    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
-  } else if (config.interface === "visit-rating") {
-    document.getElementById('form-visit-rating').classList.remove('hidden');
-  } else if (config.interface === "approval") {
-    document.getElementById('form-approval').classList.remove('hidden');
-    const tempBtn = document.getElementById('btn-temp-save-approval');
-    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
-  } else if (config.interface === "copyable-tile") {
-    document.getElementById('form-copyable-tile').classList.remove('hidden');
-    const tempBtn = document.getElementById('btn-temp-save-tile');
-    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
-  } else {
+    return;
+  }
+  if (t.layout === "tasks") {
+    document.getElementById('form-tasks').classList.remove('hidden');
+    renderTaskBuilder();
+    return;
+  }
+
+  const formId = 'form-' + t.layout;
+  const form = document.getElementById(formId);
+  if (!form) {
     document.getElementById('form-default').classList.remove('hidden');
-    const tempBtn = document.getElementById('btn-temp-save-default');
-    tempBtn.style.display = isTempOrPerm ? 'block' : 'none';
+    return;
+  }
+  form.classList.remove('hidden');
+
+  // Ref, Case and Comment visibility all follow the task's own settings.
+  form.querySelectorAll('.ref-field').forEach(el => {
+    el.style.display = t.ref === 'off' ? 'none' : 'block';
+  });
+  form.querySelectorAll('.case-field').forEach(el => {
+    el.style.display = t.caseNo === 'off' ? 'none' : 'block';
+  });
+  form.querySelectorAll('.comment-field').forEach(el => {
+    el.style.display = t.temp ? 'block' : 'none';
+  });
+
+  const tempBtnId = {
+    'default': 'btn-temp-save-default',
+    'rider-scheduling': 'btn-temp-save-rider',
+    'approval': 'btn-temp-save-approval'
+  }[t.layout];
+  if (tempBtnId) {
+    const btn = document.getElementById(tempBtnId);
+    if (btn) btn.style.display = t.temp ? 'block' : 'none';
   }
 }
 
-async function loadTemp() {
-  const config = TASK_CONFIG[currentTask];
-  const isTempOrPerm = config.tempOrPerm === "TEMP OR PERMANENT";
+// Shared Ref/Case rule. Returns an error string, or null when it is fine.
+function checkKeys(ref, cas) {
+  const t = taskByName(currentTask);
+  if (!t) return null;
 
-  if (!isTempOrPerm) return;
+  if (t.ref === 'required' && !ref) return "Reference No required";
+  if (t.caseNo === 'required' && !cas) return "Case No required";
+
+  // Neither is required but at least one is on screen: the queue still
+  // needs a number to follow the case by, so ask for one of them.
+  const anyRequired = t.ref === 'required' || t.caseNo === 'required';
+  const anyVisible = t.ref !== 'off' || t.caseNo !== 'off';
+  if (!anyRequired && anyVisible && !ref && !cas) {
+    return "Reference No OR Case No required";
+  }
+  return null;
+}
+
+/* =========================
+   TEMP TABLE
+   ========================= */
+
+async function loadTemp() {
+  const t = taskByName(currentTask);
+  if (!t || !t.temp) return;
 
   selectedIds = {};
   rowEdits = {};
@@ -2035,10 +2152,6 @@ function filterTable() {
   );
   renderTable(filtered);
 }
-
-/* =========================
-   TEMP TABLE
-   ========================= */
 
 function noteRowEdit(tempId, field, value) {
   if (!rowEdits[tempId]) rowEdits[tempId] = {};
@@ -2083,10 +2196,8 @@ function renderTable(list) {
 function toggleRowSelect(tempId, checked) {
   if (checked) selectedIds[tempId] = true;
   else delete selectedIds[tempId];
-
   const tr = document.querySelector(`tr[data-row="${tempId}"]`);
   if (tr) tr.classList.toggle('row-selected', !!checked);
-
   updateBulkBar();
 }
 
@@ -2106,16 +2217,13 @@ function clearSelection() {
   updateBulkBar();
 }
 
-function selectedCount() {
-  return Object.keys(selectedIds).length;
-}
+function selectedCount() { return Object.keys(selectedIds).length; }
 
 function updateBulkBar() {
   const bar = document.getElementById('bulk-bar');
   const n = selectedCount();
-  if (n === 0) {
-    bar.classList.add('hidden');
-  } else {
+  if (n === 0) bar.classList.add('hidden');
+  else {
     bar.classList.remove('hidden');
     document.getElementById('bulk-count').innerText =
       n + (n === 1 ? ' entry selected' : ' entries selected');
@@ -2146,7 +2254,6 @@ async function finalizeSelected() {
     const stored = tempEntries.filter(x => String(x.tempId) === String(id))[0] || {};
     const refNo = (refInput ? refInput.value : (edit.refNo !== undefined ? edit.refNo : stored.refNo || "")).trim();
     const caseNo = (caseInput ? caseInput.value : (edit.caseNo !== undefined ? edit.caseNo : stored.caseNo || "")).trim();
-
     if (!refNo && !caseNo) skipped.push(id);
     else ready.push({ tempId: id, refNo: refNo, caseNo: caseNo });
   });
@@ -2162,10 +2269,7 @@ async function finalizeSelected() {
 
   try {
     const result = await apiCall('tempFinalizeBulk', { items: ready });
-    if (!result.ok) {
-      toast(result.error || "Could not finalize", true);
-      return;
-    }
+    if (!result.ok) { toast(result.error || "Could not finalize", true); return; }
 
     const done = result.finalized || [];
     done.forEach(id => {
@@ -2177,9 +2281,7 @@ async function finalizeSelected() {
 
     let note = `${done.length} saved to Final.`;
     if (skipped.length > 0) note += ` ${skipped.length} skipped.`;
-    if (result.failed && result.failed.length > 0) {
-      note += ` ${result.failed.length} could not be saved.`;
-    }
+    if (result.failed && result.failed.length > 0) note += ` ${result.failed.length} could not be saved.`;
     toast(note);
     loadPending();
   } catch (e) {
@@ -2206,67 +2308,54 @@ function removeLocalTempEntry(tempId) {
    SAVE HANDLERS
    ========================= */
 
+function savedMessage(result) {
+  if (result && result.nextTask) return "Saved. " + result.nextTask + " is now pending.";
+  return "Saved to central records.";
+}
+
 async function saveData(type) {
+  const ref = document.getElementById('field-ref').value.trim();
+  const cas = document.getElementById('field-case').value.trim();
+  const comment = document.getElementById('field-comment').value.trim();
+
   if (type === 'Temp') {
-    const comment = document.getElementById('field-comment').value.trim();
-    const ref = document.getElementById('field-ref').value.trim();
-    const cas = document.getElementById('field-case').value.trim();
-
     if (!comment) return toast("Comment required for Temp Save", true);
-
     try {
       const result = await apiCall('tempAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
+        targetStaffName: profile.name, taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
-
       addLocalTempEntry({
-        tempId: result.tempId,
-        staffName: profile.name,
-        taskName: currentTask,
+        tempId: result.tempId, staffName: profile.name, taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
-
-      document.getElementById('field-ref').value = "";
-      document.getElementById('field-case').value = "";
-      document.getElementById('field-comment').value = "";
+      clearFields(['field-ref','field-case','field-comment']);
       toast("Draft saved.");
-    } catch (e) {
-      toast("Network error while saving.", true);
-    }
+    } catch (e) { toast("Network error while saving.", true); }
   } else {
-    const ref = document.getElementById('field-ref').value.trim();
-    const cas = document.getElementById('field-case').value.trim();
-    const comment = document.getElementById('field-comment').value.trim();
-
-    if (!ref && !cas) return toast("Reference No OR Case No required", true);
-
+    const err = checkKeys(ref, cas);
+    if (err) return toast(err, true);
     try {
       const result = await apiCall('finalAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
+        targetStaffName: profile.name, taskName: currentTask,
         comment, refNo: ref, caseNo: cas
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
+      clearFields(['field-ref','field-case','field-comment']);
       toast(savedMessage(result));
-      document.getElementById('field-ref').value = "";
-      document.getElementById('field-case').value = "";
-      document.getElementById('field-comment').value = "";
       loadPending();
-    } catch (e) {
-      toast("Network error while saving.", true);
-    }
+    } catch (e) { toast("Network error while saving.", true); }
   }
 }
 
-// Tells the person what the save just triggered, if anything.
-function savedMessage(result) {
-  if (result && result.nextTask) return "Saved. " + result.nextTask + " is now pending.";
-  return "Saved to central records.";
+function clearFields(ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
 }
 
 async function saveRiderScheduling(type) {
@@ -2279,39 +2368,36 @@ async function saveRiderScheduling(type) {
   const ampm = document.getElementById('field-ampm-rider').value;
   const remarks = document.getElementById('field-remarks-rider').value.trim();
 
+  const riderFields = ['field-ref-rider','field-case-rider','field-comment-rider',
+    'field-date-rider','field-hour-rider','field-min-rider','field-ampm-rider','field-remarks-rider'];
+
   if (type === 'Temp') {
     if (!comment) return toast("Comment required for Temp Save", true);
     try {
       const result = await apiCall('tempAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
+        targetStaffName: profile.name, taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
         scheduledDate: formatDateDMY(date),
         scheduledTime: (hour && min && ampm) ? `${hour}:${min} ${ampm}` : "",
         remarks: remarks
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
-
       addLocalTempEntry({
-        tempId: result.tempId,
-        staffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas,
-        remarks: remarks,
+        tempId: result.tempId, staffName: profile.name, taskName: currentTask,
+        comment, refNo: ref, caseNo: cas, remarks: remarks,
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
-
-      clearRiderForm();
+      clearFields(riderFields);
       toast("Draft saved.");
-    } catch (e) {
-      toast("Network error", true);
-    }
+    } catch (e) { toast("Network error", true); }
   } else {
-    if (!ref && !cas) return toast("Reference No OR Case No required", true);
+    const err = checkKeys(ref, cas);
+    if (err) return toast(err, true);
     if (!date) return toast("Date required", true);
     if (!hour || !min || !ampm) return toast("Time required", true);
 
+    // Built from parts so it is compared in local time, not UTC.
     const dp = date.split('-');
     const selectedDate = new Date(+dp[0], +dp[1] - 1, +dp[2]);
     const today = new Date();
@@ -2320,63 +2406,53 @@ async function saveRiderScheduling(type) {
 
     try {
       const result = await apiCall('finalAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
+        targetStaffName: profile.name, taskName: currentTask,
         comment, refNo: ref, caseNo: cas,
         scheduledDate: formatDateDMY(date),
         scheduledTime: `${hour}:${min} ${ampm}`,
         remarks: remarks
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
-      clearRiderForm();
+      clearFields(riderFields);
       toast(savedMessage(result));
       loadPending();
-    } catch (e) {
-      toast("Network error", true);
-    }
+    } catch (e) { toast("Network error", true); }
   }
 }
 
-function clearRiderForm() {
-  document.getElementById('field-ref-rider').value = "";
-  document.getElementById('field-case-rider').value = "";
-  document.getElementById('field-comment-rider').value = "";
-  document.getElementById('field-date-rider').value = "";
-  document.getElementById('field-hour-rider').value = "";
-  document.getElementById('field-min-rider').value = "";
-  document.getElementById('field-ampm-rider').value = "";
-  document.getElementById('field-remarks-rider').value = "";
+// "2026-08-29" -> "29 Aug 26". Split as text rather than using new Date(),
+// which parses as UTC midnight and can shift back a day in local time.
+function formatDateDMY(iso) {
+  if (!iso) return "";
+  const p = String(iso).split('-');
+  if (p.length !== 3) return iso;
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return parseInt(p[2], 10) + " " + (months[parseInt(p[1], 10) - 1] || p[1]) + " " + p[0].slice(2);
 }
 
-async function saveVisitRating(type) {
+async function saveVisitRating() {
   const ref = document.getElementById('field-ref-rating').value.trim();
   const cas = document.getElementById('field-case-rating').value.trim();
   const comment = document.getElementById('field-comment-rating').value.trim();
   const rating = document.getElementById('field-rating').value;
   const remarks = document.getElementById('field-remarks-rating').value.trim();
 
-  if (!ref && !cas) return toast("Reference No OR Case No required", true);
+  const err = checkKeys(ref, cas);
+  if (err) return toast(err, true);
   if (!rating) return toast("Rating required", true);
 
   try {
     const result = await apiCall('finalAdd', {
-      targetStaffName: profile.name,
-      taskName: currentTask,
+      targetStaffName: profile.name, taskName: currentTask,
       comment, refNo: ref, caseNo: cas,
-      rating: rating,
-      remarks: remarks
+      rating: rating, remarks: remarks
     });
     if (!result.ok) return toast(result.error || "Could not save entry", true);
-    document.getElementById('field-ref-rating').value = "";
-    document.getElementById('field-case-rating').value = "";
-    document.getElementById('field-comment-rating').value = "";
-    document.getElementById('field-rating').value = "";
-    document.getElementById('field-remarks-rating').value = "";
+    clearFields(['field-ref-rating','field-case-rating','field-comment-rating',
+      'field-rating','field-remarks-rating']);
     toast(savedMessage(result));
     loadPending();
-  } catch (e) {
-    toast("Network error", true);
-  }
+  } catch (e) { toast("Network error", true); }
 }
 
 async function saveApproval(type) {
@@ -2391,102 +2467,38 @@ async function saveApproval(type) {
     if (!comment) return toast("Comment required for Temp Save", true);
     try {
       const result = await apiCall('tempAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas,
-        approvalStatus: status.value
+        targetStaffName: profile.name, taskName: currentTask,
+        comment, refNo: ref, caseNo: cas, approvalStatus: status.value
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
-
       addLocalTempEntry({
-        tempId: result.tempId,
-        staffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas,
-        approvalStatus: status.value,
+        tempId: result.tempId, staffName: profile.name, taskName: currentTask,
+        comment, refNo: ref, caseNo: cas, approvalStatus: status.value,
         createdAt: result.createdAt || "Just now",
         createdBy: result.createdBy || user.name
       });
       clearApprovalForm();
       toast("Draft saved.");
-    } catch (e) {
-      toast("Network error", true);
-    }
+    } catch (e) { toast("Network error", true); }
   } else {
-    if (!ref && !cas) return toast("Reference No OR Case No required", true);
+    const err = checkKeys(ref, cas);
+    if (err) return toast(err, true);
     try {
       const result = await apiCall('finalAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas,
-        approvalStatus: status.value
+        targetStaffName: profile.name, taskName: currentTask,
+        comment, refNo: ref, caseNo: cas, approvalStatus: status.value
       });
       if (!result.ok) return toast(result.error || "Could not save entry", true);
       clearApprovalForm();
       toast(savedMessage(result));
       loadPending();
-    } catch (e) {
-      toast("Network error", true);
-    }
+    } catch (e) { toast("Network error", true); }
   }
 }
 
 function clearApprovalForm() {
-  document.getElementById('field-ref-approval').value = "";
-  document.getElementById('field-case-approval').value = "";
-  document.getElementById('field-comment-approval').value = "";
+  clearFields(['field-ref-approval','field-case-approval','field-comment-approval']);
   document.querySelectorAll('input[name="approval-status"]').forEach(r => r.checked = false);
-}
-
-async function saveCopyableTile(type) {
-  const ref = document.getElementById('field-ref-tile').value.trim();
-  const cas = document.getElementById('field-case-tile').value.trim();
-  const comment = document.getElementById('field-comment-tile').value.trim();
-
-  if (type === 'Temp') {
-    if (!comment) return toast("Comment required for Temp Save", true);
-    try {
-      const result = await apiCall('tempAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas
-      });
-      if (!result.ok) return toast(result.error || "Could not save entry", true);
-
-      addLocalTempEntry({
-        tempId: result.tempId,
-        staffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas,
-        createdAt: result.createdAt || "Just now",
-        createdBy: result.createdBy || user.name
-      });
-
-      document.getElementById('field-ref-tile').value = "";
-      document.getElementById('field-case-tile').value = "";
-      document.getElementById('field-comment-tile').value = "";
-      toast("Draft saved.");
-    } catch (e) {
-      toast("Network error", true);
-    }
-  } else {
-    if (!ref && !cas) return toast("Reference No OR Case No required", true);
-    try {
-      const result = await apiCall('finalAdd', {
-        targetStaffName: profile.name,
-        taskName: currentTask,
-        comment, refNo: ref, caseNo: cas
-      });
-      if (!result.ok) return toast(result.error || "Could not save entry", true);
-      document.getElementById('field-ref-tile').value = "";
-      document.getElementById('field-case-tile').value = "";
-      document.getElementById('field-comment-tile').value = "";
-      toast(savedMessage(result));
-      loadPending();
-    } catch (e) {
-      toast("Network error", true);
-    }
-  }
 }
 
 async function finalizeEntryWithInputs(tempId) {
@@ -2506,9 +2518,7 @@ async function finalizeEntryWithInputs(tempId) {
     removeLocalTempEntry(tempId);
     toast(savedMessage(result));
     loadPending();
-  } catch (e) {
-    toast("Network error", true);
-  }
+  } catch (e) { toast("Network error", true); }
 }
 
 async function removeEntry(tempId) {
@@ -2517,9 +2527,7 @@ async function removeEntry(tempId) {
     if (!result.ok) return toast(result.error || "Could not delete", true);
     removeLocalTempEntry(tempId);
     toast("Entry deleted.");
-  } catch (e) {
-    toast("Network error", true);
-  }
+  } catch (e) { toast("Network error", true); }
 }
 
 function copyToClipboard(elementId) {
@@ -2538,8 +2546,7 @@ const FORM_ACTIONS = {
   'form-default':          { save: saveData,            tempBtn: 'btn-temp-save-default' },
   'form-rider-scheduling': { save: saveRiderScheduling, tempBtn: 'btn-temp-save-rider' },
   'form-visit-rating':     { save: saveVisitRating,     tempBtn: null },
-  'form-approval':         { save: saveApproval,        tempBtn: 'btn-temp-save-approval' },
-  'form-copyable-tile':    { save: saveCopyableTile,    tempBtn: 'btn-temp-save-tile' }
+  'form-approval':         { save: saveApproval,        tempBtn: 'btn-temp-save-approval' }
 };
 
 function handleEnterKey(e) {
