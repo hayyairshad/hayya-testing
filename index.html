@@ -2152,13 +2152,6 @@ async function finalizeSelected() {
     return;
   }
 
-  // Destructive and irreversible, so this one still asks first.
-  const msg = skipped.length > 0
-    ? `Push ${ready.length} entr${ready.length === 1 ? 'y' : 'ies'} to Final records?\n` +
-      `${skipped.length} will be skipped (no Ref No or Case No).`
-    : `Push ${ready.length} entr${ready.length === 1 ? 'y' : 'ies'} to Final records?`;
-  if (!confirm(msg)) return;
-
   const btn = document.getElementById('btn-bulk-finalize');
   btn.disabled = true;
   btn.innerText = "Saving...";
@@ -2500,14 +2493,11 @@ async function finalizeEntryWithInputs(tempId) {
     return;
   }
 
-  // Destructive and irreversible, so this one still asks first.
-  if (!confirm("Push this entry to Final records?")) return;
-
   try {
     const result = await apiCall('tempFinalize', { tempId, refNo, caseNo });
     if (!result.ok) return toast(result.error || "Could not finalize", true);
     removeLocalTempEntry(tempId);
-    toast("Pushed to Final records.");
+    toast(savedMessage(result));
     loadPending();
   } catch (e) {
     toast("Network error", true);
@@ -2515,8 +2505,6 @@ async function finalizeEntryWithInputs(tempId) {
 }
 
 async function removeEntry(tempId) {
-  // Destructive and irreversible, so this one still asks first.
-  if (!confirm("Permanently delete this entry?")) return;
   try {
     const result = await apiCall('tempDelete', { tempId });
     if (!result.ok) return toast(result.error || "Could not delete", true);
