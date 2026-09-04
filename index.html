@@ -1477,29 +1477,32 @@ const REF_FIELD_BY_LAYOUT = {
 };
 
 // Each number goes back into its own field. A Ref stays a Ref.
+// Both fields are always overwritten, so switching between chips can never
+// leave a stale number behind from the one clicked before.
 function fillKeys(refNo, caseNo) {
   const t = taskByName(currentTask);
   if (!t) return;
 
-  let focused = false;
+  refNo = refNo || "";
+  caseNo = caseNo || "";
 
-  if (refNo && t.ref !== 'off') {
-    const el = document.getElementById(REF_FIELD_BY_LAYOUT[t.layout]);
-    if (el) { el.value = refNo; el.focus(); focused = true; }
-  }
-  if (caseNo && t.caseNo !== 'off') {
-    const el = document.getElementById(CASE_FIELD_BY_LAYOUT[t.layout]);
-    if (el) { el.value = caseNo; if (!focused) { el.focus(); focused = true; } }
-  }
+  const refEl = t.ref !== 'off' ? document.getElementById(REF_FIELD_BY_LAYOUT[t.layout]) : null;
+  const caseEl = t.caseNo !== 'off' ? document.getElementById(CASE_FIELD_BY_LAYOUT[t.layout]) : null;
 
-  // The number that came through has nowhere to go on this task, so put it
-  // in whichever field is on screen rather than dropping it silently.
-  if (!focused) {
-    const fallbackId = t.caseNo !== 'off'
-      ? CASE_FIELD_BY_LAYOUT[t.layout]
-      : REF_FIELD_BY_LAYOUT[t.layout];
-    const el = document.getElementById(fallbackId);
-    if (el) { el.value = caseNo || refNo || ""; el.focus(); }
+  if (refEl) refEl.value = refNo;
+  if (caseEl) caseEl.value = caseNo;
+
+  // Focus whichever field actually received a number.
+  if (refEl && refNo) refEl.focus();
+  else if (caseEl && caseNo) caseEl.focus();
+  else {
+    // The number has nowhere to go on this task, so put it in whichever
+    // field is on screen rather than dropping it silently.
+    const fallback = caseEl || refEl;
+    if (fallback && (refNo || caseNo)) {
+      fallback.value = caseNo || refNo;
+      fallback.focus();
+    }
   }
 }
 
