@@ -1380,9 +1380,10 @@ function renderNotifPanel() {
     html += `<div class="notif-empty">Nothing waiting on you.</div>`;
   } else {
     html += shown.map(p => `
-      <div class="notif-item" data-task="${escapeHtml(p.taskName)}" data-case="${escapeHtml(p.caseKey)}">
+      <div class="notif-item" data-task="${escapeHtml(p.taskName)}"
+           data-ref="${escapeHtml(p.refNo || '')}" data-case="${escapeHtml(p.caseNo || '')}">
         <div class="notif-task">${escapeHtml(p.taskName)}</div>
-        <div class="notif-meta">Case ${escapeHtml(p.caseKey)} &middot; ${escapeHtml(p.createdAt || '')}</div>
+        <div class="notif-meta">${escapeHtml(keyLabel(p))} &middot; ${escapeHtml(p.createdAt || '')}</div>
       </div>`).join('');
     if (pendingItems.length > shown.length) {
       html += `<div class="notif-empty">+ ${pendingItems.length - shown.length} more</div>`;
@@ -1394,7 +1395,9 @@ function renderNotifPanel() {
 document.addEventListener('click', function (e) {
   const item = e.target.closest ? e.target.closest('.notif-item') : null;
   if (item) {
-    openPendingItem(item.getAttribute('data-task'), item.getAttribute('data-case'));
+    openPendingItem(item.getAttribute('data-task'),
+                    item.getAttribute('data-ref'),
+                    item.getAttribute('data-case'));
     return;
   }
   if (!e.target.closest || (!e.target.closest('#notif-panel') && !e.target.closest('#btn-notifications'))) {
@@ -1403,7 +1406,7 @@ document.addEventListener('click', function (e) {
   }
 });
 
-function openPendingItem(taskName, caseKey) {
+function openPendingItem(taskName, refNo, caseNo) {
   document.getElementById('notif-panel').classList.add('hidden');
 
   let target = null;
@@ -1418,12 +1421,20 @@ function openPendingItem(taskName, caseKey) {
   }
   if (!target) { toast("That task is not in any workspace you can open.", true); return; }
 
-  pendingCaseToFill = caseKey;
+  pendingKeysToFill = { refNo: refNo || "", caseNo: caseNo || "" };
   window.location.hash = '#/staff/' + encodeURIComponent(target) +
                          '/' + encodeURIComponent(taskName);
 }
 
-let pendingCaseToFill = null;
+let pendingKeysToFill = null;
+
+// "Ref 8823 · Case 4471", or just whichever one is filled in.
+function keyLabel(p) {
+  const parts = [];
+  if (p.refNo) parts.push("Ref " + p.refNo);
+  if (p.caseNo) parts.push("Case " + p.caseNo);
+  return parts.join(" \u00b7 ") || "No number";
+}
 
 function renderPendingStrip() {
   const strip = document.getElementById('pending-strip');
@@ -1438,10 +1449,18 @@ function renderPendingStrip() {
     ? '1 case waiting on this task'
     : items.length + ' cases waiting on this task';
 
-  list.innerHTML = items.map(p => `
-    <span class="case-chip" onclick="fillCase('${escapeHtml(p.caseKey).replace(/'/g, "\\'")}')">
-      ${escapeHtml(p.caseKey)}<small>${escapeHtml(p.createdAt || '')}</small>
+  list.innerHTML = items.map((p, i) => `
+    <span class="case-chip" onclick="fillKeysFromPending(${i})">
+      ${escapeHtml(keyLabel(p))}<small>${escapeHtml(p.createdAt || '')}</small>
     </span>`).join('');
+}
+
+// Index into the current task's pending list, so the numbers never have to
+// be squeezed through an onclick string.
+function fillKeysFromPending(i) {
+  const items = pendingForTask(currentTask);
+  const p = items[i];
+  if (p) fillKeys(p.refNo, p.caseNo);
 }
 
 const CASE_FIELD_BY_LAYOUT = {
@@ -1457,16 +1476,31 @@ const REF_FIELD_BY_LAYOUT = {
   'approval': 'field-ref-approval'
 };
 
-// Drops the case number into whichever field is actually usable.
-function fillCase(caseKey) {
+// Each number goes back into its own field. A Ref stays a Ref.
+function fillKeys(refNo, caseNo) {
   const t = taskByName(currentTask);
   if (!t) return;
-  let id = t.caseNo !== 'off' ? CASE_FIELD_BY_LAYOUT[t.layout] : REF_FIELD_BY_LAYOUT[t.layout];
-  if (!id) return;
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = caseKey;
-  el.focus();
+
+  let focused = false;
+
+  if (refNo && t.ref !== 'off') {
+    const el = document.getElementById(REF_FIELD_BY_LAYOUT[t.layout]);
+    if (el) { el.value = refNo; el.focus(); focused = true; }
+  }
+  if (caseNo && t.caseNo !== 'off') {
+    const el = document.getElementById(CASE_FIELD_BY_LAYOUT[t.layout]);
+    if (el) { el.value = caseNo; if (!focused) { el.focus(); focused = true; } }
+  }
+
+  // The number that came through has nowhere to go on this task, so put it
+  // in whichever field is on screen rather than dropping it silently.
+  if (!focused) {
+    const fallbackId = t.caseNo !== 'off'
+      ? CASE_FIELD_BY_LAYOUT[t.layout]
+      : REF_FIELD_BY_LAYOUT[t.layout];
+    const el = document.getElementById(fallbackId);
+    if (el) { el.value = caseNo || refNo || ""; el.focus(); }
+  }
 }
 
 function startBellTimer() {
@@ -2000,9 +2034,9 @@ async function renderEntryScreen() {
   renderFormInterface();
   renderPendingStrip();
 
-  if (pendingCaseToFill) {
-    fillCase(pendingCaseToFill);
-    pendingCaseToFill = null;
+  if (pendingKeysToFill) {
+    fillKeys(pendingKeysToFill.refNo, pendingKeysToFill.caseNo);
+    pendingKeysToFill = null;
   }
 
   await loadTemp();
